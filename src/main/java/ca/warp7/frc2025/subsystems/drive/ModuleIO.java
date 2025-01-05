@@ -10,6 +10,7 @@ public abstract class ModuleIO {
         public double drivePositionRad = 0.0;
         public double driveVelocityRadPerSec = 0.0;
         public double driveAppliedVolts = 0.0;
+        public double driveCurrentAmps = 0.0;
 
         public boolean turnConnected = false;
         public boolean turnEncoderConnected = false;
@@ -19,9 +20,9 @@ public abstract class ModuleIO {
         public double turnAppliedVolts = 0.0;
         public double turnCurrentAmps = 0.0;
 
-        public double odometryTimestamps = 0.0;
-        public double odometryDrivePositionsRad = 0.0;
-        public Rotation2d odometryTurnsPositions = new Rotation2d();
+        public double[] odometryTimestamps = new double[] {};
+        public double[] odometryDrivePositionsRad = new double[] {};
+        public Rotation2d[] odometryTurnsPositions = new Rotation2d[] {};
     }
 
     /**
