@@ -1,8 +1,7 @@
 package ca.warp7.frc2025.subsystems.drive;
 
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
-
 import ca.warp7.frc2025.Constants.Drivetrain;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -19,15 +18,13 @@ public class ModuleIOSim extends ModuleIO {
     private static final double DRIVE_KP = 0.05;
     private static final double DRIVE_KD = 0.0;
     private static final double DRIVE_KS = 0.0;
-    private static final double DRIVE_KV_ROT =
-        0.91035; // Same units as TunerConstants: (volt * secs) / rotation
+    private static final double DRIVE_KV_ROT = 0.91035; // Same units as TunerConstants: (volt * secs) / rotation
     private static final double DRIVE_KV = 1.0 / Units.rotationsToRadians(1.0 / DRIVE_KV_ROT);
     private static final double TURN_KP = 8.0;
     private static final double TURN_KD = 0.0;
 
     private final DCMotorSim driveSim;
     private final DCMotorSim turnSim;
-
 
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
@@ -40,8 +37,13 @@ public class ModuleIOSim extends ModuleIO {
     private double turnAppliedVolts = 0.0;
 
     public ModuleIOSim(SwerveModuleConstants constants) {
-        driveSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(DRIVE_GEARBOX, constants.DriveInertia, constants.SteerMotorGearRatio), DRIVE_GEARBOX);
-        turnSim = new DCMotorSim(LinearSystemId.createDCMotorSystem(TURN_GEARBOX, constants.SteerInertia, constants.SteerMotorGearRatio), TURN_GEARBOX);
+        driveSim = new DCMotorSim(
+                LinearSystemId.createDCMotorSystem(
+                        DRIVE_GEARBOX, constants.DriveInertia, constants.SteerMotorGearRatio),
+                DRIVE_GEARBOX);
+        turnSim = new DCMotorSim(
+                LinearSystemId.createDCMotorSystem(TURN_GEARBOX, constants.SteerInertia, constants.SteerMotorGearRatio),
+                TURN_GEARBOX);
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
