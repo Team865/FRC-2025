@@ -1,5 +1,7 @@
 package ca.warp7.frc2025.subsystems.drive;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import ca.warp7.frc2025.Constants.Drivetrain;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
 import com.ctre.phoenix6.CANBus;
@@ -21,6 +23,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
@@ -79,6 +82,16 @@ public class Drive extends SubsystemBase {
         PhoenixOdometryThread.getInstance().start();
     }
 
+    /** Returns the maximum linear speed in meters per sec. */
+    public double getMaxLinearSpeedMetersPerSec() {
+        return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    }
+
+    /** Returns the maximum angular speed in radians per sec. */
+    public double getMaxAngularSpeedRadPerSec() {
+        return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
+    }
+
     /** Returns an array of module translations. */
     public static Translation2d[] getModuleTranslations() {
         return new Translation2d[] {
@@ -87,6 +100,17 @@ public class Drive extends SubsystemBase {
             new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
             new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
         };
+    }
+
+    /** Returns the current odometry pose. */
+    @AutoLogOutput(key = "Odometry/Robot")
+    public Pose2d getPose() {
+        return poseEstimator.getEstimatedPosition();
+    }
+
+    /** Returns the current odometry rotation. */
+    public Rotation2d getRotation() {
+        return getPose().getRotation();
     }
 
     /**
