@@ -18,4 +18,8 @@ public final class Constants {
         // Replaying log file on the robot
         REPLAY
     }
+
+    public static final class Drivetrain {
+        public static final double PERIOD = 0.02;
+    }
 }
