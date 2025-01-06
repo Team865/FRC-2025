@@ -1,6 +1,6 @@
 package ca.warp7.frc2025.commands;
 
-import ca.warp7.frc2025.subsystems.drive.Drive;
+import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -44,7 +44,7 @@ public class DriveCommands {
      * Field relative drive command using two joysticks (controlling linear and angular velocities).
      */
     public static Command joystickDrive(
-            Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
+            DriveSubsystem drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
         return Commands.run(
                 () -> {
                     // Get linear velocity
@@ -78,7 +78,7 @@ public class DriveCommands {
      * absolute rotation with a joystick.
      */
     public static Command joystickDriveAtAngle(
-            Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> rotationSupplier) {
+            DriveSubsystem drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> rotationSupplier) {
 
         // Create PID controller
         ProfiledPIDController angleController = new ProfiledPIDController(

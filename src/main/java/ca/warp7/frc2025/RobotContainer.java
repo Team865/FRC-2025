@@ -5,7 +5,7 @@
 package ca.warp7.frc2025;
 
 import ca.warp7.frc2025.commands.DriveCommands;
-import ca.warp7.frc2025.subsystems.drive.Drive;
+import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
 import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class RobotContainer {
     // Subsystems
-    private final Drive drive;
+    private final DriveSubsystem drive;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -28,7 +28,7 @@ public class RobotContainer {
             case REPLAY:
             case REAL:
                 // Real robot, instantiate hardware IO implementations
-                drive = new Drive(
+                drive = new DriveSubsystem(
                         new GyroIOPigeon2(),
                         new ModuleIOTalonFX(TunerConstants.FrontLeft),
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
@@ -38,7 +38,7 @@ public class RobotContainer {
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
-                drive = new Drive(
+                drive = new DriveSubsystem(
                         new GyroIO() {},
                         new ModuleIOSim(TunerConstants.FrontLeft),
                         new ModuleIOSim(TunerConstants.FrontRight),

@@ -31,7 +31,7 @@ import edu.wpi.first.units.measure.Voltage;
 import java.util.Queue;
 
 public class ModuleIOTalonFX extends ModuleIO {
-    private final SwerveModuleConstants constants;
+    private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
     private final TalonFX driveTalon;
     private final TalonFX turnTalon;
@@ -70,7 +70,7 @@ public class ModuleIOTalonFX extends ModuleIO {
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
     private final Debouncer turnEncoderConnectedDeboune = new Debouncer(0.5);
 
-    public ModuleIOTalonFX(SwerveModuleConstants constants) {
+    public ModuleIOTalonFX(SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
         this.constants = constants;
 
         driveTalon = new TalonFX(constants.DriveMotorId, TunerConstants.DrivetrainConstants.CANBusName);
@@ -78,7 +78,7 @@ public class ModuleIOTalonFX extends ModuleIO {
         cancoder = new CANcoder(constants.EncoderId, TunerConstants.DrivetrainConstants.CANBusName);
 
         // Con fig for drive motor
-        TalonFXConfiguration driveConfig = (TalonFXConfiguration) constants.DriveMotorInitialConfigs;
+        TalonFXConfiguration driveConfig = constants.DriveMotorInitialConfigs;
         driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         driveConfig.Slot0 = constants.DriveMotorGains;
         driveConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
@@ -93,7 +93,7 @@ public class ModuleIOTalonFX extends ModuleIO {
         PhoenixUtil.tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
         PhoenixUtil.tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));
 
-        TalonFXConfiguration turnConfig = (TalonFXConfiguration) constants.SteerMotorInitialConfigs;
+        TalonFXConfiguration turnConfig = constants.SteerMotorInitialConfigs;
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnConfig.Slot0 = constants.SteerMotorGains;
         turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
@@ -113,7 +113,7 @@ public class ModuleIOTalonFX extends ModuleIO {
 
         PhoenixUtil.tryUntilOk(5, () -> turnTalon.getConfigurator().apply(turnConfig, 0.25));
 
-        CANcoderConfiguration cancoderConfig = (CANcoderConfiguration) constants.EncoderInitialConfigs;
+        CANcoderConfiguration cancoderConfig = constants.EncoderInitialConfigs;
         cancoderConfig.MagnetSensor.MagnetOffset = constants.EncoderOffset;
         cancoderConfig.MagnetSensor.SensorDirection = constants.EncoderInverted
                 ? SensorDirectionValue.Clockwise_Positive
@@ -136,7 +136,7 @@ public class ModuleIOTalonFX extends ModuleIO {
         turnAppliedVolts = turnTalon.getMotorVoltage();
         turnCurrent = turnTalon.getStatorCurrent();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+        BaseStatusSignal.setUpdateFrequencyForAll(DriveSubsystem.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
