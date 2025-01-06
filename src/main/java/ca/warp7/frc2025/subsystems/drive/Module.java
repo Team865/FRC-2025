@@ -23,7 +23,10 @@ public class Module {
 
     private final String name;
 
-    public Module(ModuleIO io, String name, SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
+    public Module(
+            ModuleIO io,
+            String name,
+            SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
         this.io = io;
         this.name = name;
         this.constants = constants;

@@ -78,7 +78,10 @@ public class DriveCommands {
      * absolute rotation with a joystick.
      */
     public static Command joystickDriveAtAngle(
-            DriveSubsystem drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> rotationSupplier) {
+            DriveSubsystem drive,
+            DoubleSupplier xSupplier,
+            DoubleSupplier ySupplier,
+            Supplier<Rotation2d> rotationSupplier) {
 
         // Create PID controller
         ProfiledPIDController angleController = new ProfiledPIDController(
