@@ -1,11 +1,16 @@
 package ca.warp7.frc2025.subsystems.drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import ca.warp7.frc2025.Constants.Drivetrain;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
 import com.ctre.phoenix6.CANBus;
-// import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -57,6 +62,7 @@ public class DriveSubsystem extends SubsystemBase {
                     TunerConstants.FrontLeft.SlipCurrent,
                     1),
             getModuleTranslations());
+    private final SysIdRoutine sysId;
 
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
@@ -92,6 +98,16 @@ public class DriveSubsystem extends SubsystemBase {
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
+        // // Configure AutoBuilder for PathPlanner
+        AutoBuilder.configure(
+                this::getPose,
+                this::setPose,
+                this::getChassisSpeeds,
+                this::runVelocity,
+                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                PP_CONFIG,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this);
     }
 
     /** Returns the maximum linear speed in meters per sec. */

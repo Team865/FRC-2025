@@ -25,6 +25,12 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
 
+    // Dashboard inputs
+    private final LoggedDashboardChooser<Command> autoChooser;
+
+    /**
+     *
+     */
     public RobotContainer() {
         switch (Constants.currentMode) {
             case REPLAY:
