@@ -46,8 +46,39 @@ public class Module {
         io.setTurnPosition(state.angle);
     }
 
+    /** Runs the module with the specified output while controlling to zero degrees. */
+    public void runCharacterization(double output) {
+        io.setDriveOpenLoop(output);
+        io.setTurnPosition(new Rotation2d());
+    }
+
+    /** Returns the current drive position of the module in meters. */
+    public double getPositionMeters() {
+        return inputs.drivePositionRad * constants.WheelRadius;
+    }
+
+    /** Returns the current drive velocity of the module in meters per second. */
+    public double getVelocityMetersPerSec() {
+        return inputs.driveVelocityRadPerSec * constants.WheelRadius;
+    }
+
+    /** Returns the module position (turn angle and drive position). */
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(getPositionMeters(), getAngle());
+    }
+
+    /** Returns the module position in radians. */
+    public double getWheelRadiusCharacterizationPosition() {
+        return inputs.drivePositionRad;
+    }
+
     public Rotation2d getAngle() {
         return inputs.turnPosition;
+    }
+
+    /** Returns the module state (turn angle and drive velocity). */
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(getVelocityMetersPerSec(), getAngle());
     }
 
     /** Returns the timestamps of the samples received this cycle. */

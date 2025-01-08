@@ -18,9 +18,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -41,17 +46,17 @@ public class DriveSubsystem extends SubsystemBase {
     private static final double ROBOT_MASS_KG = 61.235;
     private static final double ROBOT_MOI = 6;
     private static final double WHEEL_COF = 1.2;
-    // private static final RobotConfig PP_CONFIG = new RobotConfig(
-    //         ROBOT_MASS_KG,
-    //         ROBOT_MOI,
-    //         new ModuleConfig(
-    //                 TunerConstants.FrontLeft.WheelRadius,
-    //                 TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-    //                 WHEEL_COF,
-    //                 DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-    //                 TunerConstants.FrontLeft.SlipCurrent,
-    //                 1),
-    //         getModuleTranslations());
+    private static final RobotConfig PP_CONFIG = new RobotConfig(
+            ROBOT_MASS_KG,
+            ROBOT_MOI,
+            new ModuleConfig(
+                    TunerConstants.FrontLeft.WheelRadius,
+                    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+                    WHEEL_COF,
+                    DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+                    TunerConstants.FrontLeft.SlipCurrent,
+                    1),
+            getModuleTranslations());
 
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
@@ -81,6 +86,12 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Start odometry thread
         PhoenixOdometryThread.getInstance().start();
+
+        sysId = new SysIdRoutine(
+                new SysIdRoutine.Config(
+                        null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
     }
 
     /** Returns the maximum linear speed in meters per sec. */
@@ -103,15 +114,63 @@ public class DriveSubsystem extends SubsystemBase {
         };
     }
 
+    /** Returns the current odometry rotation. */
+    public Rotation2d getRotation() {
+        return getPose().getRotation();
+    }
+
+    /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+    private SwerveModulePosition[] getModulePositions() {
+        SwerveModulePosition[] states = new SwerveModulePosition[4];
+        for (int i = 0; i < 4; i++) {
+            states[i] = modules[i].getPosition();
+        }
+        return states;
+    }
+
+    /** Returns the position of each module in radians. */
+    public double[] getWheelRadiusCharacterizationPositions() {
+        double[] values = new double[4];
+        for (int i = 0; i < 4; i++) {
+            values[i] = modules[i].getWheelRadiusCharacterizationPosition();
+        }
+        return values;
+    }
+
+    /** Returns the module states (turn angles and drive velocities) for all of the modules. */
+    @AutoLogOutput(key = "SwerveStates/Measured")
+    private SwerveModuleState[] getModuleStates() {
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        for (int i = 0; i < 4; i++) {
+            states[i] = modules[i].getState();
+        }
+        return states;
+    }
+
     /** Returns the current odometry pose. */
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
-    /** Returns the current odometry rotation. */
-    public Rotation2d getRotation() {
-        return getPose().getRotation();
+    /** Resets the current odometry pose. */
+    public void setPose(Pose2d pose) {
+        poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    }
+
+    public Command zeroPose() {
+        return runOnce(() -> {
+            Rotation2d rotation;
+
+            if (DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red) {
+                rotation = Rotation2d.fromDegrees(180);
+            } else {
+                rotation = new Rotation2d();
+            }
+
+            setPose(new Pose2d(getPose().getTranslation(), rotation));
+        });
     }
 
     /**
@@ -136,6 +195,29 @@ public class DriveSubsystem extends SubsystemBase {
 
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+    /** Returns the measured chassis speeds of the robot. */
+    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
+    private ChassisSpeeds getChassisSpeeds() {
+        return kinematics.toChassisSpeeds(getModuleStates());
+    }
+
+    /** Runs the drive in a straight line with the specified drive output. */
+    public void runCharacterization(double output) {
+        for (int i = 0; i < 4; i++) {
+            modules[i].runCharacterization(output);
+        }
+    }
+
+    /** Returns a command to run a quasistatic test in the specified direction. */
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
+    }
+
+    /** Returns a command to run a dynamic test in the specified direction. */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
     }
 
     @Override

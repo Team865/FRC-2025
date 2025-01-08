@@ -11,10 +11,12 @@ import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     // Subsystems
@@ -49,6 +51,17 @@ public class RobotContainer {
                 drive = null;
         }
 
+        // Set up auto routines
+        autoChooser = new LoggedDashboardChooser<>("Autos", AutoBuilder.buildAutoChooser());
+
+        autoChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
         configureBindings();
     }
 
@@ -62,6 +75,8 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
+        controller.rightStick().onTrue(drive.zeroPose());
+
         controller
                 .a()
                 .whileTrue(DriveCommands.joystickDriveAtAngle(
@@ -72,6 +87,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return autoChooser.get();
     }
 }
