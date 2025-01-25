@@ -8,6 +8,7 @@ import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
 import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
+import ca.warp7.frc2025.subsystems.drive.ModuleIO;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
@@ -34,6 +35,9 @@ public class RobotContainer {
     public RobotContainer() {
         switch (Constants.currentMode) {
             case REPLAY:
+                drive = new DriveSubsystem(
+                        new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations
                 drive = new DriveSubsystem(

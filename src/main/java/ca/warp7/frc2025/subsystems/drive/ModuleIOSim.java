@@ -11,7 +11,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class ModuleIOSim extends ModuleIO {
+public class ModuleIOSim implements ModuleIO {
     // Sim constants
     private static final DCMotor DRIVE_GEARBOX = DCMotor.getKrakenX60Foc(1);
     private static final DCMotor TURN_GEARBOX = DCMotor.getKrakenX60Foc(1);

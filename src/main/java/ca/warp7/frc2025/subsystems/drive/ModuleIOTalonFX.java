@@ -30,7 +30,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.Queue;
 
-public class ModuleIOTalonFX extends ModuleIO {
+public class ModuleIOTalonFX implements ModuleIO {
     private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
     private final TalonFX driveTalon;

@@ -40,7 +40,7 @@ public class GyroIOPigeon2 implements GyroIO {
 
         inputs.odometryYawTimestamps =
                 yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryYawPostions = yawPositionQueue.stream()
+        inputs.odometryYawPositions = yawPositionQueue.stream()
                 .map((Double value) -> Rotation2d.fromDegrees(value))
                 .toArray(Rotation2d[]::new);
 
