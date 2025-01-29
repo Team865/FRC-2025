@@ -1,5 +1,6 @@
 package ca.warp7.frc2025.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -48,36 +49,38 @@ public class DriveSubsystem extends SubsystemBase {
                     Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
                     Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
-    private static final double ROBOT_MASS_KG = 61.235;
-    private static final double ROBOT_MOI = 6;
-    private static final double WHEEL_COF = 1.2;
-    private static final RobotConfig PP_CONFIG = new RobotConfig(
-            ROBOT_MASS_KG,
-            ROBOT_MOI,
-            new ModuleConfig(
-                    TunerConstants.FrontLeft.WheelRadius,
-                    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-                    WHEEL_COF,
-                    DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-                    TunerConstants.FrontLeft.SlipCurrent,
-                    1),
-            getModuleTranslations());
-    private final SysIdRoutine sysId;
-
-    public static final Lock odometryLock = new ReentrantLock();
+    // Gyro
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-    private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+    private Rotation2d rawGyroRotation = new Rotation2d();
     private final Alert gyroDisconnectedAlert =
             new Alert("Dissconcted gryo, relying on kinematics as a fallback", AlertType.kError);
 
+    // Odometry
+    public static final Lock odometryLock = new ReentrantLock();
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
-    private Rotation2d rawGyroRotation = new Rotation2d();
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(),
     };
     private SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+
+    private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+
+    // Autos
+    private static final RobotConfig PP_CONFIG = new RobotConfig(
+            Drivetrain.ROBOT_MASS.in(Kilograms),
+            Drivetrain.ROBOT_MOI_SI,
+            new ModuleConfig(
+                    TunerConstants.FrontLeft.WheelRadius,
+                    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+                    Drivetrain.WHEEL_COF,
+                    DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+                    TunerConstants.FrontLeft.SlipCurrent,
+                    1),
+            getModuleTranslations());
+    // Sysid
+    private final SysIdRoutine sysId;
 
     public DriveSubsystem(
             GyroIO gyroIO, ModuleIO flModuleIO, ModuleIO frModuleIO, ModuleIO blModuleIO, ModuleIO brModuleIO) {
@@ -87,7 +90,7 @@ public class DriveSubsystem extends SubsystemBase {
         modules[2] = new Module(blModuleIO, "Back Left", TunerConstants.BackLeft);
         modules[3] = new Module(brModuleIO, "Back Right", TunerConstants.BackRight);
 
-        // Report usage of akit template
+        // Report usage of being derived from the akit template
         HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
         // Start odometry thread

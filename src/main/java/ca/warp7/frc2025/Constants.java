@@ -1,6 +1,9 @@
 package ca.warp7.frc2025;
 
+import static edu.wpi.first.units.Units.Pounds;
+
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -25,6 +28,10 @@ public final class Constants {
 
     public static final class Drivetrain {
         public static final double PERIOD = 0.02;
+
+        public static final Mass ROBOT_MASS = Pounds.of(137.965);
+        public static final double ROBOT_MOI_SI = 6;
+        public static final double WHEEL_COF = 1.1;
     }
 
     public static final class Climber {
