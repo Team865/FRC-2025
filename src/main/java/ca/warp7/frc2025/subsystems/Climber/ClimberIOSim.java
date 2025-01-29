@@ -16,7 +16,7 @@ public class ClimberIOSim implements ClimberIO {
     private final SingleJointedArmSim armSim = new SingleJointedArmSim(
             DCMotor.getKrakenX60(2),
             Climber.CLIMBER_GEAR_RATIO,
-            0.0,
+            0.1,
             Climber.CLIMBER_ARM_LENGTH_METERS,
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(360.0),
