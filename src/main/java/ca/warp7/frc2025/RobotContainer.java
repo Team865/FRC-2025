@@ -5,6 +5,9 @@
 package ca.warp7.frc2025;
 
 import ca.warp7.frc2025.commands.DriveCommands;
+import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
+import ca.warp7.frc2025.subsystems.Climber.ClimberIOTalonFX;
+import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
 import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
@@ -22,6 +25,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
     // Subsystems
     private final DriveSubsystem drive;
+    private final ClimberSubsystem climber;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -37,6 +41,7 @@ public class RobotContainer {
             case REPLAY:
                 drive = new DriveSubsystem(
                         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                climber = new ClimberSubsystem(new ClimberIOSim());
                 break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -46,6 +51,7 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
+                climber = new ClimberSubsystem(new ClimberIOTalonFX());
                 break;
 
             case SIM:
@@ -56,9 +62,11 @@ public class RobotContainer {
                         new ModuleIOSim(TunerConstants.FrontRight),
                         new ModuleIOSim(TunerConstants.BackLeft),
                         new ModuleIOSim(TunerConstants.BackRight));
+                climber = new ClimberSubsystem(new ClimberIOSim());
                 break;
             default:
                 drive = null;
+                climber = null;
         }
 
         // Set up auto routines
