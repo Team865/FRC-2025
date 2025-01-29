@@ -263,7 +263,7 @@ public class DriveSubsystem extends SubsystemBase {
             }
 
             if (gyroInputs.connected) {
-                rawGyroRotation = gyroInputs.odometryYawPostions[i];
+                rawGyroRotation = gyroInputs.odometryYawPositions[i];
             } else {
                 Twist2d twist = kinematics.toTwist2d(moduleDeltas);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
