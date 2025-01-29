@@ -28,7 +28,9 @@ public interface ClimberIO {
     default void setPivotSetpoint(Rotation2d rotation) {}
 
     default void setPivotPosition(Rotation2d roatation) {}
+
+    default void resetPivotPosition(Rotation2d rotation) {}
     
     default void setClimbIntakeVoltage(double volts) {}
-    
+
 }
