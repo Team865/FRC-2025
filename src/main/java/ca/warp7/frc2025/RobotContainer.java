@@ -4,6 +4,8 @@
 
 package ca.warp7.frc2025;
 
+import static edu.wpi.first.units.Units.Inches;
+
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
@@ -11,6 +13,8 @@ import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
 import ca.warp7.frc2025.subsystems.drive.ModuleIO;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
+import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
+import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
@@ -31,6 +35,7 @@ public class RobotContainer {
     // Subsystems
     private final DriveSubsystem drive;
     private final IntakeSubsystem intake;
+    private ElevatorSubsystem elevator = null;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -74,6 +79,7 @@ public class RobotContainer {
                         new RollersIOSim(DCMotor.getKrakenX60(1), 1, 0.01),
                         new ObjectDectionIO() {},
                         new ObjectDectionIO() {});
+                elevator = new ElevatorSubsystem(new ElevatorIOSim());
                 break;
             default:
                 drive = null;
@@ -132,6 +138,10 @@ public class RobotContainer {
                         .until(intake.topSensorTrigger()
                                 .negate()
                                 .and(intake.frontSensorTrigger().negate())));
+
+        controller.x().onTrue(elevator.setGoal(Inches.of(15)));
+        controller.y().onTrue(elevator.setGoal(Inches.of(28)));
+        controller.b().onTrue(elevator.setGoal(Inches.of(0)));
     }
 
     public Command getAutonomousCommand() {
