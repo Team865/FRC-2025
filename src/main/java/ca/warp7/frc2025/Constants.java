@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
 
+    public static final double PERIOD = 0.02;
+
     public static enum Mode {
         // Running on a real robot
         REAL,
