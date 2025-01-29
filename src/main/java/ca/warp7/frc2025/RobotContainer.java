@@ -7,6 +7,9 @@ package ca.warp7.frc2025;
 import static edu.wpi.first.units.Units.Inches;
 
 import ca.warp7.frc2025.commands.DriveCommands;
+import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
+import ca.warp7.frc2025.subsystems.Climber.ClimberIOTalonFX;
+import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
 import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
@@ -36,6 +39,7 @@ public class RobotContainer {
     private final DriveSubsystem drive;
     private final IntakeSubsystem intake;
     private ElevatorSubsystem elevator = null;
+    private final ClimberSubsystem climber;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -52,6 +56,7 @@ public class RobotContainer {
                 drive = new DriveSubsystem(
                         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
                 intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
+                climber = new ClimberSubsystem(new ClimberIOSim());
                 break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -65,6 +70,7 @@ public class RobotContainer {
                         new RollersIOTalonFX(1, "rio"),
                         new ObjectDectionIOLaserCAN(2, "Top"),
                         new ObjectDectionIOLaserCAN(3, "Front"));
+                climber = new ClimberSubsystem(new ClimberIOTalonFX());
                 break;
 
             case SIM:
@@ -84,6 +90,11 @@ public class RobotContainer {
             default:
                 drive = null;
                 intake = null;
+                climber = new ClimberSubsystem(new ClimberIOSim());
+                break;
+            default:
+                drive = null;
+                climber = null;
         }
 
         // Set up auto routines
