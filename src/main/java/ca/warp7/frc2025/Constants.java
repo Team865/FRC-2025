@@ -37,8 +37,17 @@ public final class Constants {
     public static final class Climber {
         public static final double CLIMBER_ARM_LENGTH_METERS = Units.inchesToMeters(0.1);
         public static final double CLIMBER_DRUM_RADIUS_METERS = Units.inchesToMeters(0.1);
+
         public static final double CLIMBER_PIVOT_GEAR_RATIO = 1.0;
         public static final double CLIMBER_INTAKE_GEAR_RATIO = 1.0;
+
+        public static final double CLIMBER_PIVOT_kP = 0.0;
+        public static final double CLIMBER_PIVOT_kI = 0.0;
+        public static final double CLIMBER_PIVOT_kD = 0.0;
+
+        public static final double CLIMBER_PIVOT_kS = 0.0;
+        public static final double CLIMBER_PIVOT_kV = 0.0;
+        public static final double CLIMBER_PIVOT_kA = 0.0;
     }
 
     public static final class Elevator {
