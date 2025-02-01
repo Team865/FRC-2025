@@ -12,8 +12,15 @@ import ca.warp7.frc2025.subsystems.drive.ModuleIO;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
+import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
+import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
+import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
+import ca.warp7.frc2025.subsystems.intake.RollersIO;
+import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
+import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -22,6 +29,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
     // Subsystems
     private final DriveSubsystem drive;
+    private final IntakeSubsystem intake;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -37,6 +45,7 @@ public class RobotContainer {
             case REPLAY:
                 drive = new DriveSubsystem(
                         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
                 break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -46,6 +55,10 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
+                intake = new IntakeSubsystem(
+                        new RollersIOTalonFX(0, ""),
+                        new ObjectDectionIOLaserCAN(0, "Top"),
+                        new ObjectDectionIOLaserCAN(0, "Front"));
                 break;
 
             case SIM:
@@ -56,9 +69,14 @@ public class RobotContainer {
                         new ModuleIOSim(TunerConstants.FrontRight),
                         new ModuleIOSim(TunerConstants.BackLeft),
                         new ModuleIOSim(TunerConstants.BackRight));
+                intake = new IntakeSubsystem(
+                        new RollersIOSim(DCMotor.getKrakenX60(1), 1, 0.01),
+                        new ObjectDectionIO() {},
+                        new ObjectDectionIO() {});
                 break;
             default:
                 drive = null;
+                intake = null;
         }
 
         // Set up auto routines
@@ -94,6 +112,8 @@ public class RobotContainer {
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
                         () -> Rotation2d.fromDegrees(90)));
+
+        // controller.leftTrigger().and(intake.topSensorTrigger().negate()).(intake.runVoltsRoller(6));
     }
 
     public Command getAutonomousCommand() {
