@@ -1,19 +1,35 @@
 package ca.warp7.frc2025.subsystems.intake;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-class IntakeSubsytem extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase {
+    // Roller io
     private final RollersIO rollersIO;
     private final RollersIOInputsAutoLogged rollersInputs = new RollersIOInputsAutoLogged();
+
+    // Sensors
+    private final ObjectDectionIO topSensorIO;
+    private final ObjectDectionIO frontSensorIO;
+
+    private final ObjectDectionIOInputsAutoLogged topSensorInputs = new ObjectDectionIOInputsAutoLogged();
+    private final ObjectDectionIOInputsAutoLogged frontSensorInputs = new ObjectDectionIOInputsAutoLogged();
+
     private final Alert disconnected;
 
-    public IntakeSubsytem(RollersIO rollersIO) {
+    private final double topDistanceToCoral = Units.inchesToMeters(2.938) * 1000;
+
+    public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
+        this.topSensorIO = topSensorIO;
+        this.frontSensorIO = frontSensorIO;
 
         disconnected = new Alert("Intake motor disconnected", AlertType.kError);
     }
@@ -21,9 +37,19 @@ class IntakeSubsytem extends SubsystemBase {
     @Override
     public void periodic() {
         rollersIO.updateInputs(rollersInputs);
-        Logger.processInputs("Intake", rollersInputs);
+        topSensorIO.updateInputs(topSensorInputs);
+        frontSensorIO.updateInputs(frontSensorInputs);
+
+        Logger.processInputs("Intake/Rollers", rollersInputs);
+        Logger.processInputs("Intake/TopSensor", topSensorInputs);
+        Logger.processInputs("Intake/FrontSensor", frontSensorInputs);
 
         disconnected.set(!rollersInputs.connected);
+    }
+
+    public Trigger topSensorTrigger() {
+        return new Trigger(() -> MathUtil.isNear(topDistanceToCoral, topSensorInputs.objectDistanceMM, 100))
+                .debounce(0.1);
     }
 
     @AutoLogOutput

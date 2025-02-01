@@ -13,11 +13,9 @@ public interface RollersIO {
         public double torqueCurrentAmps = 0.0;
     }
 
-    void updateInputs(RollersIOInputsAutoLogged inputs);
+    default void updateInputs(RollersIOInputsAutoLogged inputs) {}
 
-    void setVolts(double volts);
+    default void setVolts(double volts) {}
 
-    void setTorqueAmps(double amps);
-
-    default void setBrakeMode(boolean enabled) {}
+    default void setTorqueAmps(double amps) {}
 }
