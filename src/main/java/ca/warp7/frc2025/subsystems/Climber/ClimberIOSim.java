@@ -1,6 +1,7 @@
 package ca.warp7.frc2025.subsystems.Climber;
 
 import ca.warp7.frc2025.Constants.Climber;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,7 +14,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class ClimberIOSim implements ClimberIO {
 
-    public double pivotAppliedVolts = 0.0;
+    private double pivotAppliedVolts = 0.0;
 
     private final SingleJointedArmSim pivotSim = new SingleJointedArmSim(
             DCMotor.getKrakenX60(2),
@@ -49,11 +50,16 @@ public class ClimberIOSim implements ClimberIO {
 
         inputs.pivotAppliedVolts = new double[] {pivotAppliedVolts};
         inputs.pivotCurrentAmps = new double[] {pivotSim.getCurrentDrawAmps()};
+
+        inputs.climbIntakeVolts = intakeSim.getInputVoltage();
+        inputs.climbIntakeVelocityRadPerSec = intakeSim.getAngularVelocityRPM();
+        inputs.climbIntakeCurrentAmps = intakeSim.getCurrentDrawAmps();
     }
 
     @Override
     public void setPivotVoltage(double volts) {
-        pivotSim.setInputVoltage(volts);
+        pivotAppliedVolts = MathUtil.clamp(volts, -12, 12);
+        pivotSim.setInputVoltage(pivotAppliedVolts);
     }
 
     @Override
