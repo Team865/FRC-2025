@@ -58,12 +58,11 @@ public class ObjectDectionIOLaserCAN implements ObjectDectionIO {
                     trustMeasurment = false;
                     break;
             }
-        }
-
-        if (trustMeasurment) {
-            inputs.objectDistanceMM = measurement.distance_mm;
-        } else {
-            inputs.objectDistanceMM = 0;
+            if (trustMeasurment) {
+                inputs.objectDistanceMM = measurement.distance_mm;
+            } else {
+                inputs.objectDistanceMM = 0;
+            }
         }
     }
 }
