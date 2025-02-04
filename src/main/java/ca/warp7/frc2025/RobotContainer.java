@@ -22,6 +22,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -112,8 +113,25 @@ public class RobotContainer {
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
                         () -> Rotation2d.fromDegrees(90)));
+        // run intake motor until sensor
+        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
+                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
+                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()));
 
-        // controller.leftTrigger().and(intake.topSensorTrigger().negate()).(intake.runVoltsRoller(6));
+        controller
+                .leftTrigger()
+                .and(intake.frontSensorTrigger()
+                        .negate()
+                        .and(intake.topSensorTrigger().negate()))
+                .onTrue(intakeCommand);
+
+        controller
+                .leftTrigger()
+                .and(intake.frontSensorTrigger())
+                .onTrue(intake.runVoltsRoller(-4)
+                        .until(intake.topSensorTrigger()
+                                .negate()
+                                .and(intake.frontSensorTrigger().negate())));
     }
 
     public Command getAutonomousCommand() {

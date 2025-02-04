@@ -59,7 +59,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @AutoLogOutput
     public Command runVoltsRoller(double inputVolts) {
-        return runOnce(() -> rollersIO.setVolts(inputVolts));
+        return startEnd(() -> rollersIO.setVolts(inputVolts), () -> rollersIO.setVolts(0));
     }
 
     @AutoLogOutput
