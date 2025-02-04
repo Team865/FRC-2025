@@ -56,9 +56,9 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
                 intake = new IntakeSubsystem(
-                        new RollersIOTalonFX(0, ""),
-                        new ObjectDectionIOLaserCAN(0, "Top"),
-                        new ObjectDectionIOLaserCAN(0, "Front"));
+                        new RollersIOTalonFX(1, "rio"),
+                        new ObjectDectionIOLaserCAN(2, "Top"),
+                        new ObjectDectionIOLaserCAN(3, "Front"));
                 break;
 
             case SIM:
