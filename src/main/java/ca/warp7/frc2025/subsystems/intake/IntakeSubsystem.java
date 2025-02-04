@@ -1,7 +1,6 @@
 package ca.warp7.frc2025.subsystems.intake;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +23,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private final Alert disconnected;
 
-    private final double topDistanceToCoral = Units.inchesToMeters(2.938) * 1000;
+    private final double topDistanceToCoral = 80;
+    private final double frontTopDistanceToCoral = 145;
 
     public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
@@ -47,9 +47,14 @@ public class IntakeSubsystem extends SubsystemBase {
         disconnected.set(!rollersInputs.connected);
     }
 
+    @AutoLogOutput
     public Trigger topSensorTrigger() {
-        return new Trigger(() -> MathUtil.isNear(topDistanceToCoral, topSensorInputs.objectDistanceMM, 100))
-                .debounce(0.1);
+        return new Trigger(() -> MathUtil.isNear(topDistanceToCoral, topSensorInputs.objectDistanceMM, 30));
+    }
+
+    @AutoLogOutput
+    public Trigger frontSensorTrigger() {
+        return new Trigger(() -> MathUtil.isNear(frontTopDistanceToCoral, frontSensorInputs.objectDistanceMM, 30));
     }
 
     @AutoLogOutput
