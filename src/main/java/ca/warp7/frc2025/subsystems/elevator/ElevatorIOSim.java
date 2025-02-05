@@ -24,10 +24,4 @@ public class ElevatorIOSim implements ElevatorIO {
         appliedVolts = MathUtil.clamp(volts, -12, 12);
         sim.setInput(appliedVolts);
     }
-
-    @Override
-    public void setPID(double P, double I, double D) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPID'");
-    }
 }

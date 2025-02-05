@@ -103,12 +103,4 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     public void setVoltage(double volts) {
         talon.setControl(voltageOut.withOutput(volts));
     }
-
-    @Override
-    public void setPID(double P, double I, double D) {
-        config.Slot0.kP = P;
-        config.Slot0.kI = I;
-        config.Slot0.kD = D;
-        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
-    }
 }
