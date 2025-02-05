@@ -18,6 +18,4 @@ public interface ElevatorIO {
     public abstract void updateInputs(ElevatorIOInputAutoLogged inputs);
 
     public abstract void setVoltage(double volts);
-
-    public abstract void setPID(double P, double I, double D);
 }
