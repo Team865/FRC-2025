@@ -2,6 +2,7 @@ package ca.warp7.frc2025.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.*;
 
+import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -20,10 +21,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    // Constants
-    protected static final double DRUM_RADIUS_METERS = 0.048514 / 2;
-    protected static final double GEAR_RATIO = 80 / 14;
-
     // Logging
     private final ElevatorIO io;
     private final ElevatorIOInputAutoLogged inputs = new ElevatorIOInputAutoLogged();
@@ -51,7 +48,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             new TrapezoidProfile.Constraints(Units.inchesToMeters(9 * 12), Units.inchesToMeters(480)));
 
     private final ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
-            0, 0.06, (DCMotor.getKrakenX60(1).KvRadPerSecPerVolt * DRUM_RADIUS_METERS) / GEAR_RATIO);
+            0, 0.06, (DCMotor.getKrakenX60(1).KvRadPerSecPerVolt * Elevator.DRUM_RADIUS_METERS) / Elevator.GEAR_RATIO);
 
     private Distance goal = Inches.of(0);
 

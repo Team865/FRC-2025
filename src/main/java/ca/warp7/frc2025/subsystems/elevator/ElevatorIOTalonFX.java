@@ -1,5 +1,6 @@
 package ca.warp7.frc2025.subsystems.elevator;
 
+import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.PhoenixUtil;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -50,8 +51,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         followerTalon.setControl(new Follower(talon.getDeviceID(), true));
 
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        config.Feedback.SensorToMechanismRatio =
-                ElevatorSubsystem.GEAR_RATIO / (2 * Math.PI * ElevatorSubsystem.DRUM_RADIUS_METERS);
+        config.Feedback.SensorToMechanismRatio = Elevator.GEAR_RATIO / (2 * Math.PI * Elevator.DRUM_RADIUS_METERS);
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
         config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
