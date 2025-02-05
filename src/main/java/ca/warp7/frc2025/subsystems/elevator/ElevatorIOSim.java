@@ -15,15 +15,19 @@ public class ElevatorIOSim implements ElevatorIO {
     public void updateInputs(ElevatorIOInputAutoLogged inputs) {
         sim.update(0.02);
 
-        inputs.encoderConnected = true;
-        inputs.extensionMeters = sim.getPositionMeters();
-        inputs.velocityMeters = sim.getVelocityMetersPerSecond();
-        inputs.volts = appliedVolts;
+        inputs.positionMeters = sim.getPositionMeters();
+        inputs.velocityMetersPerSec = sim.getVelocityMetersPerSecond();
     }
 
     @Override
     public void setVoltage(double volts) {
         appliedVolts = MathUtil.clamp(volts, -12, 12);
         sim.setInput(appliedVolts);
+    }
+
+    @Override
+    public void setPID(double P, double I, double D) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setPID'");
     }
 }

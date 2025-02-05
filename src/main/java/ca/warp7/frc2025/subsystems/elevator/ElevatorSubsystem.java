@@ -4,8 +4,10 @@ import static edu.wpi.first.units.Units.*;
 
 import ca.warp7.frc2025.util.LoggedTunableNumber;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -18,6 +20,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
+    // Constants
+    protected static final double DRUM_RADIUS_METERS = 0.048514 / 2;
+    protected static final double GEAR_RATIO = 80 / 14;
+
     // Logging
     private final ElevatorIO io;
     private final ElevatorIOInputAutoLogged inputs = new ElevatorIOInputAutoLogged();
@@ -38,11 +44,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final LoggedTunableNumber D = new LoggedTunableNumber("Elevator/D", 0);
 
     // Control
-    private final PIDController feedbackController =
-            new PIDController(P.getAsDouble(), I.getAsDouble(), D.getAsDouble());
+    private final ProfiledPIDController feedbackController = new ProfiledPIDController(
+            P.getAsDouble(),
+            I.getAsDouble(),
+            D.getAsDouble(),
+            new TrapezoidProfile.Constraints(Units.inchesToMeters(9 * 12), Units.inchesToMeters(480)));
 
-    private final ElevatorFeedforward feedforwardController =
-            new ElevatorFeedforward(0, 0.06, (DCMotor.getKrakenX60(2).KvRadPerSecPerVolt * 0.048514 / 2) / (80 / 14));
+    private final ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
+            0, 0.06, (DCMotor.getKrakenX60(1).KvRadPerSecPerVolt * DRUM_RADIUS_METERS) / GEAR_RATIO);
 
     private Distance goal = Inches.of(0);
 
@@ -53,7 +62,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         root = mech.getRoot("climber", 2, 0);
 
-        elevator = root.append(new MechanismLigament2d("elevator", 0, 90));
+        elevator = root.append(new MechanismLigament2d(
+                "elevator    inputs.motorConnected = connectedDebouncer.calculate(connected);", 0, 90));
 
         wrist = elevator.append(new MechanismLigament2d("wrist", 0.5, 90, 6, new Color8Bit(Color.kPurple)));
 
@@ -70,11 +80,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         Logger.processInputs("Elevator/inputs", inputs);
 
         LoggedTunableNumber.ifChanged(hashCode(), (pid) -> feedbackController.setPID(pid[0], pid[1], pid[2]), P, I, D);
-        double feedforwardVolts = feedforwardController.calculate(inputs.velocityMeters);
+        double feedforwardVolts = feedforwardController.calculate(inputs.velocityMetersPerSec);
 
-        double feedbackVolts = feedbackController.calculate(inputs.extensionMeters, goal.in(Meters));
+        double feedbackVolts = feedbackController.calculate(inputs.positionMeters, goal.in(Meters));
         io.setVoltage(feedbackVolts + feedforwardVolts);
-
-        elevator.setLength(inputs.extensionMeters);
     }
 }
