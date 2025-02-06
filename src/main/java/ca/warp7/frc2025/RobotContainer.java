@@ -91,15 +91,13 @@ public class RobotContainer {
                         new ObjectDectionIO() {},
                         new ObjectDectionIO() {});
                 elevator = new ElevatorSubsystem(new ElevatorIOSim());
+                climber = new ClimberSubsystem(new ClimberIOSim());
                 break;
             default:
                 drive = null;
                 intake = null;
                 climber = new ClimberSubsystem(new ClimberIOSim());
                 break;
-            default:
-                drive = null;
-                climber = null;
         }
 
         // Set up auto routines
