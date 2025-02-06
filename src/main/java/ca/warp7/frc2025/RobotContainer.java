@@ -6,6 +6,7 @@ package ca.warp7.frc2025;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import ca.warp7.frc2025.Constants.Climber;
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOTalonFX;
@@ -70,7 +71,10 @@ public class RobotContainer {
                         new RollersIOTalonFX(1, "rio"),
                         new ObjectDectionIOLaserCAN(2, "Top"),
                         new ObjectDectionIOLaserCAN(3, "Front"));
-                climber = new ClimberSubsystem(new ClimberIOTalonFX());
+                climber = new ClimberSubsystem(new ClimberIOTalonFX(
+                        Climber.CLIMBER_LEFT_MOTER_ID,
+                        Climber.CLIMBER_RIGHT_MOTER_ID,
+                        Climber.CLIMBER_INTAKE_MOTER_ID));
                 break;
 
             case SIM:
