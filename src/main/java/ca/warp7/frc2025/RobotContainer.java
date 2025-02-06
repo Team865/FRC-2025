@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Inches;
 
 import ca.warp7.frc2025.Constants.Climber;
 import ca.warp7.frc2025.commands.DriveCommands;
+import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOTalonFX;
 import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
@@ -57,7 +58,7 @@ public class RobotContainer {
                 drive = new DriveSubsystem(
                         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
                 intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
-                climber = new ClimberSubsystem(new ClimberIOSim());
+                climber = new ClimberSubsystem(new ClimberIO(){});
                 break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations

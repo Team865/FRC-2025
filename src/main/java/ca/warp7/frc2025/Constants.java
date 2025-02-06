@@ -44,13 +44,6 @@ public final class Constants {
         public static final double CLIMBER_PIVOT_GEAR_RATIO = 1.0;
         public static final double CLIMBER_INTAKE_GEAR_RATIO = 1.0;
 
-        public static final double CLIMBER_PIVOT_kP = 0.0;
-        public static final double CLIMBER_PIVOT_kI = 0.0;
-        public static final double CLIMBER_PIVOT_kD = 0.0;
-
-        public static final double CLIMBER_PIVOT_kS = 0.0;
-        public static final double CLIMBER_PIVOT_kV = 0.0;
-        public static final double CLIMBER_PIVOT_kA = 0.0;
     }
 
     public static final class Elevator {
