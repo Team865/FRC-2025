@@ -35,6 +35,9 @@ public final class Constants {
     }
 
     public static final class Climber {
+        public static final int CLIMBER_LEFT_MOTER_ID = 0;
+        public static final int CLIMBER_RIGHT_MOTER_ID = 0;
+        public static final int CLIMBER_INTAKE_MOTER_ID = 0;
         public static final double CLIMBER_ARM_LENGTH_METERS = Units.inchesToMeters(0.1);
         public static final double CLIMBER_DRUM_RADIUS_METERS = Units.inchesToMeters(0.1);
 

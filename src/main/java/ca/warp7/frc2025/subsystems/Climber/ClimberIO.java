@@ -2,8 +2,6 @@ package ca.warp7.frc2025.subsystems.Climber;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-
 public interface ClimberIO {
     @AutoLog
     static class ClimberIOInputs {
