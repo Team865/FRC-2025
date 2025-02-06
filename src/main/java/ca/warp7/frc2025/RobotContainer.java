@@ -58,7 +58,7 @@ public class RobotContainer {
                 drive = new DriveSubsystem(
                         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
                 intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
-                climber = new ClimberSubsystem(new ClimberIO(){});
+                climber = new ClimberSubsystem(new ClimberIO() {});
                 break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations
