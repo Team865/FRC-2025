@@ -120,13 +120,6 @@ public class RobotContainer {
 
         controller.rightStick().onTrue(drive.zeroPose());
 
-        controller
-                .a()
-                .whileTrue(DriveCommands.joystickDriveAtAngle(
-                        drive,
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
-                        () -> Rotation2d.fromDegrees(90)));
         // run intake motor until sensor
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
