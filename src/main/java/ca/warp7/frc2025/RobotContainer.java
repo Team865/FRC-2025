@@ -23,9 +23,7 @@ import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -45,9 +43,6 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    /**
-     *
-     */
     public RobotContainer() {
         switch (Constants.currentMode) {
             case REAL:
@@ -79,33 +74,36 @@ public class RobotContainer {
                 elevator = new ElevatorSubsystem(new ElevatorIOSim());
 
                 climber = new ClimberSubsystem(new ClimberIOSim());
-
                 break;
             case REPLAY:
             default:
                 drive = new DriveSubsystem(
                         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-                
+
                 intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
 
                 elevator = new ElevatorSubsystem(new ElevatorIO() {});
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
-                break;
         }
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Autos", AutoBuilder.buildAutoChooser());
 
-        autoChooser.addOption("Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        if (Constants.tuningMode) {
+            autoChooser.addOption(
+                    "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+            autoChooser.addOption(
+                    "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+            autoChooser.addOption(
+                    "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+            autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+            autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-        configureBindings();
+            configureTuningBindings();
+        } else {
+            configureBindings();
+        }
     }
 
     /**
@@ -143,6 +141,14 @@ public class RobotContainer {
         controller.x().onTrue(elevator.setGoal(Inches.of(15)));
         controller.y().onTrue(elevator.setGoal(Inches.of(28)));
         controller.b().onTrue(elevator.setGoal(Inches.of(0)));
+    }
+
+    private void configureTuningBindings() {
+        controller.a().onTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        controller.b().onTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+        controller.x().onTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        controller.y().onTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {
