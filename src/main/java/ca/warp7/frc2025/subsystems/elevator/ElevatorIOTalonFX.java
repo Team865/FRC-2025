@@ -6,9 +6,11 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
@@ -28,6 +30,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // Control signals
     private final VoltageOut voltageOut =
             new VoltageOut(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
+    private final PositionVoltage positionVoltageOut =
+            new PositionVoltage(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
 
     // Status Signals
     // type system abuse - these correspond to linear meters, NOT rotations
@@ -51,6 +55,15 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         followerTalon.setControl(new Follower(talon.getDeviceID(), true));
 
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+        config.Slot0.kG = 0;
+        config.Slot0.kS = 0;
+        config.Slot0.kV = 0;
+        config.Slot0.kA = 0;
+        config.Slot0.kP = 0;
+        config.Slot0.kD = 0;
+
         config.Feedback.SensorToMechanismRatio = Elevator.GEAR_RATIO / (2 * Math.PI * Elevator.DRUM_RADIUS_METERS);
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
@@ -100,7 +113,33 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     @Override
+    public void setPosition(double meters) {
+        talon.setControl(positionVoltageOut.withPosition(meters));
+    }
+
+    @Override
     public void setVoltage(double volts) {
         talon.setControl(voltageOut.withOutput(volts));
+    }
+
+    @Override
+    public void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {
+        config.Slot0.kG = kG;
+        config.Slot0.kS = kS;
+        config.Slot0.kV = kV;
+        config.Slot0.kA = kA;
+        config.Slot0.kP = kP;
+        config.Slot0.kD = kD;
+
+        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
+    }
+
+    @Override
+    public void setMotionProfile(double velocity, double acceleration, double jerk) {
+        config.MotionMagic.MotionMagicCruiseVelocity = velocity;
+        config.MotionMagic.MotionMagicAcceleration = acceleration;
+        config.MotionMagic.MotionMagicJerk = jerk;
+
+        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 }

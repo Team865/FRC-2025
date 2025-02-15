@@ -18,4 +18,10 @@ public interface ElevatorIO {
     public default void updateInputs(ElevatorIOInputAutoLogged inputs) {}
 
     public default void setVoltage(double volts) {}
+
+    public default void setPosition(double meters) {}
+
+    public default void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {}
+
+    public default void setMotionProfile(double velocity, double acceleration, double jerk) {}
 }
