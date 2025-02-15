@@ -8,6 +8,19 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * Class containing global constants for the whole robot
+ *
+ * CANID Schema for CANivoreCANivore bus:
+ * 0_ system devices: gyro, power
+ * 1_ Front Left  swerve
+ * 2_ Front Right swerve
+ * 3_ Back  Left  swerve
+ * 4_ Back  Right swerve
+ * 5_ Elevator
+ * 6_ Climber
+ *
+ * CANID Schema for rio bus:
+ * 0_ system deivces:
+ * 1_ intake
  */
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
