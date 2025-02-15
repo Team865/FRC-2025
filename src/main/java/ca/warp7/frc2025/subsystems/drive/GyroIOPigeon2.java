@@ -14,20 +14,31 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.Queue;
 
 public class GyroIOPigeon2 implements GyroIO {
-    private final Pigeon2 pigeon =
-            new Pigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, TunerConstants.DrivetrainConstants.CANBusName);
-    private final StatusSignal<Angle> yaw = pigeon.getYaw();
+    // Devices
+    private final Pigeon2 pigeon;
+
+    // Status Signals
+    private final StatusSignal<Angle> yaw;
+    private final StatusSignal<AngularVelocity> yawVelocity;
+
+    // Odometry Queues
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
-    private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
 
-    public GyroIOPigeon2() {
+    public GyroIOPigeon2(int Pigeon2Id, String CANBus) {
+        pigeon = new Pigeon2(Pigeon2Id, CANBus);
+
         PhoenixUtil.tryUntilOk(5, () -> pigeon.getConfigurator().apply(new Pigeon2Configuration(), 0.25));
         PhoenixUtil.tryUntilOk(5, () -> pigeon.getConfigurator().setYaw(0.0));
 
+        yaw = pigeon.getYaw();
+        yawVelocity = pigeon.getAngularVelocityZWorld();
+
         yaw.setUpdateFrequency(DriveSubsystem.ODOMETRY_FREQUENCY);
         yawVelocity.setUpdateFrequency(50.0);
+
         pigeon.optimizeBusUtilization();
+
         yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(pigeon.getYaw());
     }
