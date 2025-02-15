@@ -65,6 +65,9 @@ public final class Constants {
     public static final class Elevator {
         public static final CANBus CANBUS = new CANBus("drivetrain");
 
+        public static final int LEFT_MOTOR_ID = 0;
+        public static final int RIGHT_MOTOR_ID = 0;
+
         public static final double DRUM_RADIUS_METERS = 0.048514 / 2;
         public static final double GEAR_RATIO = 80 / 16;
     }
