@@ -13,8 +13,10 @@ import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
 import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
+import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
 import ca.warp7.frc2025.subsystems.drive.ModuleIO;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
+import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIO;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
@@ -48,7 +50,13 @@ public class RobotContainer {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
                 drive = new DriveSubsystem(
-                        new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                        new GyroIOPigeon2(
+                                TunerConstants.DrivetrainConstants.Pigeon2Id,
+                                TunerConstants.DrivetrainConstants.CANBusName),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight));
 
                 intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
 
