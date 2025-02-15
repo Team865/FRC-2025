@@ -21,7 +21,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final ObjectDectionIOInputsAutoLogged topSensorInputs = new ObjectDectionIOInputsAutoLogged();
     private final ObjectDectionIOInputsAutoLogged frontSensorInputs = new ObjectDectionIOInputsAutoLogged();
 
-    private final Alert disconnected;
+    private final Alert disconnectedMotor;
 
     private final double topDistanceToCoral = 80;
     private final double frontTopDistanceToCoral = 145;
@@ -31,7 +31,7 @@ public class IntakeSubsystem extends SubsystemBase {
         this.topSensorIO = topSensorIO;
         this.frontSensorIO = frontSensorIO;
 
-        disconnected = new Alert("Intake motor disconnected", AlertType.kError);
+        disconnectedMotor = new Alert("Intake motor disconnected", AlertType.kError);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.processInputs("Intake/TopSensor", topSensorInputs);
         Logger.processInputs("Intake/FrontSensor", frontSensorInputs);
 
-        disconnected.set(!rollersInputs.connected);
+        disconnectedMotor.set(!rollersInputs.connected);
     }
 
     @AutoLogOutput

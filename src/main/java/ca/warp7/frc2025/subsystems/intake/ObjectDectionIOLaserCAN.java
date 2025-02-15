@@ -3,6 +3,7 @@ package ca.warp7.frc2025.subsystems.intake;
 import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.LaserCan;
 import au.grapplerobotics.interfaces.LaserCanInterface;
+import ca.warp7.frc2025.Constants.Intake.LaserCANConstants;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
@@ -12,9 +13,9 @@ public class ObjectDectionIOLaserCAN implements ObjectDectionIO {
 
     private final Alert laserCanStatus;
 
-    public ObjectDectionIOLaserCAN(int laserCANId, String name) {
-        this.name = name + "LaserCAN";
-        laserCan = new LaserCan(laserCANId);
+    public ObjectDectionIOLaserCAN(LaserCANConstants constants) {
+        this.name = constants.name() + "LaserCAN";
+        laserCan = new LaserCan(constants.CANid());
 
         laserCanStatus = new Alert("Unset", AlertType.kError);
 
