@@ -63,11 +63,13 @@ public class DriveCommands {
                     omega = Math.copySign(omega * omega, omega);
 
                     // Convert to field relative speeds & send command
-                            // Convert to field relative speeds & send command
-                            ChassisSpeeds speeds = new ChassisSpeeds(
-                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX()) * drive.getMaxLinearSpeedMetersPerSec(),
-                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY()) * drive.getMaxLinearSpeedMetersPerSec(),
-                                    SensitivityGainAdjustment.steerGainAdjustment(omega) * drive.getMaxAngularSpeedRadPerSec());
+                    // Convert to field relative speeds & send command
+                    ChassisSpeeds speeds = new ChassisSpeeds(
+                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
+                                    * drive.getMaxLinearSpeedMetersPerSec(),
+                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
+                                    * drive.getMaxLinearSpeedMetersPerSec(),
+                            SensitivityGainAdjustment.steerGainAdjustment(omega) * drive.getMaxAngularSpeedRadPerSec());
                     boolean isFlipped = DriverStation.getAlliance().isPresent()
                             && DriverStation.getAlliance().get() == Alliance.Red;
                     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -108,8 +110,10 @@ public class DriveCommands {
 
                             // Convert to field relative speeds & send command
                             ChassisSpeeds speeds = new ChassisSpeeds(
-                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX()) * drive.getMaxLinearSpeedMetersPerSec(),
-                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY()) * drive.getMaxLinearSpeedMetersPerSec(),
+                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
+                                            * drive.getMaxLinearSpeedMetersPerSec(),
+                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
+                                            * drive.getMaxLinearSpeedMetersPerSec(),
                                     SensitivityGainAdjustment.steerGainAdjustment(omega));
                             boolean isFlipped = DriverStation.getAlliance().isPresent()
                                     && DriverStation.getAlliance().get() == Alliance.Red;
