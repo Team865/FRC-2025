@@ -15,7 +15,9 @@ public interface ElevatorIO {
         double[] tempCelsius = new double[] {};
     }
 
-    public abstract void updateInputs(ElevatorIOInputAutoLogged inputs);
+    public default void updateInputs(ElevatorIOInputAutoLogged inputs) {}
+    ;
 
-    public abstract void setVoltage(double volts);
+    public default void setVoltage(double volts) {}
+    ;
 }
