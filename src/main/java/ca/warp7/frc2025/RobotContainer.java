@@ -143,8 +143,7 @@ public class RobotContainer {
         controller.b().onTrue(elevator.setGoal(Inches.of(0)));
     }
 
-    private void configureTuningBindings() {
-    }
+    private void configureTuningBindings() {}
 
     public Command getAutonomousCommand() {
         return autoChooser.get();
