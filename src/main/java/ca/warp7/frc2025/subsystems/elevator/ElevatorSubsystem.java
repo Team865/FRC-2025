@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -52,6 +53,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Distance goal = Inches.of(0);
 
+    private final SysIdRoutine sysIdRoutine;
+
     public ElevatorSubsystem(ElevatorIO io) {
         this.io = io;
 
@@ -65,10 +68,23 @@ public class ElevatorSubsystem extends SubsystemBase {
         wrist = elevator.append(new MechanismLigament2d("wrist", 0.5, 90, 6, new Color8Bit(Color.kPurple)));
 
         SmartDashboard.putData("MyMechanism", mech);
+
+        sysIdRoutine = new SysIdRoutine(
+                new SysIdRoutine.Config(
+                        null, Volts.of(4), null, (state) -> Logger.recordOutput("Elevator/SysIdState/", state)),
+                new SysIdRoutine.Mechanism((volts) -> io.setVoltage(volts.magnitude()), null, this));
     }
 
     public Command setGoal(Distance goal) {
         return this.runOnce(() -> this.goal = goal);
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction);
     }
 
     @Override
