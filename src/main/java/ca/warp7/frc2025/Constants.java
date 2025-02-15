@@ -60,6 +60,6 @@ public final class Constants {
 
     public static final class Elevator {
         public static final double DRUM_RADIUS_METERS = 0.048514 / 2;
-        public static final double GEAR_RATIO = 80 / 14;
+        public static final double GEAR_RATIO = 80 / 16;
     }
 }
