@@ -144,11 +144,6 @@ public class RobotContainer {
     }
 
     private void configureTuningBindings() {
-        controller.a().onTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        controller.b().onTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-        controller.x().onTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        controller.y().onTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {
