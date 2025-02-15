@@ -3,7 +3,6 @@ package ca.warp7.frc2025;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.CANBus;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -70,6 +69,17 @@ public final class Constants {
 
         public static final double DRUM_RADIUS_METERS = 0.048514 / 2;
         public static final double GEAR_RATIO = 80 / 16;
+
+        // TODO: make this proper
+        // Sim constants TEMP
+        // kG: 0.686
+        // kV: 4.6
+        // maxAccel: 480
+        // maxVel: 90
+        // kP: 0.1
+        // kA: 0
+        // kD: 0
+        // kS: 0
     }
 
     public static final class Intake {
@@ -78,7 +88,7 @@ public final class Constants {
         public static final int MOTOR_ID = 11;
 
         public static record LaserCANConstants(int CANid, String name) {}
-        
+
         public static final LaserCANConstants TOP_LASER_CAN = new LaserCANConstants(12, "Top");
         public static final LaserCANConstants FRONT_LASER_CAN = new LaserCANConstants(13, "Front");
     }
