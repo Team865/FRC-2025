@@ -50,6 +50,8 @@ public final class Constants {
     }
 
     public static final class Climber {
+        public static final CANBus CANBUS = new CANBus("drivetrain");
+
         public static final int CLIMBER_LEFT_MOTER_ID = 0;
         public static final int CLIMBER_RIGHT_MOTER_ID = 0;
         public static final int CLIMBER_INTAKE_MOTER_ID = 0;
@@ -61,6 +63,8 @@ public final class Constants {
     }
 
     public static final class Elevator {
+        public static final CANBus CANBUS = new CANBus("drivetrain");
+
         public static final double DRUM_RADIUS_METERS = 0.048514 / 2;
         public static final double GEAR_RATIO = 80 / 16;
     }
