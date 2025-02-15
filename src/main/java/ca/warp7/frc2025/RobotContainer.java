@@ -6,27 +6,22 @@ package ca.warp7.frc2025;
 
 import static edu.wpi.first.units.Units.Inches;
 
-import ca.warp7.frc2025.Constants.Climber;
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
-import ca.warp7.frc2025.subsystems.Climber.ClimberIOTalonFX;
 import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
-import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
 import ca.warp7.frc2025.subsystems.drive.ModuleIO;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
-import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
+import ca.warp7.frc2025.subsystems.elevator.ElevatorIO;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
 import ca.warp7.frc2025.subsystems.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
-import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
-import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -54,28 +49,16 @@ public class RobotContainer {
      */
     public RobotContainer() {
         switch (Constants.currentMode) {
-            case REPLAY:
-                drive = new DriveSubsystem(
-                        new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-                intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
-                climber = new ClimberSubsystem(new ClimberIO() {});
-                break;
             case REAL:
                 // Real robot, instantiate hardware IO implementations
                 drive = new DriveSubsystem(
-                        new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                        new ModuleIOTalonFX(TunerConstants.FrontRight),
-                        new ModuleIOTalonFX(TunerConstants.BackLeft),
-                        new ModuleIOTalonFX(TunerConstants.BackRight));
-                intake = new IntakeSubsystem(
-                        new RollersIOTalonFX(1, "rio"),
-                        new ObjectDectionIOLaserCAN(2, "Top"),
-                        new ObjectDectionIOLaserCAN(3, "Front"));
-                climber = new ClimberSubsystem(new ClimberIOTalonFX(
-                        Climber.CLIMBER_LEFT_MOTER_ID,
-                        Climber.CLIMBER_RIGHT_MOTER_ID,
-                        Climber.CLIMBER_INTAKE_MOTER_ID));
+                        new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+
+                intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
+
+                climber = new ClimberSubsystem(new ClimberIO() {});
+
+                elevator = new ElevatorSubsystem(new ElevatorIO() {});
                 break;
 
             case SIM:
@@ -86,17 +69,23 @@ public class RobotContainer {
                         new ModuleIOSim(TunerConstants.FrontRight),
                         new ModuleIOSim(TunerConstants.BackLeft),
                         new ModuleIOSim(TunerConstants.BackRight));
+
                 intake = new IntakeSubsystem(
                         new RollersIOSim(DCMotor.getKrakenX60(1), 1, 0.01),
                         new ObjectDectionIO() {},
                         new ObjectDectionIO() {});
+
                 elevator = new ElevatorSubsystem(new ElevatorIOSim());
+
                 climber = new ClimberSubsystem(new ClimberIOSim());
+
                 break;
+            case REPLAY:
             default:
-                drive = null;
-                intake = null;
-                climber = new ClimberSubsystem(new ClimberIOSim());
+                drive = new DriveSubsystem(
+                        new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
+                climber = new ClimberSubsystem(new ClimberIO() {});
                 break;
         }
 
