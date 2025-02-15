@@ -7,6 +7,7 @@ package ca.warp7.frc2025;
 import static edu.wpi.first.units.Units.Inches;
 
 import ca.warp7.frc2025.commands.DriveCommands;
+import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
 import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
@@ -17,7 +18,6 @@ import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIO;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
-import ca.warp7.frc2025.subsystems.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;

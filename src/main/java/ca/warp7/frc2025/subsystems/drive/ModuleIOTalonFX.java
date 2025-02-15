@@ -1,6 +1,6 @@
 package ca.warp7.frc2025.subsystems.drive;
 
-import ca.warp7.frc2025.subsystems.generated.TunerConstants;
+import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.util.PhoenixUtil;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;

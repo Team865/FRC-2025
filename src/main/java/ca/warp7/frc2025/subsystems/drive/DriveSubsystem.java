@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import ca.warp7.frc2025.Constants.Drivetrain;
-import ca.warp7.frc2025.subsystems.generated.TunerConstants;
+import ca.warp7.frc2025.generated.TunerConstants;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
