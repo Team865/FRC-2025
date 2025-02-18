@@ -2,20 +2,22 @@ package ca.warp7.frc2025.subsystems.Climber;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public interface ClimberIO {
     @AutoLog
     static class ClimberIOInputs {
+        public Rotation2d pivotRotation = new Rotation2d(); 
+        public double pivotVelocityRotationsPerSecond = 0.0; 
+
         public boolean motorConnected = false;
-        public boolean followerConnected = true;
+        public boolean followorConnected = false; 
 
-        public double pivotPosition = 0.0;
-        public double pivotVelocityMetersPerSec = 0.0;
+        public double[] pivtoVoltage = new double[] {}; 
+        public double[] pivotCurrentAmps = double [] {}; 
+        public double[] pivotTempCelsuis = new double[] {}; 
 
-        public double[] pivotAppliedVolts = new double[] {};
-        public double[] pivotCurrentAmps = new double[] {};
-
-        public double climbIntakeVolts = 0.0;
-        public double climbIntakeCurrentAmps = 0.0;
+        
     }
 
     default void updateInputs(ClimberIOInputsAutoLogged inputs) {}
