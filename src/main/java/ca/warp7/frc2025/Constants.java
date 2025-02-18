@@ -49,8 +49,6 @@ public final class Constants {
     }
 
     public static final class Climber {
-        public static final CANBus CANBUS = new CANBus("drivetrain");
-
         public static final int CLIMBER_LEFT_MOTER_ID = 0;
         public static final int CLIMBER_RIGHT_MOTER_ID = 0;
         public static final int CLIMBER_INTAKE_MOTER_ID = 0;
@@ -62,8 +60,6 @@ public final class Constants {
     }
 
     public static final class Elevator {
-        public static final CANBus CANBUS = new CANBus("drivetrain");
-
         public static final int LEFT_MOTOR_ID = 0;
         public static final int RIGHT_MOTOR_ID = 0;
 
