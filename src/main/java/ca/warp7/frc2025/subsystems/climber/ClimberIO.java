@@ -14,7 +14,7 @@ public interface ClimberIO {
         public boolean followorConnected = false; 
 
         public double[] pivtoVoltage = new double[] {}; 
-        public double[] pivotCurrentAmps = double [] {}; 
+        public double[] pivotCurrentAmps = new double [] {}; 
         public double[] pivotTempCelsuis = new double[] {}; 
 
         
@@ -22,7 +22,9 @@ public interface ClimberIO {
 
     default void updateInputs(ClimberIOInputsAutoLogged inputs) {}
 
-    default void setPivotVoltage(double volts) {}
+    default void setPivotSetpoint(final Rotation2d rotation){}
 
-    default void setIntakeVoltage(double volts) {}
+    default void setPivotVoltage(final double leftVoltage, final double rightVoltage) {}
+
+
 }
