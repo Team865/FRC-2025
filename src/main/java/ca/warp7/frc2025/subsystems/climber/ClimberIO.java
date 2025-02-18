@@ -1,6 +1,5 @@
 package ca.warp7.frc2025.subsystems.climber;
 
-import ca.warp7.frc2025.subsystems.Climber.ClimberIOInputsAutoLogged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -8,7 +7,7 @@ public interface ClimberIO {
     @AutoLog
     static class ClimberIOInputs {
         public boolean motorConnected = false;
-        public boolean followorConnected = false;
+        public boolean followerConnected = false;
 
         public Rotation2d pivotRotation = new Rotation2d();
         public double pivotVelocityRotationsPerSecond = 0.0;
