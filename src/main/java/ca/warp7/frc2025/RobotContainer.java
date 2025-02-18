@@ -23,6 +23,7 @@ import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -139,8 +140,7 @@ public class RobotContainer {
                                 .and(intake.frontSensorTrigger().negate())));
 
         controller.x().onTrue(elevator.setGoal(Inches.of(15)));
-        controller.y().onTrue(elevator.setGoal(Inches.of(28)));
-        controller.b().onTrue(elevator.setGoal(Inches.of(0)));
+        controller.a().onTrue(climber.runStateCmd(Rotation2d.fromDegrees(15)));
     }
 
     private void configureTuningBindings() {}

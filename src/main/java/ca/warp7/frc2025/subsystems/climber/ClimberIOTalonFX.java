@@ -3,6 +3,7 @@ package ca.warp7.frc2025.subsystems.climber;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -40,6 +41,8 @@ public class ClimberIOTalonFX implements ClimberIO {
     public ClimberIOTalonFX(int pivotMotorID, int followerMotorID) {
         pivotMotor = new TalonFX(pivotMotorID, "Drivetrain");
         followerMotor = new TalonFX(followerMotorID, "Drivetrain");
+        followerMotor.setControl(new Follower(pivotMotor.getDeviceID(), true));
+
 
         pivotRotations = pivotMotor.getPosition();
         pivotVelocity = pivotMotor.getVelocity();
