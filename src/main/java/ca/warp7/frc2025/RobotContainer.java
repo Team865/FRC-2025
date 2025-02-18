@@ -19,6 +19,7 @@ import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIO;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
+import ca.warp7.frc2025.subsystems.elevator.ElevatorIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
@@ -62,7 +63,7 @@ public class RobotContainer {
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
-                elevator = new ElevatorSubsystem(new ElevatorIO() {});
+                elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
                 break;
 
             case SIM:
