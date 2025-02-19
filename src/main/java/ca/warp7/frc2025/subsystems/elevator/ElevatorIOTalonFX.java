@@ -67,11 +67,13 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         config.Slot0.kD = 0;
 
         config.Feedback.SensorToMechanismRatio = Elevator.GEAR_RATIO / (2 * Math.PI * Elevator.DRUM_RADIUS_METERS);
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-        config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-        config.CurrentLimits.SupplyCurrentLimit = 80.0;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        // config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+        // config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+        config.CurrentLimits.SupplyCurrentLimit = 60.0;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.CurrentLimits.StatorCurrentLimit = 80.0;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
         PhoenixUtil.tryUntilOk(5, () -> followerTalon.getConfigurator().apply(config));
