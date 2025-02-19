@@ -7,6 +7,7 @@ package ca.warp7.frc2025;
 import static edu.wpi.first.units.Units.Inches;
 
 import ca.warp7.frc2025.Constants.Elevator;
+import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
@@ -24,8 +25,10 @@ import ca.warp7.frc2025.subsystems.elevator.ElevatorIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
+import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
+import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -60,7 +63,10 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
 
-                intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
+                intake = new IntakeSubsystem(
+                        new RollersIOTalonFX(2, "rio"),
+                        new ObjectDectionIOLaserCAN(Intake.TOP_LASER_CAN),
+                        new ObjectDectionIOLaserCAN(Intake.FRONT_LASER_CAN));
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
