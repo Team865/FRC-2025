@@ -7,7 +7,7 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -31,8 +31,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // Control signals
     private final VoltageOut voltageOut =
             new VoltageOut(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
-    private final PositionVoltage positionVoltageOut =
-            new PositionVoltage(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
+    private final MotionMagicVoltage positionVoltageOut =
+            new MotionMagicVoltage(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
 
     // Status Signals
     // type system abuse - these correspond to linear meters, NOT rotations
@@ -147,7 +147,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     public void setMotionProfile(double velocity, double acceleration, double jerk) {
         config.MotionMagic.MotionMagicCruiseVelocity = velocity;
         config.MotionMagic.MotionMagicAcceleration = acceleration;
-        config.MotionMagic.MotionMagicJerk = jerk;
 
         PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
     }
