@@ -132,6 +132,7 @@ public class RobotContainer {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
+        controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
 
         // run intake motor until sensor
