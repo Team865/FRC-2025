@@ -1,9 +1,11 @@
 package ca.warp7.frc2025;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -65,6 +67,9 @@ public final class Constants {
 
         public static final double DRUM_RADIUS_METERS = 0.048514 / 2;
         public static final double GEAR_RATIO = 80 / 16;
+
+        public static final Distance STOW = Inches.of(0);
+        public static final Distance L4 = Inches.of(28.75);
     }
 
     public static final class Intake {
