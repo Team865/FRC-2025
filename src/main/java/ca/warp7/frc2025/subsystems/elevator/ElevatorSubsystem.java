@@ -38,7 +38,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(
-                        null, Volts.of(4), null, (state) -> Logger.recordOutput("Elevator/SysIdState/", state)),
+                        null,
+                        Volts.of(1),
+                        Seconds.of(3),
+                        (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
                 new SysIdRoutine.Mechanism((volts) -> io.setVoltage(volts.magnitude()), null, this));
 
         io.setControlConstants(kG.get(), kS.get(), kV.get(), kA.get(), kP.get(), kD.get());
