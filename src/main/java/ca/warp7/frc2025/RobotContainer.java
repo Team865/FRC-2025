@@ -6,6 +6,7 @@ package ca.warp7.frc2025;
 
 import static edu.wpi.first.units.Units.Inches;
 
+import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
@@ -147,9 +148,8 @@ public class RobotContainer {
                                 .negate()
                                 .and(intake.frontSensorTrigger().negate())));
 
-        controller.x().onTrue(elevator.setGoal(Inches.of(15)));
-        controller.y().onTrue(elevator.setGoal(Inches.of(28)));
-        controller.b().onTrue(elevator.setGoal(Inches.of(0)));
+        controller.b().onTrue(elevator.setGoal(Elevator.L4));
+        controller.a().onTrue(elevator.setGoal(Elevator.STOW));
     }
 
     private void configureTuningBindings() {}
