@@ -4,8 +4,6 @@
 
 package ca.warp7.frc2025;
 
-import static edu.wpi.first.units.Units.Inches;
-
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.commands.DriveCommands;
