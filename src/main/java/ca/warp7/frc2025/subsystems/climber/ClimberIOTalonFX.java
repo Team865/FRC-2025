@@ -9,6 +9,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
@@ -20,6 +22,7 @@ import edu.wpi.first.units.measure.Voltage;
 public class ClimberIOTalonFX implements ClimberIO {
     private final TalonFX pivotMotor;
     private final TalonFX followerMotor;
+    private final SparkMax intakeMotor;
 
     private final StatusSignal<Angle> pivotRotations;
     private final StatusSignal<AngularVelocity> pivotVelocity;
@@ -38,11 +41,12 @@ public class ClimberIOTalonFX implements ClimberIO {
     private final TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
     private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
-    public ClimberIOTalonFX(int pivotMotorID, int followerMotorID) {
+    public ClimberIOTalonFX(int pivotMotorID, int followerMotorID, int intakeID) {
         pivotMotor = new TalonFX(pivotMotorID, "Drivetrain");
         followerMotor = new TalonFX(followerMotorID, "Drivetrain");
-        followerMotor.setControl(new Follower(pivotMotor.getDeviceID(), true));
+        intakeMotor = new SparkMax(intakeID, MotorType.kBrushless);
 
+        followerMotor.setControl(new Follower(pivotMotor.getDeviceID(), true));
 
         pivotRotations = pivotMotor.getPosition();
         pivotVelocity = pivotMotor.getVelocity();
@@ -69,6 +73,7 @@ public class ClimberIOTalonFX implements ClimberIO {
         pivotConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
 
         pivotMotor.getConfigurator().apply(pivotConfig);
+        followerMotor.getConfigurator().apply(pivotConfig);
         pivotMotor.setPosition(ClimberSubsystem.PIVOT_MIN_ANGLE.getRotations());
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
@@ -106,5 +111,10 @@ public class ClimberIOTalonFX implements ClimberIO {
     @Override
     public void setPivotSetpoint(Rotation2d rotation) {
         pivotMotor.setControl(pivotMotionMagic.withPosition(rotation.getRotations()));
+    }
+
+    @Override
+    public void setIntakeVoltage(double volts) {
+        intakeMotor.set(volts);
     }
 }

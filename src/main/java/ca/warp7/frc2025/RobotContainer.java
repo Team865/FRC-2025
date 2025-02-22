@@ -4,16 +4,17 @@
 
 package ca.warp7.frc2025;
 
-import static edu.wpi.first.units.Units.Inches;
-
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.subsystems.climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.climber.ClimberIOSim;
+import ca.warp7.frc2025.subsystems.climber.ClimberIOTalonFX;
 import ca.warp7.frc2025.subsystems.climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
+import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
 import ca.warp7.frc2025.subsystems.drive.ModuleIO;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
+import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIO;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
@@ -49,11 +50,15 @@ public class RobotContainer {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
                 drive = new DriveSubsystem(
-                        new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+                        new GyroIOPigeon2(10, "Drivetrain"),
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight));
 
                 intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
 
-                climber = new ClimberSubsystem(new ClimberIO() {});
+                climber = new ClimberSubsystem(new ClimberIOTalonFX(61, 62, 55));
 
                 elevator = new ElevatorSubsystem(new ElevatorIO() {});
                 break;
@@ -139,8 +144,16 @@ public class RobotContainer {
                                 .negate()
                                 .and(intake.frontSensorTrigger().negate())));
 
-        controller.x().onTrue(elevator.setGoal(Inches.of(15)));
-        controller.a().onTrue(climber.runStateCmd(Rotation2d.fromDegrees(15)));
+        controller.x().whileTrue(climber.runStateCmd(Rotation2d.fromDegrees(90)));
+
+        controller.a().onTrue(climber.setPivotVoltage(-5));
+        controller.a().onFalse(climber.setPivotVoltage(0));
+
+        controller.b().onTrue(climber.setPivotVoltage(5));
+        controller.b().onFalse(climber.setPivotVoltage(0));
+
+        controller.y().onTrue(climber.setIntakeVoltage(5));
+        controller.y().onFalse(climber.setIntakeVoltage(0));
     }
 
     private void configureTuningBindings() {}

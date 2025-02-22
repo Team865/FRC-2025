@@ -22,4 +22,6 @@ public interface ClimberIO {
     public default void setPivotSetpoint(final Rotation2d rotation) {}
 
     public default void setPivotVoltage(final double volts) {}
+
+    public default void setIntakeVoltage(final double volts) {}
 }

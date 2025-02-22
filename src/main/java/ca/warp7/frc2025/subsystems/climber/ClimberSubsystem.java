@@ -50,4 +50,17 @@ public class ClimberSubsystem extends SubsystemBase {
     public Command runStateCmd(Rotation2d rotation) {
         return runStateCmd(() -> rotation);
     }
+
+    public Command setPivotVoltage(double volts) {
+        return this.run(() -> {
+            io.setPivotVoltage(volts);
+        });
+    }
+
+    public Command setIntakeVoltage(double volts) {
+        return this.run(() -> {
+            io.setIntakeVoltage(volts);
+            System.out.println("INTAKE VOLTAGE");
+        });
+    }
 }
