@@ -66,10 +66,14 @@ public class DriveCommands {
                     // Convert to field relative speeds & send command
                     ChassisSpeeds speeds = new ChassisSpeeds(
                             SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
-                                    * drive.getMaxLinearSpeedMetersPerSec(),
+                                    * drive.getMaxLinearSpeedMetersPerSec()
+                                    * drive.speedModifer,
                             SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
-                                    * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.steerGainAdjustment(omega) * drive.getMaxAngularSpeedRadPerSec());
+                                    * drive.getMaxLinearSpeedMetersPerSec()
+                                    * drive.speedModifer,
+                            SensitivityGainAdjustment.steerGainAdjustment(omega)
+                                    * drive.getMaxAngularSpeedRadPerSec()
+                                    * drive.speedModifer);
                     boolean isFlipped = DriverStation.getAlliance().isPresent()
                             && DriverStation.getAlliance().get() == Alliance.Red;
                     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(

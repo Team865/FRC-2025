@@ -37,6 +37,10 @@ public interface ModuleIO {
      */
     public default void setDriveOpenLoop(double output) {}
 
+    public default void setDrivePD(double P, double D) {}
+
+    public default void setTurnPD(double P, double D) {}
+
     /**
      * Run the turn motor at the passed open loop value
      * @param output

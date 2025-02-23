@@ -65,6 +65,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final StatusSignal<Voltage> turnAppliedVolts;
     private final StatusSignal<Current> turnCurrent;
 
+    // Configs
+    private final TalonFXConfiguration turnConfig;
+    private final TalonFXConfiguration driveConfig;
+
     // debouncers for connections
     private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
@@ -79,7 +83,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         cancoder = new CANcoder(constants.EncoderId, TunerConstants.DrivetrainConstants.CANBusName);
 
         // Con fig for drive motor
-        TalonFXConfiguration driveConfig = constants.DriveMotorInitialConfigs;
+        driveConfig = constants.DriveMotorInitialConfigs;
         driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         driveConfig.Slot0 = constants.DriveMotorGains;
         driveConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
@@ -94,7 +98,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         PhoenixUtil.tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
         PhoenixUtil.tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));
 
-        TalonFXConfiguration turnConfig = constants.SteerMotorInitialConfigs;
+        turnConfig = constants.SteerMotorInitialConfigs;
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnConfig.Slot0 = constants.SteerMotorGains;
         turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
@@ -210,7 +214,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void setDriveVelocity(double velocityRadPerSec) {
-        double velocityRotPerSec = Units.rotationsToRadians(velocityRadPerSec);
+        double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
         driveTalon.setControl(
                 switch (constants.DriveMotorClosedLoopOutput) {
                     case Voltage -> velocityVoltageRequest.withVelocity(velocityRotPerSec);
@@ -225,5 +229,21 @@ public class ModuleIOTalonFX implements ModuleIO {
                     case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations());
                     case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(rotation.getRotations());
                 });
+    }
+
+    @Override
+    public void setDrivePD(double P, double D) {
+        // driveConfig.Slot0.kP = P;
+        // driveConfig.Slot0.kD = D;
+        //
+        // PhoenixUtil.tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
+    }
+
+    @Override
+    public void setTurnPD(double P, double D) {
+        // turnConfig.Slot0.kP = P;
+        // turnConfig.Slot0.kD = D;
+        //
+        // PhoenixUtil.tryUntilOk(5, () -> driveTalon.getConfigurator().apply(turnConfig, 0.25));
     }
 }
