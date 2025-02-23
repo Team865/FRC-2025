@@ -91,6 +91,14 @@ public class Module {
         return odometryPositions;
     }
 
+    public void setDrivePD(double P, double D) {
+        io.setDrivePD(P, D);
+    }
+
+    public void setTurnPD(double P, double D) {
+        io.setTurnPD(P, D);
+    }
+
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module" + name, inputs);

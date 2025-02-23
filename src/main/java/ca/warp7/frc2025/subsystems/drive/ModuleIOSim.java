@@ -53,7 +53,7 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Running closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts = driveFFVolts + driveController.calculate(driveSim.getAngularVelocityRadPerSec());
+            driveAppliedVolts = driveController.calculate(driveSim.getAngularVelocityRadPerSec());
         } else {
             driveController.reset();
         }
@@ -104,11 +104,22 @@ public class ModuleIOSim implements ModuleIO {
     public void setDriveVelocity(double velocityRadPerSec) {
         driveClosedLoop = true;
         driveFFVolts = driveFFController.calculate(velocityRadPerSec);
+        driveController.setSetpoint(velocityRadPerSec);
     }
 
     @Override
     public void setTurnPosition(Rotation2d rotation) {
         turnClosedLoop = true;
         turnController.setSetpoint(rotation.getRadians());
+    }
+
+    @Override
+    public void setDrivePD(double P, double D) {
+        driveController.setPID(P, 0, D);
+    }
+
+    @Override
+    public void setTurnPD(double P, double D) {
+        turnController.setPID(P, 0, D);
     }
 }
