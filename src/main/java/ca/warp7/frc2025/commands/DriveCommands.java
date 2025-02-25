@@ -3,6 +3,7 @@ package ca.warp7.frc2025.commands;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.util.SensitivityGainAdjustment;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,8 +19,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
     private static final double DEADBAND = 0.1;
@@ -136,6 +139,64 @@ public class DriveCommands {
                 // Reset PID controller when command starts
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
+
+    public static Command reefAlign(
+            DriveSubsystem drive,
+            Supplier<Rotation2d> tx,
+            Supplier<Rotation2d> ty,
+            Supplier<Rotation2d> xGoal,
+            Supplier<Rotation2d> yGoal) {
+        final PIDController xController = new PIDController(1.0, 0.0, 0.0);
+        final PIDController yController = new PIDController(1.0, 0.0, 0.0);
+        final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        return drive.run(() -> {
+            Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
+            Logger.recordOutput("Swerve/ty", tx.get().getDegrees());
+            final ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    new ChassisSpeeds(
+                            yController.calculate(
+                                            ty.get().getDegrees(), yGoal.get().getDegrees())
+                                    * 0.3,
+                            xController.calculate(
+                                            tx.get().getDegrees(), xGoal.get().getDegrees())
+                                    * 0.3,
+                            0),
+                    // -thetaController.calculate(
+                    //                 pose.getRotation().getRadians(),
+                    //                 target.getRotation().getRadians())
+                    //         * 0.3),
+                    drive.getRotation());
+            drive.runVelocity(speeds);
+        });
+    }
+
+    public static Command poseLockDriveCommand(DriveSubsystem drive, Supplier<Optional<Pose2d>> targetSupplier) {
+        final PIDController xController = new PIDController(1.0, 0.0, 0.0);
+        final PIDController yController = new PIDController(1.0, 0.0, 0.0);
+        final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+        return drive.run(() -> {
+            targetSupplier.get().ifPresent((target) -> {
+                final var pose = drive.getPose();
+                Logger.recordOutput("Swerve/Target Pose", target);
+                final ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                        new ChassisSpeeds(
+                                -xController.calculate(pose.getX(), target.getX()) * 0.3,
+                                -yController.calculate(pose.getY(), target.getY()) * 0.3,
+                                0),
+                        // -thetaController.calculate(
+                        //                 pose.getRotation().getRadians(),
+                        //                 target.getRotation().getRadians())
+                        //         * 0.3),
+                        drive.getRotation());
+                Logger.recordOutput("Choreo/Feedback + FF Target Speeds Robot Relative", speeds);
+                drive.runVelocity(speeds);
+            });
+        });
+    }
+
     // courtesy of 6238
 
     /** Measures the robot's wheel radius by spinning in a circle. */
