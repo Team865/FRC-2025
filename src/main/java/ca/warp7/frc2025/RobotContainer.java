@@ -128,7 +128,11 @@ public class RobotContainer {
      */
     private void configureBindings() {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX(),
+                () -> drive.speedModifer));
 
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
@@ -153,8 +157,16 @@ public class RobotContainer {
                                 .negate()
                                 .and(intake.frontSensorTrigger().negate())));
 
-        controller.b().onTrue(elevator.setGoal(Elevator.L4));
-        controller.a().onTrue(elevator.setGoal(Elevator.STOW));
+        controller.start().toggleOnTrue(drive.runOnce(() -> {
+            if (drive.speedModifer != 1) {
+                drive.speedModifer = 1;
+            } else {
+                drive.speedModifer = 0.5;
+            }
+        }));
+
+        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.3).andThen(elevator.setGoal(Elevator.L4)));
+        controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
     }
 
     private void configureTuningBindings() {}
