@@ -102,12 +102,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         StatusCode talonCode =
                 BaseStatusSignal.refreshAll(position, velocity, appliedVolts, torqueCurrent, supplyCurrent, temp);
 
-        System.out.println("talon: " + talonCode);
-
         StatusCode followerCode = BaseStatusSignal.refreshAll(
                 followerAppliedVolts, followerTorqueCurrent, followerSupplyCurrent, followerTemp);
-
-        System.out.println("follower: " + followerCode);
 
         inputs.motorConnected = connectedDebouncerMain.calculate(talonCode.isOK());
         inputs.followerConnected = connectedDebouncerFollower.calculate(followerCode.isOK());
