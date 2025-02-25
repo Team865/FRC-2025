@@ -165,7 +165,7 @@ public class RobotContainer {
             }
         }));
 
-        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.3).andThen(elevator.setGoal(Elevator.L4)));
+        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
         controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
     }
 
