@@ -11,6 +11,11 @@ import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
 import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
+import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
+import ca.warp7.frc2025.subsystems.Vision.VisionIO;
+import ca.warp7.frc2025.subsystems.Vision.VisionIOLimelight;
+import ca.warp7.frc2025.subsystems.Vision.VisionIOPhotonVisionSim;
+import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
 import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
@@ -41,6 +46,7 @@ public class RobotContainer {
     private final IntakeSubsystem intake;
     private final ElevatorSubsystem elevator;
     private final ClimberSubsystem climber;
+    private final VisionSubsystem vision;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -69,6 +75,11 @@ public class RobotContainer {
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
                 elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
+
+                vision = new VisionSubsystem(
+                        drive::addVisionMeasurement,
+                        new VisionIOLimelight(VisionConstants.camera0Name, () -> drive.getRotation()),
+                        new VisionIOLimelight(VisionConstants.camera1Name, () -> drive.getRotation()));
                 break;
 
             case SIM:
@@ -88,6 +99,13 @@ public class RobotContainer {
                 elevator = new ElevatorSubsystem(new ElevatorIOSim());
 
                 climber = new ClimberSubsystem(new ClimberIOSim());
+
+                vision = new VisionSubsystem(
+                        drive::addVisionMeasurement,
+                        new VisionIOPhotonVisionSim(
+                                VisionConstants.camera0Name, VisionConstants.robotToCamera0, () -> drive.getPose()),
+                        new VisionIOPhotonVisionSim(
+                                VisionConstants.camera1Name, VisionConstants.robotToCamera1, () -> drive.getPose()));
                 break;
             case REPLAY:
             default:
@@ -99,6 +117,8 @@ public class RobotContainer {
                 elevator = new ElevatorSubsystem(new ElevatorIO() {});
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
+
+                vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
         // Set up auto routines
