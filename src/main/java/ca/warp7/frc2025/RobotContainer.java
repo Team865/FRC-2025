@@ -33,6 +33,7 @@ import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -127,6 +128,7 @@ public class RobotContainer {
         if (Constants.tuningMode) {
             autoChooser.addOption(
                     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+            autoChooser.addOption("Drive Wheel FF Characterization", DriveCommands.feedforwardCharacterization(drive));
             autoChooser.addOption(
                     "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption(
@@ -189,7 +191,17 @@ public class RobotContainer {
         controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
     }
 
-    private void configureTuningBindings() {}
+    private void configureTuningBindings() {
+        controller.a().onTrue(drive.run(() -> drive.runVelocity(new ChassisSpeeds(2, 0, 0))));
+        controller.b().onTrue(drive.run(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
+
+        drive.setDefaultCommand(DriveCommands.joystickDrive(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX(),
+                () -> drive.speedModifer));
+    }
 
     public Command getAutonomousCommand() {
         return autoChooser.get();
