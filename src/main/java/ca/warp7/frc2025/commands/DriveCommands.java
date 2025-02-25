@@ -49,7 +49,11 @@ public class DriveCommands {
      * Field relative drive command using two joysticks (controlling linear and angular velocities).
      */
     public static Command joystickDrive(
-            DriveSubsystem drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
+            DriveSubsystem drive,
+            DoubleSupplier xSupplier,
+            DoubleSupplier ySupplier,
+            DoubleSupplier omegaSupplier,
+            DoubleSupplier speedMultiplier) {
         return Commands.run(
                 () -> {
                     // Get linear velocity
@@ -62,14 +66,17 @@ public class DriveCommands {
                     // Square rotation value for more precise control
                     omega = Math.copySign(omega * omega, omega);
 
+                    double speedMulti = speedMultiplier.getAsDouble();
+
                     // Convert to field relative speeds & send command
                     // Convert to field relative speeds & send command
                     ChassisSpeeds speeds = new ChassisSpeeds(
-                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
+                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX() * speedMulti)
                                     * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
+                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY() * speedMulti)
                                     * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.steerGainAdjustment(omega) * drive.getMaxAngularSpeedRadPerSec());
+                            SensitivityGainAdjustment.steerGainAdjustment(omega * speedMulti)
+                                    * drive.getMaxAngularSpeedRadPerSec());
                     boolean isFlipped = DriverStation.getAlliance().isPresent()
                             && DriverStation.getAlliance().get() == Alliance.Red;
                     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
