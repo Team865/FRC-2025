@@ -33,6 +33,7 @@ import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -198,7 +199,8 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target]);
+                () -> VisionConstants.ty[drive.target],
+                () -> vision.tag().orElse(new Pose2d()));
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.rightTrigger().whileTrue(align);
@@ -220,7 +222,9 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target]);
+                () -> VisionConstants.ty[drive.target],
+                () -> vision.tag().orElse(new Pose2d()));
+
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.a().whileTrue(align);

@@ -72,7 +72,7 @@ public final class Constants {
         public static final Distance L4 = Inches.of(28.75);
         public static final Distance INTAKE = Inches.of(3);
         public static final Distance L3 = Inches.of(21);
-        public static final Distance L2 = Inches.of(14);
+        public static final Distance L2 = Inches.of(12.75);
     }
 
     public static final class Intake {
