@@ -11,15 +11,15 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
-    public static Rotation2d[] tx = {Rotation2d.fromRadians(0), Rotation2d.fromDegrees(0)};
+    public static Rotation2d[] tx = {Rotation2d.fromDegrees(-4), Rotation2d.fromDegrees(-4)};
 
-    public static Rotation2d[] ty = {Rotation2d.fromDegrees(-0.225), Rotation2d.fromDegrees(0)};
+    public static Rotation2d[] ty = {Rotation2d.fromRadians(0.021), Rotation2d.fromRadians(0.021)};
 
     // AprilTag layout
     public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    public static String camera0Name = "limelight-top";
-    public static String camera1Name = "limelight-low";
+    public static String camera0Name = "limelight-right";
+    public static String camera1Name = "limelight-left";
 
     // Robot to camera transforms
     // (Not used by Limelight, configure in web UI instead)

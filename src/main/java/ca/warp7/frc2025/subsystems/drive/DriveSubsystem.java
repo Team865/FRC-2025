@@ -87,6 +87,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     public double speedModifer = 1;
 
+    public int target = 0;
+
     public DriveSubsystem(
             GyroIO gyroIO, ModuleIO flModuleIO, ModuleIO frModuleIO, ModuleIO blModuleIO, ModuleIO brModuleIO) {
         this.gyroIO = gyroIO;

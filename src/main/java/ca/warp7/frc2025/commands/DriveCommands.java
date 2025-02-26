@@ -149,28 +149,24 @@ public class DriveCommands {
             Supplier<Rotation2d> ty,
             Supplier<Rotation2d> xGoal,
             Supplier<Rotation2d> yGoal) {
-        final PIDController xController = new PIDController(1.0, 0.0, 0.0);
-        final PIDController yController = new PIDController(1.0, 0.0, 0.0);
+        final PIDController xController = new PIDController(0.0, 0.0, 0.0);
+        final PIDController yController = new PIDController(0.0125, 0.0, 0.0);
         final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
         return drive.run(() -> {
             Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
-            Logger.recordOutput("Swerve/ty", tx.get().getDegrees());
-            final ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                    new ChassisSpeeds(
-                            yController.calculate(
-                                            ty.get().getDegrees(), yGoal.get().getDegrees())
-                                    * 0.3,
-                            xController.calculate(
-                                            tx.get().getDegrees(), xGoal.get().getDegrees())
-                                    * 0.3,
-                            0),
-                    // -thetaController.calculate(
-                    //                 pose.getRotation().getRadians(),
-                    //                 target.getRotation().getRadians())
-                    //         * 0.3),
-                    drive.getRotation());
+            Logger.recordOutput("Swerve/tx", tx.get().getDegrees());
+            Logger.recordOutput("Swerve/tx-goal", xGoal.get().getDegrees());
+            Logger.recordOutput("Swerve/ty-goal", yGoal.get().getDegrees());
+            final ChassisSpeeds speeds = new ChassisSpeeds(
+                    xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
+                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
+                    0);
+            // -thetaController.calculate(
+            //                 pose.getRotation().getRadians(),
+            //                 target.getRotation().getRadians())
+            //         * 0.3),
             drive.runVelocity(speeds);
         });
     }

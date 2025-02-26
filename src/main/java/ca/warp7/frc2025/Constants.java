@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
-    public static final boolean tuningMode = true;
+    public static final boolean tuningMode = false;
 
     public static final double PERIOD = 0.02;
 
@@ -70,6 +70,9 @@ public final class Constants {
 
         public static final Distance STOW = Inches.of(0);
         public static final Distance L4 = Inches.of(28.75);
+        public static final Distance INTAKE = Inches.of(3);
+        public static final Distance L3 = Inches.of(21);
+        public static final Distance L2 = Inches.of(14);
     }
 
     public static final class Intake {
