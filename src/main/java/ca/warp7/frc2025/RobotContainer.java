@@ -33,7 +33,6 @@ import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -174,7 +173,7 @@ public class RobotContainer {
         controller
                 .leftTrigger()
                 .and(intake.frontSensorTrigger())
-                .onTrue(intake.runVoltsRoller(-4)
+                .onTrue(intake.runVoltsRoller(-6)
                         .until(intake.topSensorTrigger()
                                 .negate()
                                 .and(intake.frontSensorTrigger().negate())));
@@ -189,11 +188,25 @@ public class RobotContainer {
 
         controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
         controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
+        controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
+        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
+        controller
+                .leftBumper()
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
+        Command align = DriveCommands.reefAlign(
+                drive,
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target]);
+        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
+        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
+        controller.rightTrigger().whileTrue(align);
     }
 
     private void configureTuningBindings() {
-        controller.a().onTrue(drive.run(() -> drive.runVelocity(new ChassisSpeeds(2, 0, 0))));
-        controller.b().onTrue(drive.run(() -> drive.runVelocity(new ChassisSpeeds(0, 0, 0))));
+        controller.leftStick().onTrue(drive.zeroPose());
+        controller.rightStick().onTrue(drive.zeroPose());
 
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,
@@ -201,6 +214,16 @@ public class RobotContainer {
                 () -> -controller.getLeftX(),
                 () -> -controller.getRightX(),
                 () -> drive.speedModifer));
+
+        Command align = DriveCommands.reefAlign(
+                drive,
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target]);
+        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
+        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
+        controller.a().whileTrue(align);
     }
 
     public Command getAutonomousCommand() {
