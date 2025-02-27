@@ -16,16 +16,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final ElevatorIO io;
     private final ElevatorIOInputAutoLogged inputs = new ElevatorIOInputAutoLogged();
 
-    private final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG", 0);
-    private final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS", 0);
-    private final LoggedTunableNumber kV = new LoggedTunableNumber("Elevator/kV", 0);
-    private final LoggedTunableNumber kA = new LoggedTunableNumber("Elevator/kA", 0);
+    private final LoggedTunableNumber kG = new LoggedTunableNumber("Elevator/kG", 0.56);
+    private final LoggedTunableNumber kS = new LoggedTunableNumber("Elevator/kS", 0.24);
+    private final LoggedTunableNumber kV = new LoggedTunableNumber("Elevator/kV", 4.44);
+    private final LoggedTunableNumber kA = new LoggedTunableNumber("Elevator/kA", 0.07);
 
-    private final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", 0);
+    private final LoggedTunableNumber kP = new LoggedTunableNumber("Elevator/kP", 100);
     private final LoggedTunableNumber kD = new LoggedTunableNumber("Elevator/kD", 0);
 
-    private final LoggedTunableNumber velocity = new LoggedTunableNumber("Elevator/MaxVel", 0);
-    private final LoggedTunableNumber accel = new LoggedTunableNumber("Elevator/maxAccel", 0);
+    private final LoggedTunableNumber velocity = new LoggedTunableNumber("Elevator/MaxVel", 80);
+    private final LoggedTunableNumber accel = new LoggedTunableNumber("Elevator/maxAccel", 200);
     private final LoggedTunableNumber jerk = new LoggedTunableNumber("Elevator/maxJerk", 0);
     // Control
 
@@ -38,8 +38,15 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(
-                        null, Volts.of(4), null, (state) -> Logger.recordOutput("Elevator/SysIdState/", state)),
+                        null,
+                        Volts.of(1),
+                        Seconds.of(3),
+                        (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
                 new SysIdRoutine.Mechanism((volts) -> io.setVoltage(volts.magnitude()), null, this));
+
+        io.setControlConstants(kG.get(), kS.get(), kV.get(), kA.get(), kP.get(), kD.get());
+
+        io.setMotionProfile(velocity.get(), accel.get(), accel.get());
     }
 
     @AutoLogOutput(key = "Elevator/goal")

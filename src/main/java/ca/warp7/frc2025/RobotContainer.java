@@ -4,7 +4,19 @@
 
 package ca.warp7.frc2025;
 
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
+import ca.warp7.frc2025.Constants.Elevator;
+import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.commands.DriveCommands;
+import ca.warp7.frc2025.generated.TunerConstants;
+import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
+import ca.warp7.frc2025.subsystems.Vision.VisionIO;
+import ca.warp7.frc2025.subsystems.Vision.VisionIOLimelight;
+import ca.warp7.frc2025.subsystems.Vision.VisionIOPhotonVisionSim;
+import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
 import ca.warp7.frc2025.subsystems.climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.climber.ClimberIOTalonFX;
 import ca.warp7.frc2025.subsystems.climber.ClimberSubsystem;
@@ -16,19 +28,22 @@ import ca.warp7.frc2025.subsystems.drive.ModuleIOSim;
 import ca.warp7.frc2025.subsystems.drive.ModuleIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIO;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorIOSim;
+import ca.warp7.frc2025.subsystems.elevator.ElevatorIOTalonFX;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
-import ca.warp7.frc2025.subsystems.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.intake.ObjectDectionIO;
+import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
-import com.pathplanner.lib.auto.AutoBuilder;
+import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     // Subsystems
@@ -36,6 +51,7 @@ public class RobotContainer {
     private final IntakeSubsystem intake;
     private final ElevatorSubsystem elevator;
     private final ClimberSubsystem climber;
+    private final VisionSubsystem vision;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -43,22 +59,32 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    public RobotContainer() {
+public RobotContainer() {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
                 drive = new DriveSubsystem(
-                        new GyroIOPigeon2(10, "Drivetrain"),
+                        new GyroIOPigeon2(
+                                TunerConstants.DrivetrainConstants.Pigeon2Id,
+                                TunerConstants.DrivetrainConstants.CANBusName),
                         new ModuleIOTalonFX(TunerConstants.FrontLeft),
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
 
-                intake = new IntakeSubsystem(new RollersIO() {}, new ObjectDectionIO() {}, new ObjectDectionIO() {});
+                intake = new IntakeSubsystem(
+                        new RollersIOTalonFX(2, "rio"),
+                        new ObjectDectionIOLaserCAN(Intake.TOP_LASER_CAN),
+                        new ObjectDectionIOLaserCAN(Intake.FRONT_LASER_CAN));
 
                 climber = new ClimberSubsystem(new ClimberIOTalonFX(62, 52));
 
-                elevator = new ElevatorSubsystem(new ElevatorIO() {});
+                elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
+
+                vision = new VisionSubsystem(
+                        drive::addVisionMeasurement,
+                        new VisionIOLimelight(VisionConstants.camera0Name, () -> drive.getRotation()),
+                        new VisionIOLimelight(VisionConstants.camera1Name, () -> drive.getRotation()));
                 break;
 
             case SIM:
@@ -79,6 +105,12 @@ public class RobotContainer {
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
+                vision = new VisionSubsystem(
+                        drive::addVisionMeasurement,
+                        new VisionIOPhotonVisionSim(
+                                VisionConstants.camera0Name, VisionConstants.robotToCamera0, () -> drive.getPose()),
+                        new VisionIOPhotonVisionSim(
+                                VisionConstants.camera1Name, VisionConstants.robotToCamera1, () -> drive.getPose()));
                 break;
             case REPLAY:
             default:
@@ -90,6 +122,8 @@ public class RobotContainer {
                 elevator = new ElevatorSubsystem(new ElevatorIO() {});
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
+
+                vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
         // Set up auto routines
@@ -98,6 +132,7 @@ public class RobotContainer {
         if (Constants.tuningMode) {
             autoChooser.addOption(
                     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+            autoChooser.addOption("Drive Wheel FF Characterization", DriveCommands.feedforwardCharacterization(drive));
             autoChooser.addOption(
                     "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption(
@@ -119,8 +154,13 @@ public class RobotContainer {
      */
     private void configureBindings() {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX(),
+                () -> drive.speedModifer));
 
+        controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
 
         // run intake motor until sensor
@@ -138,15 +178,64 @@ public class RobotContainer {
         controller
                 .leftTrigger()
                 .and(intake.frontSensorTrigger())
-                .onTrue(intake.runVoltsRoller(-4)
+                .onTrue(intake.runVoltsRoller(-6)
                         .until(intake.topSensorTrigger()
                                 .negate()
                                 .and(intake.frontSensorTrigger().negate())));
+
+        controller.start().toggleOnTrue(drive.runOnce(() -> {
+            if (drive.speedModifer != 1) {
+                drive.speedModifer = 1;
+            } else {
+                drive.speedModifer = 0.5;
+            }
+        }));
+
+        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
+        controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
+        controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
+        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
+        controller
+                .leftBumper()
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
+        Command align = DriveCommands.reefAlign(
+                drive,
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target],
+                () -> vision.tag().orElse(new Pose2d()));
+        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
+        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
+        controller.rightTrigger().whileTrue(align);
     }
 
-    private void configureTuningBindings() {}
+    private void configureTuningBindings() {
+        controller.leftStick().onTrue(drive.zeroPose());
+        controller.rightStick().onTrue(drive.zeroPose());
+
+        drive.setDefaultCommand(DriveCommands.joystickDrive(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX(),
+                () -> drive.speedModifer));
+
+        Command align = DriveCommands.reefAlign(
+                drive,
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target],
+                () -> vision.tag().orElse(new Pose2d()));
+
+        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
+        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
+        controller.a().whileTrue(align);
+    }
 
     public Command getAutonomousCommand() {
         return autoChooser.get();
     }
+
 }

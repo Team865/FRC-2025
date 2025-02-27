@@ -6,6 +6,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.junction.Logger;
@@ -70,6 +71,11 @@ public class Module {
     /** Returns the module position in radians. */
     public double getWheelRadiusCharacterizationPosition() {
         return inputs.drivePositionRad;
+    }
+
+    /** Returns the module velocity in rotations/sec (Phoenix native units). */
+    public double getFFCharacterizationVelocity() {
+        return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
     }
 
     public Rotation2d getAngle() {

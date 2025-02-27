@@ -1,8 +1,11 @@
 package ca.warp7.frc2025;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.CANBus;
+
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -47,30 +50,18 @@ public final class Constants {
         public static final double WHEEL_COF = 1.1;
     }
 
-    public static final class Climber {
-        public static final CANBus CANBUS = new CANBus("drivetrain");
-        public static final double GEAR_RATIO = 1.0;
-    }
-
     public static final class Elevator {
-        public static final CANBus CANBUS = new CANBus("drivetrain");
-
         public static final int LEFT_MOTOR_ID = 0;
         public static final int RIGHT_MOTOR_ID = 0;
 
         public static final double DRUM_RADIUS_METERS = 0.048514 / 2;
         public static final double GEAR_RATIO = 80 / 16;
 
-        // TODO: make this proper
-        // Sim constants TEMP
-        // kG: 0.686
-        // kV: 4.6
-        // maxAccel: 480
-        // maxVel: 90
-        // kP: 0.1
-        // kA: 0
-        // kD: 0
-        // kS: 0
+        public static final Distance STOW = Inches.of(0);
+        public static final Distance L4 = Inches.of(28.75);
+        public static final Distance INTAKE = Inches.of(3);
+        public static final Distance L3 = Inches.of(21);
+        public static final Distance L2 = Inches.of(12.75);
     }
 
     public static final class Intake {

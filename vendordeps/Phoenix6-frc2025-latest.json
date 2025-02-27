@@ -414,6 +414,22 @@
                 "osxuniversal"
             ],
             "simMode": "swsim"
+        },
+        {
+            "groupId": "com.ctre.phoenix6.sim",
+            "artifactId": "simProCANdi",
+            "version": "25.3.1",
+            "libName": "CTRE_SimProCANdi",
+            "headerClassifier": "headers",
+            "sharedLibrary": true,
+            "skipInvalidPlatforms": true,
+            "binaryPlatforms": [
+                "windowsx86-64",
+                "linuxx86-64",
+                "linuxarm64",
+                "osxuniversal"
+            ],
+            "simMode": "swsim"
         }
     ]
 }

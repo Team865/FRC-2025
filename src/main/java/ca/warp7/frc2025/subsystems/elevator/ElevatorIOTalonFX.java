@@ -3,10 +3,11 @@ package ca.warp7.frc2025.subsystems.elevator;
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.PhoenixUtil;
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -30,8 +31,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // Control signals
     private final VoltageOut voltageOut =
             new VoltageOut(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
-    private final PositionVoltage positionVoltageOut =
-            new PositionVoltage(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
+    private final MotionMagicVoltage positionVoltageOut =
+            new MotionMagicVoltage(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
 
     // Status Signals
     // type system abuse - these correspond to linear meters, NOT rotations
@@ -47,14 +48,15 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private final StatusSignal<Current> followerSupplyCurrent;
     private final StatusSignal<Temperature> followerTemp;
 
-    private final Debouncer connectedDebouncer = new Debouncer(0.5);
+    private final Debouncer connectedDebouncerMain = new Debouncer(0.5);
+    private final Debouncer connectedDebouncerFollower = new Debouncer(0.5);
 
     public ElevatorIOTalonFX(int leftMotorID, int rightMotorID) {
-        talon = new TalonFX(leftMotorID, "rio");
-        followerTalon = new TalonFX(rightMotorID, "rio");
+        talon = new TalonFX(leftMotorID, "Drivetrain");
+        followerTalon = new TalonFX(rightMotorID, "Drivetrain");
         followerTalon.setControl(new Follower(talon.getDeviceID(), true));
 
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
         config.Slot0.kG = 0;
@@ -66,13 +68,15 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         config.Feedback.SensorToMechanismRatio = Elevator.GEAR_RATIO / (2 * Math.PI * Elevator.DRUM_RADIUS_METERS);
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-        config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-        config.CurrentLimits.SupplyCurrentLimit = 80.0;
+        // config.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+        // config.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+        config.CurrentLimits.SupplyCurrentLimit = 60.0;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.CurrentLimits.StatorCurrentLimit = 80.0;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
-        PhoenixUtil.tryUntilOk(5, () -> followerTalon.getConfigurator().apply(config, 0.25));
+        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
+        PhoenixUtil.tryUntilOk(5, () -> followerTalon.getConfigurator().apply(config));
         PhoenixUtil.tryUntilOk(5, () -> talon.setPosition(0));
 
         position = talon.getPosition();
@@ -88,20 +92,21 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         followerTemp = followerTalon.getDeviceTemp();
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, position, velocity, appliedVolts, torqueCurrent, temp);
-        ParentDevice.optimizeBusUtilizationForAll(talon, followerTalon);
+        BaseStatusSignal.setUpdateFrequencyForAll(
+                50.0, followerAppliedVolts, followerTorqueCurrent, followerSupplyCurrent, followerTemp);
+        ParentDevice.optimizeBusUtilizationForAll(talon);
     }
 
     @Override
     public void updateInputs(ElevatorIOInputAutoLogged inputs) {
-        boolean connected = BaseStatusSignal.refreshAll(
-                        position, velocity, appliedVolts, torqueCurrent, supplyCurrent, temp)
-                .isOK();
-        boolean followerConnected = BaseStatusSignal.refreshAll(
-                        followerAppliedVolts, followerTorqueCurrent, followerSupplyCurrent, followerTemp)
-                .isOK();
+        StatusCode talonCode =
+                BaseStatusSignal.refreshAll(position, velocity, appliedVolts, torqueCurrent, supplyCurrent, temp);
 
-        inputs.motorConnected = connectedDebouncer.calculate(connected);
-        inputs.followerConnected = connectedDebouncer.calculate(followerConnected);
+        StatusCode followerCode = BaseStatusSignal.refreshAll(
+                followerAppliedVolts, followerTorqueCurrent, followerSupplyCurrent, followerTemp);
+
+        inputs.motorConnected = connectedDebouncerMain.calculate(talonCode.isOK());
+        inputs.followerConnected = connectedDebouncerFollower.calculate(followerCode.isOK());
         inputs.positionMeters = position.getValueAsDouble();
         inputs.velocityMetersPerSec = velocity.getValueAsDouble();
         inputs.appliedVolts = new double[] {appliedVolts.getValueAsDouble(), followerAppliedVolts.getValueAsDouble()};
@@ -131,15 +136,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         config.Slot0.kP = kP;
         config.Slot0.kD = kD;
 
-        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
+        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
     }
 
     @Override
     public void setMotionProfile(double velocity, double acceleration, double jerk) {
         config.MotionMagic.MotionMagicCruiseVelocity = velocity;
         config.MotionMagic.MotionMagicAcceleration = acceleration;
-        config.MotionMagic.MotionMagicJerk = jerk;
 
-        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
+        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
     }
 }
