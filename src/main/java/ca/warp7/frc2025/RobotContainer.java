@@ -195,7 +195,13 @@ public class RobotContainer {
             }
         }));
 
-        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
+        Trigger L4 = new Trigger(() -> vision.getPoseObv(drive.target) != null
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45);
+
+        controller
+                .b()
+                .and(L4)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
         controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
         controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
         controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));

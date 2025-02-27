@@ -151,23 +151,24 @@ public class DriveCommands {
             Supplier<Rotation2d> yGoal,
             Supplier<Pose2d> target) {
         final PIDController xController = new PIDController(0.0, 0.0, 0.0);
-        final PIDController yController = new PIDController(0.0125, 0.0, 0.0);
+        final PIDController yController = new PIDController(0.0075, 0.0, 0.0);
         final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        Pose2d currentPose = drive.getPose();
         return drive.run(() -> {
+            Pose2d currentPose = drive.getPose();
             Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
             Logger.recordOutput("Swerve/tx", tx.get().getDegrees());
             Logger.recordOutput("Swerve/tx-goal", xGoal.get().getDegrees());
             Logger.recordOutput("Swerve/ty-goal", yGoal.get().getDegrees());
-            Logger.recordOutput("Swerve/Current-Pose", currentPose.getRotation().getRadians());
-            Logger.recordOutput("Swerve/Target", target.get().getRotation().getRadians());
+            Logger.recordOutput("Swerve/Current-Pose", currentPose.getRotation().getDegrees());
+            Logger.recordOutput("Swerve/Target", target.get().getRotation().getDegrees());
             final ChassisSpeeds speeds = new ChassisSpeeds(
                     xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
-                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
-                    thetaController.calculate(
-                            currentPose.getRotation().getRadians(),
-                            target.get().getRotation().getRadians()));
+                    -yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
+                    0);
+            // thetaController.calculate(
+            //         currentPose.getRotation().getRadians(),
+            //         target.get().getRotation().getRadians()));
             drive.runVelocity(speeds);
         });
     }

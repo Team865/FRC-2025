@@ -173,6 +173,19 @@ public class VisionSubsystem extends SubsystemBase {
         return inputs[cameraIndex].latestTargetObservation;
     }
 
+    /**
+     * Returns the X angle to the best target, which can be used for simple servoing with vision.
+     *
+     * @param cameraIndex The index of the camera to use.
+     */
+    public PoseObservation getPoseObv(int cameraIndex) {
+        if (inputs[cameraIndex].poseObservations.length > 0) {
+            return inputs[cameraIndex].poseObservations[0];
+        } else {
+            return null;
+        }
+    }
+
     @FunctionalInterface
     public static interface VisionConsumer {
         public void accept(
