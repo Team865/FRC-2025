@@ -6,12 +6,15 @@ import static edu.wpi.first.units.Units.Volts;
 
 import ca.warp7.frc2025.Constants.Drivetrain;
 import ca.warp7.frc2025.generated.TunerConstants;
+import ca.warp7.frc2025.util.LocalADStarAK;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -87,6 +90,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public double speedModifer = 1;
 
+    @AutoLogOutput
     public int target = 0;
 
     public DriveSubsystem(
@@ -108,7 +112,7 @@ public class DriveSubsystem extends SubsystemBase {
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
-        // // Configure AutoBuilder for PathPlanner
+        // Configure AutoBuilder for PathPlanner
         AutoBuilder.configure(
                 this::getPose,
                 this::setPose,
@@ -118,6 +122,13 @@ public class DriveSubsystem extends SubsystemBase {
                 PP_CONFIG,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
+        Pathfinding.setPathfinder(new LocalADStarAK());
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+        });
+        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+        });
     }
 
     /** Returns the maximum linear speed in meters per sec. */
@@ -266,7 +277,7 @@ public class DriveSubsystem extends SubsystemBase {
     /** Adds a new timestamped vision measurement. */
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        // poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
     @Override
