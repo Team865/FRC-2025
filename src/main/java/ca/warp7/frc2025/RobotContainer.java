@@ -8,14 +8,14 @@ import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.generated.TunerConstants;
-import ca.warp7.frc2025.subsystems.Climber.ClimberIO;
-import ca.warp7.frc2025.subsystems.Climber.ClimberIOSim;
-import ca.warp7.frc2025.subsystems.Climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO;
 import ca.warp7.frc2025.subsystems.Vision.VisionIOLimelight;
 import ca.warp7.frc2025.subsystems.Vision.VisionIOPhotonVisionSim;
 import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
+import ca.warp7.frc2025.subsystems.climber.ClimberIO;
+import ca.warp7.frc2025.subsystems.climber.ClimberIOTalonFX;
+import ca.warp7.frc2025.subsystems.climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.subsystems.drive.GyroIO;
 import ca.warp7.frc2025.subsystems.drive.GyroIOPigeon2;
@@ -35,6 +35,8 @@ import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -73,7 +75,7 @@ public class RobotContainer {
                         new ObjectDectionIOLaserCAN(Intake.TOP_LASER_CAN),
                         new ObjectDectionIOLaserCAN(Intake.FRONT_LASER_CAN));
 
-                climber = new ClimberSubsystem(new ClimberIO() {});
+                climber = new ClimberSubsystem(new ClimberIOTalonFX(62, 52));
 
                 elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
 
@@ -99,7 +101,7 @@ public class RobotContainer {
 
                 elevator = new ElevatorSubsystem(new ElevatorIOSim());
 
-                climber = new ClimberSubsystem(new ClimberIOSim());
+                climber = new ClimberSubsystem(new ClimberIO() {});
 
                 vision = new VisionSubsystem(
                         drive::addVisionMeasurement,

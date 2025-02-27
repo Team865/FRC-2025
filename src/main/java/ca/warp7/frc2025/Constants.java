@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.CANBus;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -27,7 +26,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
-    public static final boolean tuningMode = true;
+    public static final boolean tuningMode = false;
 
     public static final double PERIOD = 0.02;
 
@@ -48,17 +47,6 @@ public final class Constants {
         public static final Mass ROBOT_MASS = Pounds.of(137.965);
         public static final double ROBOT_MOI_SI = 6;
         public static final double WHEEL_COF = 1.1;
-    }
-
-    public static final class Climber {
-        public static final int CLIMBER_LEFT_MOTER_ID = 0;
-        public static final int CLIMBER_RIGHT_MOTER_ID = 0;
-        public static final int CLIMBER_INTAKE_MOTER_ID = 0;
-        public static final double CLIMBER_ARM_LENGTH_METERS = Units.inchesToMeters(0.1);
-        public static final double CLIMBER_DRUM_RADIUS_METERS = Units.inchesToMeters(0.1);
-
-        public static final double CLIMBER_PIVOT_GEAR_RATIO = 1.0;
-        public static final double CLIMBER_INTAKE_GEAR_RATIO = 1.0;
     }
 
     public static final class Elevator {
