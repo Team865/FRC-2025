@@ -2,6 +2,7 @@ package ca.warp7.frc2025.subsystems.Vision;
 
 import static ca.warp7.frc2025.subsystems.Vision.VisionConstants.*;
 
+import ca.warp7.frc2025.subsystems.Vision.VisionIO.PoseObservation;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO.TargetObservation;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -153,6 +154,14 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Optional<Pose2d> tag() {
         return currentTag.map((tag) -> tag.toPose2d());
+    }
+
+    public Optional<Pose2d> getTag(int camera) {
+        if (inputs[camera].tagIds.length > 0) {
+            return aprilTagLayout.getTagPose(inputs[camera].tagIds[0]).map((pose3d) -> pose3d.toPose2d());
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**

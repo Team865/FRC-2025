@@ -34,6 +34,7 @@ import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -207,10 +208,12 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> VisionConstants.ty[drive.target],
-                () -> vision.tag().orElse(new Pose2d()));
+                () -> vision.tag()
+                        .map((pose2d) -> pose2d.rotateBy(Rotation2d.k180deg))
+                        .orElse(new Pose2d()));
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
-        controller.rightTrigger().whileTrue(align);
+        controller.povDown().whileTrue(align);
     }
 
     private void configureTuningBindings() {
@@ -230,7 +233,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> VisionConstants.ty[drive.target],
-                () -> vision.tag().orElse(new Pose2d()));
+                () -> vision.getTag(drive.target).orElse(new Pose2d()));
 
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
