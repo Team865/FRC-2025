@@ -121,7 +121,7 @@ public class ModuleIOTalonFX implements ModuleIO {
                 ? SensorDirectionValue.Clockwise_Positive
                 : SensorDirectionValue.CounterClockwise_Positive;
 
-        PhoenixUtil.tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig, 025));
+        PhoenixUtil.tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig, 0.25));
 
         timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
