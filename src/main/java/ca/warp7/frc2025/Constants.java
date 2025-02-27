@@ -45,7 +45,7 @@ public final class Constants {
         public static final double PERIOD = 0.02;
 
         public static final Mass ROBOT_MASS = Pounds.of(137.965);
-        public static final double ROBOT_MOI_SI = 6;
+        public static final double ROBOT_MOI_SI = 5.6262432744;
         public static final double WHEEL_COF = 1.1;
     }
 
