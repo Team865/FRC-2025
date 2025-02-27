@@ -23,8 +23,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private final Alert disconnectedMotor;
 
-    private final double topDistanceToCoral = 80;
+    private final double topDistanceToCoral = 95;
     private final double frontTopDistanceToCoral = 145;
+
+    private boolean holding = false;
 
     public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
@@ -49,13 +51,23 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @AutoLogOutput
     public Trigger topSensorTrigger() {
-        return new Trigger(() -> MathUtil.isNear(topDistanceToCoral, topSensorInputs.objectDistanceMM, 30));
+        return new Trigger(() -> MathUtil.isNear(topDistanceToCoral, topSensorInputs.objectDistanceMM, 50));
     }
 
     @AutoLogOutput
     public Trigger frontSensorTrigger() {
         return new Trigger(() -> MathUtil.isNear(frontTopDistanceToCoral, frontSensorInputs.objectDistanceMM, 30));
     }
+
+    @AutoLogOutput
+    public Trigger holdingTrigger() {
+        return new Trigger(() -> holding);
+    }
+
+    public Command setHolding(boolean state) {
+        return runOnce(() -> holding = state);
+    }
+    ;
 
     @AutoLogOutput
     public Command runVoltsRoller(double inputVolts) {

@@ -39,7 +39,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -163,23 +165,26 @@ public class RobotContainer {
 
         // run intake motor until sensor
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
+                elevator.setGoal(Elevator.INTAKE),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()));
+                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()),
+                elevator.setGoal(Elevator.STOW),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                intake.setHolding(true));
 
-        controller
-                .leftTrigger()
-                .and(intake.frontSensorTrigger()
-                        .negate()
-                        .and(intake.topSensorTrigger().negate()))
-                .onTrue(intakeCommand);
+        SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
+                intake.runVoltsRoller(-4).until(intake.topSensorTrigger().negate()), intake.setHolding(false));
 
-        controller
-                .leftTrigger()
-                .and(intake.frontSensorTrigger())
-                .onTrue(intake.runVoltsRoller(-6)
-                        .until(intake.topSensorTrigger()
-                                .negate()
-                                .and(intake.frontSensorTrigger().negate())));
+        // controller
+        //         .leftTrigger()
+        //         .and(intake.frontSensorTrigger()
+        //                 .negate()
+        //                 .and(intake.topSensorTrigger().negate()))
+        //         .onTrue(intakeCommand);
+
+        controller.leftTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
+        controller.leftTrigger().and(intake.holdingTrigger().negate()).onTrue(intakeCommand);
 
         controller.start().toggleOnTrue(drive.runOnce(() -> {
             if (drive.speedModifer != 1) {

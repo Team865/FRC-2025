@@ -3,10 +3,12 @@ package ca.warp7.frc2025.subsystems.elevator;
 import static edu.wpi.first.units.Units.*;
 
 import ca.warp7.frc2025.util.LoggedTunableNumber;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -60,6 +62,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.dynamic(direction);
+    }
+
+    public Trigger atSetpointTrigger() {
+        return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
     }
 
     @Override
