@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -168,13 +169,13 @@ public class RobotContainer {
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()),
+                intake.runVoltsRoller(4).until(intake.topSensorTrigger().negate()),
                 elevator.setGoal(Elevator.STOW),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
 
         SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
-                intake.runVoltsRoller(-1).until(intake.topSensorTrigger().negate()), intake.setHolding(false));
+                new WaitCommand(4).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
 
         // controller
         //         .leftTrigger()
