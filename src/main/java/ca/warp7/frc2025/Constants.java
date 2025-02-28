@@ -30,6 +30,8 @@ public final class Constants {
 
     public static final double PERIOD = 0.02;
 
+    public static boolean disableHAL = false;
+
     public static enum Mode {
         // Running on a real robot
         REAL,

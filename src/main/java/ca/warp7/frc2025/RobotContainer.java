@@ -32,8 +32,10 @@ import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
+import ca.warp7.frc2025.util.ClosestHPStation;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -154,12 +156,24 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureBindings() {
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
+        Command driveCommand = DriveCommands.joystickDrive(
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> -controller.getRightX(),
-                () -> drive.speedModifer));
+                () -> drive.speedModifer);
+
+        Command intakeAngle = DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> ClosestHPStation.getClosestStation(drive.getPose())
+                        .getRotation()
+                        .rotateBy(Rotation2d.k180deg));
+
+        drive.setDefaultCommand(driveCommand);
+
+        controller.povUp().whileTrue(intakeAngle);
 
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
