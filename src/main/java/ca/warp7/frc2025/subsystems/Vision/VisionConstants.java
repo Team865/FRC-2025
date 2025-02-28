@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
-    public static Rotation2d[] tx = {Rotation2d.fromDegrees(-4), Rotation2d.fromDegrees(-4)};
+    public static Rotation2d[] tx = {Rotation2d.fromDegrees(0.01), Rotation2d.fromDegrees(0.01)};
 
     public static Rotation2d[] ty = {Rotation2d.fromRadians(0.021), Rotation2d.fromRadians(0.021)};
 
