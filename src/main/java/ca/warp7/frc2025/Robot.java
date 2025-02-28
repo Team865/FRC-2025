@@ -5,6 +5,7 @@
 package ca.warp7.frc2025;
 
 import au.grapplerobotics.CanBridge;
+import ca.warp7.frc2025.util.PhoenixUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -53,6 +54,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
+        PhoenixUtil.refreshAll();
         CommandScheduler.getInstance().run();
     }
 

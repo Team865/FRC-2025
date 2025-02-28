@@ -156,7 +156,19 @@ public class ModuleIOTalonFX implements ModuleIO {
                 turnAppliedVolts,
                 turnCurrent);
 
-        ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
+        PhoenixUtil.tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon));
+
+        PhoenixUtil.registerSignals(
+                true,
+                drivePosition,
+                driveVelocity,
+                driveAppliedVolts,
+                driveCurrent,
+                turnAbsolutePosition,
+                turnPosition,
+                turnVelocity,
+                turnAppliedVolts,
+                turnCurrent);
     }
 
     @Override
