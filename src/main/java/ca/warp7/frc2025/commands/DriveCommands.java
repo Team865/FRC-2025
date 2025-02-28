@@ -150,8 +150,8 @@ public class DriveCommands {
             Supplier<Rotation2d> xGoal,
             Supplier<Rotation2d> yGoal,
             Supplier<Pose2d> target) {
-        final PIDController xController = new PIDController(0.0, 0.0, 0.0);
-        final PIDController yController = new PIDController(0.0075, 0.0, 0.0);
+        final PIDController xController = new PIDController(0.08, 0.0, 0.0);
+        final PIDController yController = new PIDController(0.0125, 0.0, 0.0);
         final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         return drive.run(() -> {
@@ -165,10 +165,9 @@ public class DriveCommands {
             final ChassisSpeeds speeds = new ChassisSpeeds(
                     xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
                     -yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
-                    0);
-            // thetaController.calculate(
-            //         currentPose.getRotation().getRadians(),
-            //         target.get().getRotation().getRadians()));
+                    thetaController.calculate(
+                            currentPose.getRotation().getRadians(),
+                            target.get().getRotation().getRadians()));
             drive.runVelocity(speeds);
         });
     }
