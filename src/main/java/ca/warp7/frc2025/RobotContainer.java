@@ -175,7 +175,7 @@ public class RobotContainer {
                 intake.setHolding(true));
 
         SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
-                intake.runVoltsRoller(-4).until(intake.topSensorTrigger().negate()), intake.setHolding(false));
+                intake.runVoltsRoller(-1).until(intake.topSensorTrigger().negate()), intake.setHolding(false));
 
         // controller
         //         .leftTrigger()
@@ -202,7 +202,11 @@ public class RobotContainer {
                 .b()
                 .and(L4)
                 .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
-        controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
+
+        controller
+                .a()
+                .and(L4)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
         controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
         controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
         controller
