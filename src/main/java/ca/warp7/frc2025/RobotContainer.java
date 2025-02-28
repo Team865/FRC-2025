@@ -84,8 +84,8 @@ public class RobotContainer {
 
                 vision = new VisionSubsystem(
                         drive::addVisionMeasurement,
-                        new VisionIOLimelight(VisionConstants.camera0Name, () -> drive.getRotation()),
-                        new VisionIOLimelight(VisionConstants.camera1Name, () -> drive.getRotation()));
+                        new VisionIOLimelight(VisionConstants.camera0Name, () -> drive.getRotation(), true),
+                        new VisionIOLimelight(VisionConstants.camera1Name, () -> drive.getRotation(), false));
                 break;
 
             case SIM:
