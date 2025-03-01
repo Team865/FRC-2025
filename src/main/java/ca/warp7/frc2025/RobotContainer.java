@@ -34,6 +34,7 @@ import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import ca.warp7.frc2025.util.ClosestHPStation;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -145,8 +146,48 @@ public class RobotContainer {
 
             configureTuningBindings();
         } else {
+            configureNamedCommands();
             configureBindings();
         }
+    }
+
+    private void configureNamedCommands() {
+        Trigger Lockout = new Trigger(() -> vision.getPoseObv(drive.target) != null
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45);
+
+        Command Stow = new WaitUntilCommand(Lockout)
+                .andThen(elevator.setGoal(Elevator.STOW))
+                .andThen(new WaitUntilCommand(elevator.atSetpointTrigger()))
+                .andThen(drive.setSpeedModifer(1));
+
+        NamedCommands.registerCommand("Stow", Stow);
+
+        Command align = DriveCommands.reefAlign(
+                drive,
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target],
+                () -> vision.tag()
+                        .map((pose2d) -> pose2d.rotateBy(Rotation2d.k180deg))
+                        .orElse(new Pose2d()));
+
+        Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target]);
+        //
+        SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
+                new WaitCommand(4).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
+        //
+        Command autoScore = new SequentialCommandGroup(
+                new WaitUntilCommand(Lockout),
+                elevator.setGoal(Elevator.L4),
+                align.until(reefAlignTrigger),
+                outakeCommand);
+
+        NamedCommands.registerCommand("autoScore", autoScore);
     }
 
     /**

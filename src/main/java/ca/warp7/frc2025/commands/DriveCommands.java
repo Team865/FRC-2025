@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -165,6 +166,13 @@ public class DriveCommands {
                             target.get().getRotation().getRadians()));
             drive.runVelocity(speeds);
         });
+    }
+
+    public static Trigger isReefAlignedTigger(
+            Supplier<Rotation2d> tx, Supplier<Rotation2d> ty, Supplier<Rotation2d> xGoal, Supplier<Rotation2d> yGoal) {
+        return new Trigger(
+                () -> MathUtil.isNear(xGoal.get().getDegrees(), tx.get().getDegrees(), 1)
+                        && MathUtil.isNear(yGoal.get().getDegrees(), ty.get().getDegrees(), 1));
     }
 
     public static Command poseLockDriveCommand(DriveSubsystem drive, Supplier<Optional<Pose2d>> targetSupplier) {
