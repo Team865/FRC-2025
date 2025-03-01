@@ -275,6 +275,10 @@ public class DriveSubsystem extends SubsystemBase {
         return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
     }
 
+    public Command setSpeedModifer(double value) {
+        return runOnce(() -> speedModifer = value);
+    }
+
     /** Adds a new timestamped vision measurement. */
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
