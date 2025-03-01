@@ -41,12 +41,14 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -263,15 +265,38 @@ public class RobotContainer {
         controller
                 .leftBumper()
                 .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
+
+        BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
+
         Command align = DriveCommands.reefAlign(
                 drive,
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> VisionConstants.ty[drive.target],
-                () -> vision.tag().map((pose2d) -> pose2d).orElse(new Pose2d()));
-        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
-        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
+                () -> vision.tag()
+                        .map((pose2d) -> pose2d.rotateBy(Rotation2d.k180deg))
+                        .orElse(new Pose2d()));
+
+        Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> VisionConstants.ty[drive.target]);
+
+        Command autoScore = new SequentialCommandGroup(
+                new WaitUntilCommand(Lockout),
+                elevator.setGoal(Elevator.L4),
+                align.until(reefAlignTrigger),
+                outakeCommand);
+
+        CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
+        CommandScheduler.getInstance().removeComposedCommand(align);
+
+        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
+        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
+
         controller.povDown().whileTrue(align);
     }
 
