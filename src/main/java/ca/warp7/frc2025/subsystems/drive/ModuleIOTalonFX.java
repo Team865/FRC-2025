@@ -92,7 +92,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveConfig.MotionMagic.MotionMagicCruiseVelocity = metersToRots(constants.SpeedAt12Volts);
-        driveConfig.MotionMagic.MotionMagicAcceleration = metersToRots(8.0);
+        driveConfig.MotionMagic.MotionMagicAcceleration = metersToRots(14.0);
         driveConfig.MotorOutput.Inverted = constants.DriveMotorInverted
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
