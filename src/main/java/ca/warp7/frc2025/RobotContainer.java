@@ -157,11 +157,7 @@ public class RobotContainer {
      */
     private void configureBindings() {
         Command driveCommand = DriveCommands.joystickDrive(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX(),
-                () -> drive.speedModifer);
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
 
         Command intakeAngle = DriveCommands.joystickDriveAtAngle(
                 drive,
