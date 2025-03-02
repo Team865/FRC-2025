@@ -146,8 +146,9 @@ public class DriveCommands {
             Supplier<Rotation2d> xGoal,
             Supplier<Rotation2d> yGoal,
             Supplier<Pose2d> target) {
-        final PIDController xController = new PIDController(0.08, 0.0, 0.0);
-        final PIDController yController = new PIDController(0.0125, 0.0, 0.0);
+        // final PIDController xController = new PIDController(0.08, 0.0, 0.0);
+        final PIDController xController = new PIDController(0.04, 0.0, 0);
+        final PIDController yController = new PIDController(0.0075, 0.0, 0.1);
         final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         return drive.run(() -> {
@@ -171,8 +172,8 @@ public class DriveCommands {
     public static Trigger isReefAlignedTigger(
             Supplier<Rotation2d> tx, Supplier<Rotation2d> ty, Supplier<Rotation2d> xGoal, Supplier<Rotation2d> yGoal) {
         return new Trigger(
-                () -> MathUtil.isNear(xGoal.get().getDegrees(), tx.get().getDegrees(), 1)
-                        && MathUtil.isNear(yGoal.get().getDegrees(), ty.get().getDegrees(), 1));
+                () -> MathUtil.isNear(xGoal.get().getDegrees(), tx.get().getDegrees(), 5)
+                        && MathUtil.isNear(yGoal.get().getDegrees(), ty.get().getDegrees(), 0.5));
     }
 
     public static Command poseLockDriveCommand(DriveSubsystem drive, Supplier<Optional<Pose2d>> targetSupplier) {
