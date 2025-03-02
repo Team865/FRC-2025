@@ -227,7 +227,7 @@ public class RobotContainer {
 
         drive.setDefaultCommand(driveCommand);
 
-        controller.povUp().whileTrue(intakeAngle);
+        controller.leftBumper().whileTrue(intakeAngle);
 
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
@@ -237,22 +237,15 @@ public class RobotContainer {
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                intake.runVoltsRoller(4).until(intake.topSensorTrigger().negate()),
+                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()),
                 elevator.setGoal(Elevator.STOW),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
 
         SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
-                new WaitCommand(4).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
+                new WaitCommand(0.5).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
 
-        // controller
-        //         .leftTrigger()
-        //         .and(intake.frontSensorTrigger()
-        //                 .negate()
-        //                 .and(intake.topSensorTrigger().negate()))
-        //         .onTrue(intakeCommand);
-
-        controller.leftTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
+        controller.rightTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
         controller.leftTrigger().and(intake.holdingTrigger().negate()).onTrue(intakeCommand);
 
         controller.start().toggleOnTrue(drive.runOnce(() -> {
@@ -267,19 +260,15 @@ public class RobotContainer {
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45);
 
         controller
-                .b()
-                .and(L4)
-                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
-
-        controller
                 .a()
                 .and(L4)
                 .onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
+
         controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
-        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
-        controller
-                .leftBumper()
-                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
+
+        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
+
+        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
 
         BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
@@ -312,7 +301,7 @@ public class RobotContainer {
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
-        controller.povDown().whileTrue(align);
+        controller.y().whileTrue(autoScore);
     }
 
     private void configureTuningBindings() {}
