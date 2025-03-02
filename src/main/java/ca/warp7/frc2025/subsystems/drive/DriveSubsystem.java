@@ -14,7 +14,10 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -85,6 +88,14 @@ public class DriveSubsystem extends SubsystemBase {
                     TunerConstants.FrontLeft.SlipCurrent,
                     1),
             getModuleTranslations());
+    // Setpoint generator
+    private final SwerveSetpointGenerator setpointGenerator =
+            new SwerveSetpointGenerator(PP_CONFIG, getMaxAngularSpeedRadPerSec());
+
+    private final DriveFeedforwards feedforwards = DriveFeedforwards.zeros(4);
+
+    private SwerveSetpoint lastSetpoint;
+
     // Sysid
     private final SysIdRoutine sysId;
 
@@ -129,6 +140,7 @@ public class DriveSubsystem extends SubsystemBase {
         PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
             Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
+        lastSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), feedforwards);
     }
 
     /** Returns the maximum linear speed in meters per sec. */
@@ -226,10 +238,10 @@ public class DriveSubsystem extends SubsystemBase {
      */
     public void runVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
-        speeds = ChassisSpeeds.discretize(speeds, Drivetrain.PERIOD);
         speeds.times(speedModifer);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+
+        lastSetpoint = setpointGenerator.generateSetpoint(lastSetpoint, speeds, Drivetrain.PERIOD);
+        SwerveModuleState[] setpointStates = lastSetpoint.moduleStates();
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);

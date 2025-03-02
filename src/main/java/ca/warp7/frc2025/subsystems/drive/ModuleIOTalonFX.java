@@ -7,11 +7,11 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -40,7 +40,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     // Voltage control requests
     private final VoltageOut voltageRequest = new VoltageOut(0);
     private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
-    private final MotionMagicVelocityVoltage velocityVoltageRequest = new MotionMagicVelocityVoltage(0.0);
+    private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
 
     // Torque control requests
     private final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
@@ -70,10 +70,6 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
     private final Debouncer turnEncoderConnectedDeboune = new Debouncer(0.5);
 
-    private double metersToRots(double meters) {
-        return meters / (constants.WheelRadius * 2 * Math.PI);
-    }
-
     public ModuleIOTalonFX(
             SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
         this.constants = constants;
@@ -91,8 +87,6 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        driveConfig.MotionMagic.MotionMagicCruiseVelocity = metersToRots(constants.SpeedAt12Volts);
-        driveConfig.MotionMagic.MotionMagicAcceleration = metersToRots(14.0);
         driveConfig.MotorOutput.Inverted = constants.DriveMotorInverted
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
