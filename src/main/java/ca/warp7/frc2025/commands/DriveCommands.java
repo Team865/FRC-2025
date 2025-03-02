@@ -160,7 +160,7 @@ public class DriveCommands {
             Logger.recordOutput("Swerve/Target", target.get().getRotation().getDegrees());
             final ChassisSpeeds speeds = new ChassisSpeeds(
                     xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
-                    -yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
+                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
                     thetaController.calculate(
                             currentPose.getRotation().getRadians(),
                             target.get().getRotation().getRadians()));

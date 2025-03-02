@@ -11,9 +11,9 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
-    public static Rotation2d[] tx = {Rotation2d.fromDegrees(0.01), Rotation2d.fromDegrees(0.01)};
+    public static Rotation2d[] tx = {Rotation2d.fromDegrees(0.002), Rotation2d.fromDegrees(0.001)};
 
-    public static Rotation2d[] ty = {Rotation2d.fromRadians(0.021), Rotation2d.fromRadians(0.021)};
+    public static Rotation2d[] ty = {Rotation2d.fromRadians(-0.001), Rotation2d.fromRadians(-0.001)};
 
     // AprilTag layout
     public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
