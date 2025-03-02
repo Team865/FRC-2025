@@ -26,7 +26,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "I - HumanPlayerL"
+            "pathName": "I - rIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rIntake - L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreRight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoScore"
           }
         }
       ]

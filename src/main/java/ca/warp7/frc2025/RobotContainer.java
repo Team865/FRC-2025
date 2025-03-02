@@ -49,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -132,6 +133,8 @@ public class RobotContainer {
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
+        configureNamedCommands();
+
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Autos", AutoBuilder.buildAutoChooser());
 
@@ -148,19 +151,17 @@ public class RobotContainer {
 
             configureTuningBindings();
         } else {
-            configureNamedCommands();
             configureBindings();
         }
     }
 
     private void configureNamedCommands() {
         Trigger Lockout = new Trigger(() -> vision.getPoseObv(drive.target) != null
-                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45);
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.3);
 
-        Command Stow = new WaitUntilCommand(Lockout)
-                .andThen(elevator.setGoal(Elevator.STOW))
-                .andThen(new WaitUntilCommand(elevator.atSetpointTrigger()))
-                .andThen(drive.setSpeedModifer(1));
+        Logger.recordOutput("Lockout", Lockout);
+
+        Command Stow = elevator.setGoal(Elevator.STOW).andThen(new WaitUntilCommand(elevator.atSetpointTrigger()));
 
         NamedCommands.registerCommand("Stow", Stow);
 
@@ -181,15 +182,29 @@ public class RobotContainer {
                 () -> VisionConstants.ty[drive.target]);
         //
         SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
-                new WaitCommand(4).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
+                new WaitCommand(1).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
         //
         Command autoScore = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
+                // drive.setSpeedModifer(0.25),
                 align.until(reefAlignTrigger),
                 outakeCommand);
 
         NamedCommands.registerCommand("autoScore", autoScore);
+
+        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
+                elevator.setGoal(Elevator.INTAKE),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
+                intake.runVoltsRoller(4).until(intake.topSensorTrigger().negate()),
+                elevator.setGoal(Elevator.STOW),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                intake.setHolding(true));
+
+        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 1));
+        NamedCommands.registerCommand("scoreLeft", drive.runOnce(() -> drive.target = 0));
+        NamedCommands.registerCommand("Intake", intakeCommand);
     }
 
     /**

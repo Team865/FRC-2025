@@ -16,44 +16,30 @@
     },
     {
       "anchor": {
-        "x": 3.6766666666666663,
-        "y": 5.098333333333333
+        "x": 3.5275596217105267,
+        "y": 5.684513774671052
       },
       "prevControl": {
-        "x": 3.3154487179487173,
-        "y": 5.645320512820513
+        "x": 3.1663416729925777,
+        "y": 6.231500954158232
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Reef L"
     }
   ],
-  "rotationTargets": [],
-  "constraintZones": [],
-  "pointTowardsZones": [],
-  "eventMarkers": [
+  "rotationTargets": [
     {
-      "name": "evStow",
-      "waypointRelativePos": 0.2,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "evL4",
-      "waypointRelativePos": 0.8,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "hpOuttake",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -59.99999999999999
     }
   ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -69,5 +55,5 @@
     "velocity": 0,
     "rotation": 125.00000000000001
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
