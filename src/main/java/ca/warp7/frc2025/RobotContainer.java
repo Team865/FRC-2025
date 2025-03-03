@@ -75,7 +75,7 @@ public class RobotContainer {
                         new ObjectDectionIOLaserCAN(Intake.TOP_LASER_CAN),
                         new ObjectDectionIOLaserCAN(Intake.FRONT_LASER_CAN));
 
-                climber = new ClimberSubsystem(new ClimberIOTalonFX(62, 52));
+                climber = new ClimberSubsystem(new ClimberIOTalonFX(62, 59, 0));
 
                 elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
 
@@ -229,7 +229,8 @@ public class RobotContainer {
 
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
-        controller.a().whileTrue(align);
+
+        controller.a().onTrue(climber.runOnce(() -> climber.setGoal(0)));
     }
 
     public Command getAutonomousCommand() {
