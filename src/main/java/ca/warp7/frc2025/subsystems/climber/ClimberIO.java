@@ -22,5 +22,9 @@ public interface ClimberIO {
 
     public default void setIntakeVoltage(final double volts) {}
 
+    public default void setServoPosition(final double position) {}
+
     public default void setPivotPosition(final double position) {}
+    
+    public default void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {}
 }
