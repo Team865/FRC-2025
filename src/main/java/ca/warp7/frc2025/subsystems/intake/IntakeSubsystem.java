@@ -26,7 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double topDistanceToCoral = 95;
     private final double frontTopDistanceToCoral = 145;
 
-    private boolean holding = false;
+    public boolean holding = false;
 
     public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
@@ -67,7 +67,6 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command setHolding(boolean state) {
         return runOnce(() -> holding = state);
     }
-    ;
 
     @AutoLogOutput
     public Command runVoltsRoller(double inputVolts) {

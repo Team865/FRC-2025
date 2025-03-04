@@ -188,8 +188,10 @@ public class RobotContainer {
                                 : Rotation2d.fromDegrees(0))
                         .orElse(Rotation2d.fromDegrees(0)));
         //
-        SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
-                new WaitCommand(1).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
+        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
+                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+                        .deadlineFor(intake.runVoltsRoller(-4)))
+                .finallyDo(() -> intake.holding = false);
         //
         Command autoScoreL4 = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
@@ -261,8 +263,10 @@ public class RobotContainer {
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
 
-        SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
-                new WaitCommand(0.5).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
+        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
+                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+                        .deadlineFor(intake.runVoltsRoller(-4)))
+                .finallyDo(() -> intake.holding = false);
 
         controller.rightTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
         controller
