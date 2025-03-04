@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -152,8 +153,13 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    public Optional<Pose2d> tag() {
-        return currentTag.map((tag) -> tag.toPose2d());
+    @AutoLogOutput
+    public Optional<Integer> getTagID(int camera) {
+        if (inputs[camera].tagIds.length > 0) {
+            return Optional.of(inputs[camera].tagIds[0]);
+        } else {
+            return Optional.empty();
+        }
     }
 
     public Optional<Pose2d> getTag(int camera) {

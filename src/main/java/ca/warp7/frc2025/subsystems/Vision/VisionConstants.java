@@ -9,11 +9,56 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import java.util.HashMap;
 
 public class VisionConstants {
     public static Rotation2d[] tx = {Rotation2d.fromDegrees(0.002), Rotation2d.fromDegrees(0.001)};
 
     public static Rotation2d[] ty = {Rotation2d.fromRadians(-0.001), Rotation2d.fromRadians(-0.001)};
+
+    public static HashMap<Integer, Tuple<Rotation2d, Rotation2d>> reefTy = new HashMap<>();
+
+    public static record Tuple<L, R>(L l, R r) {}
+
+    // first value is limelight on the right 2nd is the limelight on the left
+    static {
+        // Defaults
+
+        // Red
+        reefTy.put(6, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(7, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(8, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(9, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(10, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(11, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+
+        // Blue
+        reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(18, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(19, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(20, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(21, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+
+        // Actual
+
+        reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(0.1), Rotation2d.fromDegrees(1.8)));
+        reefTy.put(18, new Tuple<>(Rotation2d.fromDegrees(-1.27), Rotation2d.fromDegrees(-0.80)));
+        reefTy.put(19, new Tuple<>(Rotation2d.fromDegrees(1), Rotation2d.fromDegrees(2.5)));
+        reefTy.put(20, new Tuple<>(Rotation2d.fromDegrees(0.45), Rotation2d.fromDegrees(2)));
+        reefTy.put(21, new Tuple<>(Rotation2d.fromDegrees(0.75), Rotation2d.fromDegrees(2.51)));
+        reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(1.58), Rotation2d.fromDegrees(2.69)));
+    }
+
+    public static Rotation2d getTy(int id, int camera) {
+        Tuple<Rotation2d, Rotation2d> tys = reefTy.get(id);
+
+        if (camera == 0) {
+            return tys.l();
+        } else {
+            return tys.r();
+        }
+    }
 
     // AprilTag layout
     public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);

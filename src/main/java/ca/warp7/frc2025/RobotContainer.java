@@ -33,9 +33,9 @@ import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import ca.warp7.frc2025.util.ClosestHPStation;
+import ca.warp7.frc2025.util.VisionUtil;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -170,16 +171,22 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target],
-                () -> vision.tag()
-                        .map((pose2d) -> pose2d.rotateBy(Rotation2d.k180deg))
-                        .orElse(new Pose2d()));
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)),
+                () -> Optional.empty());
 
         Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target]);
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)));
         //
         SequentialCommandGroup outakeCommand = new SequentialCommandGroup(
                 new WaitCommand(1).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
@@ -278,16 +285,28 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target],
-                () -> vision.tag()
-                        .map((pose2d) -> pose2d.rotateBy(Rotation2d.k180deg))
-                        .orElse(new Pose2d()));
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)),
+                () -> vision.getTagID(drive.target)
+                        .flatMap((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.aprilTagLayout
+                                        .getTagPose(id)
+                                        .flatMap((pose) ->
+                                                Optional.of(pose.getRotation().toRotation2d()))
+                                : Optional.empty()));
 
         Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target]);
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)));
 
         Command autoScore = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
