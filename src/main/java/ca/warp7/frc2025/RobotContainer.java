@@ -194,7 +194,7 @@ public class RobotContainer {
         Command autoScore = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
-                // drive.setSpeedModifer(0.25),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
                 align.until(reefAlignTrigger),
                 outakeCommand);
 
