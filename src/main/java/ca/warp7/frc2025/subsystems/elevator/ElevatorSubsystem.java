@@ -68,6 +68,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
     }
 
+    public Trigger atSetpointTrigger(Distance goal) {
+        return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
