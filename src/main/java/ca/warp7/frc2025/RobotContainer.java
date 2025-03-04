@@ -4,6 +4,7 @@
 
 package ca.warp7.frc2025;
 
+import ca.warp7.frc2025.Constants.Climber;
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.commands.DriveCommands;
@@ -75,7 +76,8 @@ public class RobotContainer {
                         new ObjectDectionIOLaserCAN(Intake.TOP_LASER_CAN),
                         new ObjectDectionIOLaserCAN(Intake.FRONT_LASER_CAN));
 
-                climber = new ClimberSubsystem(new ClimberIOTalonFX(62, 59, 0));
+                climber = new ClimberSubsystem(
+                        new ClimberIOTalonFX(Climber.PIVOT_ID, Climber.INTAKE_ID, Climber.Servo_PWM));
 
                 elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
 
@@ -230,7 +232,17 @@ public class RobotContainer {
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
 
-        controller.a().onTrue(climber.runOnce(() -> climber.setGoal(0)));
+        controller.a().onTrue(climber.setPivotServoPosition(0).andThen(climber.setGoal(Climber.CLIMB)));
+        controller.x().onTrue(climber.setPivotServoPosition(0).andThen(climber.setGoal(Climber.STOW)));
+        controller
+                .b()
+                .onTrue(
+                        /*climber.setPivotServoPosition(1).andThen*/ (climber.setPivotVoltage(6)
+                                .withTimeout(0.5)
+                                .andThen(climber.setPivotVoltage(0))));
+
+        controller.rightTrigger().onTrue(climber.setIntakeVoltage(-8));
+        controller.rightTrigger().onFalse(climber.setIntakeVoltage(0));
     }
 
     public Command getAutonomousCommand() {

@@ -1,11 +1,10 @@
 package ca.warp7.frc2025.subsystems.climber;
 
+import ca.warp7.frc2025.util.LoggedTunableNumber;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import ca.warp7.frc2025.util.LoggedTunableNumber;
 
 public class ClimberSubsystem extends SubsystemBase {
     private final ClimberIO io;
@@ -17,9 +16,9 @@ public class ClimberSubsystem extends SubsystemBase {
     private final LoggedTunableNumber kV = new LoggedTunableNumber("Clibmer/kV", 0.0);
     private final LoggedTunableNumber kA = new LoggedTunableNumber("Climber/kA", 0.0);
 
-    private final LoggedTunableNumber kP = new LoggedTunableNumber("Climber/kP", 0);
-    private final LoggedTunableNumber kD = new LoggedTunableNumber("Climber/kD", 0);
-    
+    private final LoggedTunableNumber kP = new LoggedTunableNumber("Climber/kP", 50);
+    private final LoggedTunableNumber kD = new LoggedTunableNumber("Climber/kD", 10);
+
     public ClimberSubsystem(ClimberIO io) {
         this.io = io;
         inputs = new ClimberIOInputsAutoLogged();
@@ -28,7 +27,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
     @AutoLogOutput(key = "Climber/goal")
     public Command setGoal(double goal) {
-        return this.runOnce(() -> this.goal = goal);
+        return this.runOnce(() -> io.setPivotPosition(goal));
     }
 
     @Override
@@ -46,7 +45,6 @@ public class ClimberSubsystem extends SubsystemBase {
                 kA,
                 kP,
                 kD);
-        io.setPivotPosition(goal);
     }
 
     public Command setIntakeVoltage(double volts) {
@@ -59,5 +57,9 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command setPivotServoPosition(double position) {
         return this.runOnce(() -> io.setServoPosition(position));
+    }
+
+    public Command setPivotSpeed(double speed) {
+        return this.runOnce(() -> io.setPivotSpeed(speed));
     }
 }
