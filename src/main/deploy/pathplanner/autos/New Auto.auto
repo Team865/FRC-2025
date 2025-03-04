@@ -17,6 +17,12 @@
               {
                 "type": "named",
                 "data": {
+                  "name": "scoreRight"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
                   "name": "autoScore"
                 }
               }
@@ -45,6 +51,36 @@
           "type": "named",
           "data": {
             "name": "scoreRight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoScore"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L - rIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rIntake - L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreLeft"
           }
         },
         {

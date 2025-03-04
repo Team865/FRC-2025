@@ -1,0 +1,121 @@
+{
+ "name":"frc2025",
+ "version":1,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{
+   "Blue1":{
+    "x":{
+     "exp":"8.029 m",
+     "val":8.029
+    },
+    "y":{
+     "exp":"5.424 m",
+     "val":5.424
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "Reef-I":{
+    "x":{
+     "exp":"5.279 m",
+     "val":5.279
+    },
+    "y":{
+     "exp":"5.405 m",
+     "val":5.405
+    },
+    "heading":{
+     "exp":"-120 deg",
+     "val":-2.0943951023931953
+    }
+   },
+   "ReefI":{
+    "x":{
+     "exp":"Reef - I.x",
+     "val":5.279
+    },
+    "y":{
+     "exp":"Reef - I.y",
+     "val":5.405
+    },
+    "heading":{
+     "exp":"Reef - I.heading",
+     "val":-2.0943951023931953
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"13.375 in",
+    "val":0.339725
+   },
+   "y":{
+    "exp":"10.875 in",
+    "val":0.276225
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-13.375 in",
+    "val":-0.339725
+   },
+   "y":{
+    "exp":"10.875 in",
+    "val":0.276225
+   }
+  },
+  "mass":{
+   "exp":"137.964 lbs",
+   "val":62.57941773468
+  },
+  "inertia":{
+   "exp":"5.62 kg m ^ 2",
+   "val":5.62
+  },
+  "gearing":{
+   "exp":"(50 / 16) * (17 / 27) * (45 / 15)",
+   "val":5.902777777777778
+  },
+  "radius":{
+   "exp":"1.927 in",
+   "val":0.0489458
+  },
+  "vmax":{
+   "exp":"5800 RPM",
+   "val":607.3745796940267
+  },
+  "tmax":{
+   "exp":"0.6 N * m",
+   "val":0.6
+  },
+  "cof":{
+   "exp":"1.1",
+   "val":1.1
+  },
+  "bumper":{
+   "front":{
+    "exp":"0.978 / 2 m",
+    "val":0.489
+   },
+   "side":{
+    "exp":"0.819 / 2 m",
+    "val":0.4095
+   },
+   "back":{
+    "exp":"0.978 / 2 m",
+    "val":0.489
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[]
+}
