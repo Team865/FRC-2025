@@ -211,7 +211,7 @@ public class RobotContainer {
                 outakeCommand);
 
         NamedCommands.registerCommand("autoScoreL3", autoScoreL3);
-        
+
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
@@ -326,15 +326,15 @@ public class RobotContainer {
                                 : Rotation2d.fromDegrees(0))
                         .orElse(Rotation2d.fromDegrees(0)));
 
-        Command autoScoreL4  = new SequentialCommandGroup(
+        Command autoScoreL4 = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
                 align.until(reefAlignTrigger),
                 drive.runOnce(() -> vision.getTagID(drive.target)
                         .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
                 outakeCommand);
-                
-        Command autoScoreL3  = new SequentialCommandGroup(
+
+        Command autoScoreL3 = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.L3),
                 align.until(reefAlignTrigger),
                 drive.runOnce(() -> vision.getTagID(drive.target)
