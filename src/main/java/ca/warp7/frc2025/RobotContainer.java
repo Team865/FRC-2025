@@ -255,7 +255,11 @@ public class RobotContainer {
                 new WaitCommand(0.5).deadlineFor(intake.runVoltsRoller(-4)), intake.setHolding(false));
 
         controller.rightTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
-        controller.leftTrigger().and(intake.holdingTrigger().negate()).onTrue(intakeCommand);
+        controller
+                .leftTrigger()
+                .and(intake.holdingTrigger().negate())
+                .and(elevator.atSetpointTrigger(Elevator.STOW))
+                .onTrue(intakeCommand);
 
         controller.start().toggleOnTrue(drive.runOnce(() -> {
             if (drive.speedModifer != 1) {
