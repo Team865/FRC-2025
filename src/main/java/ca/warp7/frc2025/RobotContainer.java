@@ -280,7 +280,8 @@ public class RobotContainer {
                 // .and(L4)
                 .onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
 
-        controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
+        // controller.y().onTrue(drive.runOnce(() -> drive.speedModifer =
+        // 1).andThen(elevator.setGoal(Elevator.INTAKE)));
 
         controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2A)));
 
@@ -327,11 +328,15 @@ public class RobotContainer {
                         .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
                 outakeCommand);
 
+        CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
+        CommandScheduler.getInstance().removeComposedCommand(align);
+
         Command autoScoreL3 = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.L3),
                 align.until(reefAlignTrigger),
                 drive.runOnce(() -> vision.getTagID(drive.target)
                         .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
                 outakeCommand);
 
         CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
@@ -341,6 +346,10 @@ public class RobotContainer {
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
         controller.y().whileTrue(autoScoreL4);
+
+        controller.b().whileTrue(autoScoreL3);
+
+        controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
 
         // controller.start().controller.y().and(isManual).onTrue(elevator.setGoal(Elevator.L4));
     }
