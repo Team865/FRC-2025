@@ -149,7 +149,8 @@ public class DriveCommands {
         // final PIDController xController = new PIDController(0.08, 0.0, 0.0);
         final PIDController xController = new PIDController(0.12, 0.0, 0);
         final PIDController yController = new PIDController(0.025, 0.0, 0.1);
-        final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
+        ProfiledPIDController thetaController = new ProfiledPIDController(
+                ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         return drive.run(() -> {
             Pose2d currentPose = drive.getPose();
