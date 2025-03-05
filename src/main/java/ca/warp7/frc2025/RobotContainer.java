@@ -247,7 +247,6 @@ public class RobotContainer {
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()),
                 elevator.setGoal(Elevator.STOW),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
