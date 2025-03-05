@@ -49,7 +49,7 @@ public final class Constants {
 
         public static final Mass ROBOT_MASS = Pounds.of(137.965);
         public static final Distance WIDTH = Meters.of(0.819);
-        public static final double ROBOT_MOI_SI = 5.6262432744;
+        public static final double ROBOT_MOI_SI = 6.8554906507;
         public static final double WHEEL_COF = 1.1;
     }
 
@@ -63,7 +63,7 @@ public final class Constants {
         public static final Distance STOW = Inches.of(0);
         public static final Distance L4 = Inches.of(28.5);
         public static final Distance INTAKE = Inches.of(3);
-        public static final Distance L3 = Inches.of(19.625);
+        public static final Distance L3 = Inches.of(19.625 - 0.25);
         public static final Distance L2 = Inches.of(11.75);
         public static final Distance L2A = Inches.of(12);
     }
