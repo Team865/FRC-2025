@@ -217,17 +217,16 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("autoScore", autoScore);
 
-        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.INTAKE),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
-                elevator.setGoal(Elevator.STOW),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.setHolding(true));
+        Command intakeCommand = new SequentialCommandGroup(
+                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
+                elevator.setGoal(Elevator.STOW)
+                ).finallyDo(() -> intake.holding = true);
 
-        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 0));
+        NamedCommands.registerCommand("L4", elevator.setGoal(Elevator.L4));
+        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 1));
         NamedCommands.registerCommand("scoreLeft", drive.runOnce(() -> drive.target = 0));
         NamedCommands.registerCommand("Intake", intakeCommand);
+        NamedCommands.registerCommand("evIntake", elevator.setGoal(Elevator.INTAKE));
     }
 
     /**
