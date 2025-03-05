@@ -64,10 +64,10 @@ public class ClimberIOTalonFX implements ClimberIO {
         config.Slot0.kP = 0;
         config.Slot0.kD = 0;
 
-        config.CurrentLimits.SupplyCurrentLimit = 10.0;
+        config.CurrentLimits.SupplyCurrentLimit = 80;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        config.CurrentLimits.StatorCurrentLimit = 10.0;
+        config.CurrentLimits.StatorCurrentLimit = 100.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         PhoenixUtil.tryUntilOk(5, () -> pivotMoter.getConfigurator().apply(config));

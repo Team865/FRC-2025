@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -236,12 +237,12 @@ public class RobotContainer {
         controller.x().onTrue(climber.setPivotServoPosition(0).andThen(climber.setGoal(Climber.STOW)));
         controller
                 .b()
-                .onTrue(
-                        /*climber.setPivotServoPosition(1).andThen*/ (climber.setPivotVoltage(6)
-                                .withTimeout(0.5)
+                .onTrue(climber.setPivotServoPosition(1)
+                        .andThen(climber.setPivotVoltage(10)
+                                .andThen(new WaitCommand(7.5))
                                 .andThen(climber.setPivotVoltage(0))));
 
-        controller.rightTrigger().onTrue(climber.setIntakeVoltage(-8));
+        controller.rightTrigger().onTrue(climber.setIntakeVoltage(-5));
         controller.rightTrigger().onFalse(climber.setIntakeVoltage(0));
     }
 
