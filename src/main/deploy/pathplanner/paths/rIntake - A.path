@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2410256410256408,
-        "y": 7.0385897435897435
+        "x": 1.2043791118421052,
+        "y": 6.989689555921052
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.004743589743589,
-        "y": 6.18198717948718
+        "x": 1.9680970605600536,
+        "y": 6.133086991818488
       },
       "isLocked": false,
       "linkedName": "Right Human Player"
@@ -52,10 +52,10 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAngularAcceleration": 740.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -67,7 +67,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 125.00000000000001
+    "rotation": 126.0
   },
   "useDefaultConstraints": true
 }
