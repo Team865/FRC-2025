@@ -193,7 +193,7 @@ public class RobotContainer {
                         .deadlineFor(intake.runVoltsRoller(-4)))
                 .finallyDo(() -> intake.holding = false);
         //
-        Command autoScoreL4 = new SequentialCommandGroup(
+        Command autoScore = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
@@ -202,23 +202,12 @@ public class RobotContainer {
                         .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
                 outakeCommand);
 
-        NamedCommands.registerCommand("autoScoreL4", autoScoreL4);
-
-        Command autoScoreL3 = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.L3),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                align.until(reefAlignTrigger),
-                drive.runOnce(() -> vision.getTagID(drive.target)
-                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
-                outakeCommand);
-
-        NamedCommands.registerCommand("autoScoreL3", autoScoreL3);
+        NamedCommands.registerCommand("autoScore", autoScore);
 
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                intake.runVoltsRoller(4).until(intake.topSensorTrigger().negate()),
                 elevator.setGoal(Elevator.STOW),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
