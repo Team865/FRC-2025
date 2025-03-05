@@ -2,6 +2,7 @@ package ca.warp7.frc2025.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.*;
 
+import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
@@ -76,7 +77,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Elevator/inputs", inputs);
-        Logger.recordOutput("Elevator/goal", goal);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
@@ -98,6 +98,10 @@ public class ElevatorSubsystem extends SubsystemBase {
                 accel,
                 jerk);
 
-        io.setPosition(goal.in(Meters));
+        if (atSetpointTrigger(Elevator.STOW).getAsBoolean() && goal.isEquivalent(Elevator.STOW)) {
+            io.stop();
+        } else {
+            io.setPosition(goal.in(Meters));
+        }
     }
 }

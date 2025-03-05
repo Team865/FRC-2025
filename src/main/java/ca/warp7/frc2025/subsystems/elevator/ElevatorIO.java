@@ -24,4 +24,6 @@ public interface ElevatorIO {
     public default void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {}
 
     public default void setMotionProfile(double velocity, double acceleration, double jerk) {}
+
+    public default void stop() {}
 }
