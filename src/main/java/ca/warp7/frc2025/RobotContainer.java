@@ -68,6 +68,15 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
+    public enum ControlMode {
+        MANUAL,
+        ASSIST,
+    }
+
+    private ControlMode controlMode = ControlMode.ASSIST;
+
+    private Trigger isManual = new Trigger(() -> controlMode.MANUAL == ControlMode.MANUAL);
+
     public RobotContainer() {
         switch (Constants.currentMode) {
             case REAL:
