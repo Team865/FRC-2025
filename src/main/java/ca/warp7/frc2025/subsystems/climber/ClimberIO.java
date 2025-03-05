@@ -5,6 +5,8 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ClimberIO {
     @AutoLog
     public static class ClimberIOInputs {
+        public boolean motorConnected = false;
+
         public double pivotRotation = 0.0;
         public double pivotVelocityRotationsPerSecond = 0.0;
         public double pivotVoltage = 0.0;
@@ -22,5 +24,11 @@ public interface ClimberIO {
 
     public default void setIntakeVoltage(final double volts) {}
 
+    public default void setServoPosition(final double position) {}
+
+    public default void setPivotSpeed(final double speed) {}
+
     public default void setPivotPosition(final double position) {}
+
+    public default void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {}
 }

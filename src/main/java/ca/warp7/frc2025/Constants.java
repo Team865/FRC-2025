@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
-    public static final boolean tuningMode = false;
+    public static final boolean tuningMode = true;
 
     public static final double PERIOD = 0.02;
 
@@ -77,5 +77,14 @@ public final class Constants {
 
         public static final LaserCANConstants TOP_LASER_CAN = new LaserCANConstants(12, "Top");
         public static final LaserCANConstants FRONT_LASER_CAN = new LaserCANConstants(13, "Front");
+    }
+
+    public static final class Climber {
+        public static final int PIVOT_ID = 61;
+        public static final int INTAKE_ID = 59;
+        public static final int Servo_PWM = 0;
+
+        public static final double CLIMB = -110.28759;
+        public static final double STOW = 0.0;
     }
 }

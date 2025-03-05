@@ -4,6 +4,7 @@
 
 package ca.warp7.frc2025;
 
+import ca.warp7.frc2025.Constants.Climber;
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.commands.DriveCommands;
@@ -85,7 +86,8 @@ public class RobotContainer {
                         new ObjectDectionIOLaserCAN(Intake.TOP_LASER_CAN),
                         new ObjectDectionIOLaserCAN(Intake.FRONT_LASER_CAN));
 
-                climber = new ClimberSubsystem(new ClimberIOTalonFX(62, 52));
+                climber = new ClimberSubsystem(
+                        new ClimberIOTalonFX(Climber.PIVOT_ID, Climber.INTAKE_ID, Climber.Servo_PWM));
 
                 elevator = new ElevatorSubsystem(new ElevatorIOTalonFX(11, 12));
 
