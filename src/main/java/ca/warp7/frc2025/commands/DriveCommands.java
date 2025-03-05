@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -55,11 +56,7 @@ public class DriveCommands {
      * Field relative drive command using two joysticks (controlling linear and angular velocities).
      */
     public static Command joystickDrive(
-            DriveSubsystem drive,
-            DoubleSupplier xSupplier,
-            DoubleSupplier ySupplier,
-            DoubleSupplier omegaSupplier,
-            DoubleSupplier speedMultiplier) {
+            DriveSubsystem drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
         return Commands.run(
                 () -> {
                     // Get linear velocity
@@ -72,17 +69,16 @@ public class DriveCommands {
                     // Square rotation value for more precise control
                     omega = Math.copySign(omega * omega, omega);
 
-                    double speedMulti = speedMultiplier.getAsDouble();
+                    // double speedMulti = speedMultiplier.getAsDouble();
 
                     // Convert to field relative speeds & send command
                     // Convert to field relative speeds & send command
                     ChassisSpeeds speeds = new ChassisSpeeds(
-                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX() * speedMulti)
+                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
                                     * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY() * speedMulti)
+                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
                                     * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.steerGainAdjustment(omega * speedMulti)
-                                    * drive.getMaxAngularSpeedRadPerSec());
+                            SensitivityGainAdjustment.steerGainAdjustment(omega) * drive.getMaxAngularSpeedRadPerSec());
                     boolean isFlipped = DriverStation.getAlliance().isPresent()
                             && DriverStation.getAlliance().get() == Alliance.Red;
                     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -149,27 +145,42 @@ public class DriveCommands {
             Supplier<Rotation2d> ty,
             Supplier<Rotation2d> xGoal,
             Supplier<Rotation2d> yGoal,
-            Supplier<Pose2d> target) {
-        final PIDController xController = new PIDController(0.0, 0.0, 0.0);
-        final PIDController yController = new PIDController(0.0125, 0.0, 0.0);
-        final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
+            Supplier<Optional<Rotation2d>> targetAngleSupplier) {
+        // final PIDController xController = new PIDController(0.08, 0.0, 0.0);
+        final PIDController xController = new PIDController(0.12, 0.0, 0);
+        final PIDController yController = new PIDController(0.025, 0.0, 0.1);
+        ProfiledPIDController thetaController = new ProfiledPIDController(
+                ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        Pose2d currentPose = drive.getPose();
         return drive.run(() -> {
+            Pose2d currentPose = drive.getPose();
+            Optional<Rotation2d> targetAngle = targetAngleSupplier.get();
             Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
             Logger.recordOutput("Swerve/tx", tx.get().getDegrees());
             Logger.recordOutput("Swerve/tx-goal", xGoal.get().getDegrees());
             Logger.recordOutput("Swerve/ty-goal", yGoal.get().getDegrees());
-            Logger.recordOutput("Swerve/Current-Pose", currentPose.getRotation().getRadians());
-            Logger.recordOutput("Swerve/Target", target.get().getRotation().getRadians());
+            Logger.recordOutput("Swerve/Current-Pose", currentPose.getRotation().getDegrees());
+            targetAngle.ifPresent((angle) -> Logger.recordOutput("Swerve/Target", angle));
+            Logger.recordOutput(
+                    "Swerve/output",
+                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()));
             final ChassisSpeeds speeds = new ChassisSpeeds(
                     xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
                     yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
-                    thetaController.calculate(
-                            currentPose.getRotation().getRadians(),
-                            target.get().getRotation().getRadians()));
+                    targetAngle.isPresent()
+                            ? thetaController.calculate(
+                                    currentPose.getRotation().getRadians(),
+                                    targetAngle.get().getRadians())
+                            : 0);
             drive.runVelocity(speeds);
         });
+    }
+
+    public static Trigger isReefAlignedTigger(
+            Supplier<Rotation2d> tx, Supplier<Rotation2d> ty, Supplier<Rotation2d> xGoal, Supplier<Rotation2d> yGoal) {
+        return new Trigger(
+                () -> MathUtil.isNear(xGoal.get().getDegrees(), tx.get().getDegrees(), 5)
+                        && MathUtil.isNear(yGoal.get().getDegrees(), ty.get().getDegrees(), 0.5));
     }
 
     public static Command poseLockDriveCommand(DriveSubsystem drive, Supplier<Optional<Pose2d>> targetSupplier) {

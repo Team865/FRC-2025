@@ -2,11 +2,14 @@ package ca.warp7.frc2025.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.*;
 
+import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -62,11 +65,18 @@ public class ElevatorSubsystem extends SubsystemBase {
         return sysIdRoutine.dynamic(direction);
     }
 
+    public Trigger atSetpointTrigger() {
+        return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
+    }
+
+    public Trigger atSetpointTrigger(Distance goal) {
+        return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Elevator/inputs", inputs);
-        Logger.recordOutput("Elevator/goal", goal);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
@@ -88,6 +98,10 @@ public class ElevatorSubsystem extends SubsystemBase {
                 accel,
                 jerk);
 
-        io.setPosition(goal.in(Meters));
+        if (atSetpointTrigger(Elevator.STOW).getAsBoolean() && goal.isEquivalent(Elevator.STOW)) {
+            io.stop();
+        } else {
+            io.setPosition(goal.in(Meters));
+        }
     }
 }

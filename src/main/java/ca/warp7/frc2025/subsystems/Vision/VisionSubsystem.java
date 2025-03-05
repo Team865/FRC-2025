@@ -2,6 +2,7 @@ package ca.warp7.frc2025.subsystems.Vision;
 
 import static ca.warp7.frc2025.subsystems.Vision.VisionConstants.*;
 
+import ca.warp7.frc2025.subsystems.Vision.VisionIO.PoseObservation;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO.TargetObservation;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -151,8 +153,21 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    public Optional<Pose2d> tag() {
-        return currentTag.map((tag) -> tag.toPose2d());
+    @AutoLogOutput
+    public Optional<Integer> getTagID(int camera) {
+        if (inputs[camera].tagIds.length > 0) {
+            return Optional.of(inputs[camera].tagIds[0]);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Pose2d> getTag(int camera) {
+        if (inputs[camera].tagIds.length > 0) {
+            return aprilTagLayout.getTagPose(inputs[camera].tagIds[0]).map((pose3d) -> pose3d.toPose2d());
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -162,6 +177,19 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public TargetObservation getTarget(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation;
+    }
+
+    /**
+     * Returns the X angle to the best target, which can be used for simple servoing with vision.
+     *
+     * @param cameraIndex The index of the camera to use.
+     */
+    public PoseObservation getPoseObv(int cameraIndex) {
+        if (inputs[cameraIndex].poseObservations.length > 0) {
+            return inputs[cameraIndex].poseObservations[0];
+        } else {
+            return null;
+        }
     }
 
     @FunctionalInterface

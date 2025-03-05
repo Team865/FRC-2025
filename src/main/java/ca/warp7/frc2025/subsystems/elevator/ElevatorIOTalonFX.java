@@ -8,6 +8,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -33,6 +34,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             new VoltageOut(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
     private final MotionMagicVoltage positionVoltageOut =
             new MotionMagicVoltage(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
+    private final NeutralOut neutralOut = new NeutralOut();
 
     // Status Signals
     // type system abuse - these correspond to linear meters, NOT rotations
@@ -137,6 +139,11 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         config.Slot0.kD = kD;
 
         PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config));
+    }
+
+    @Override
+    public void stop() {
+        talon.setControl(neutralOut);
     }
 
     @Override

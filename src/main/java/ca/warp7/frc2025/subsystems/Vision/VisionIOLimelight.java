@@ -30,7 +30,9 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
 
-    public VisionIOLimelight(String limeLightName, Supplier<Rotation2d> rotationSupplier) {
+    private final boolean flip;
+
+    public VisionIOLimelight(String limeLightName, Supplier<Rotation2d> rotationSupplier, boolean flip) {
         this.limeLightName = limeLightName;
         NetworkTable nt = NetworkTableInstance.getDefault().getTable(limeLightName);
         this.rotationSupplier = rotationSupplier;
@@ -40,6 +42,8 @@ public class VisionIOLimelight implements VisionIO {
         tySubscriber = nt.getDoubleTopic("ty").subscribe(0.0);
         megatag1Subscriber = nt.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = nt.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+
+        this.flip = flip;
     }
 
     @Override
@@ -47,7 +51,8 @@ public class VisionIOLimelight implements VisionIO {
         inputs.connected = ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
 
         inputs.latestTargetObservation = new TargetObservation(
-                Rotation2d.fromDegrees(txSubscriber.get()), Rotation2d.fromDegrees(tySubscriber.get()));
+                Rotation2d.fromDegrees(txSubscriber.get() * (flip ? -1 : 1)),
+                Rotation2d.fromDegrees(tySubscriber.get()));
 
         inputs.name = limeLightName;
 

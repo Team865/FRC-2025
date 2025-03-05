@@ -5,6 +5,9 @@
 package ca.warp7.frc2025;
 
 import au.grapplerobotics.CanBridge;
+import ca.warp7.frc2025.util.PhoenixUtil;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -45,6 +48,8 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         }
 
+        RobotController.setBrownoutVoltage(6.0);
+
         // Start logger
         Logger.start();
 
@@ -53,6 +58,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
+        // Switch thread to high priority to improve loop timing
+        Threads.setCurrentThreadPriority(true, 10);
+
+        PhoenixUtil.refreshAll();
         CommandScheduler.getInstance().run();
     }
 

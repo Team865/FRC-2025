@@ -1,6 +1,7 @@
 package ca.warp7.frc2025;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.CANBus;
@@ -30,6 +31,8 @@ public final class Constants {
 
     public static final double PERIOD = 0.02;
 
+    public static boolean disableHAL = false;
+
     public static enum Mode {
         // Running on a real robot
         REAL,
@@ -45,7 +48,8 @@ public final class Constants {
         public static final double PERIOD = 0.02;
 
         public static final Mass ROBOT_MASS = Pounds.of(137.965);
-        public static final double ROBOT_MOI_SI = 6;
+        public static final Distance WIDTH = Meters.of(0.819);
+        public static final double ROBOT_MOI_SI = 6.8554906507;
         public static final double WHEEL_COF = 1.1;
     }
 
@@ -57,10 +61,11 @@ public final class Constants {
         public static final double GEAR_RATIO = 80 / 16;
 
         public static final Distance STOW = Inches.of(0);
-        public static final Distance L4 = Inches.of(28.75);
+        public static final Distance L4 = Inches.of(28.5);
         public static final Distance INTAKE = Inches.of(3);
-        public static final Distance L3 = Inches.of(21);
-        public static final Distance L2 = Inches.of(12.75);
+        public static final Distance L3 = Inches.of(19.625 - 0.25);
+        public static final Distance L2 = Inches.of(11.75);
+        public static final Distance L2A = Inches.of(12);
     }
 
     public static final class Intake {

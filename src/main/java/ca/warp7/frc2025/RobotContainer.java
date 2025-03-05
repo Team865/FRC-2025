@@ -33,16 +33,25 @@ import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
+import ca.warp7.frc2025.util.ClosestHPStation;
+import ca.warp7.frc2025.util.VisionUtil;
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -84,8 +93,8 @@ public class RobotContainer {
 
                 vision = new VisionSubsystem(
                         drive::addVisionMeasurement,
-                        new VisionIOLimelight(VisionConstants.camera0Name, () -> drive.getRotation()),
-                        new VisionIOLimelight(VisionConstants.camera1Name, () -> drive.getRotation()));
+                        new VisionIOLimelight(VisionConstants.camera0Name, () -> drive.getRotation(), false),
+                        new VisionIOLimelight(VisionConstants.camera1Name, () -> drive.getRotation(), false));
                 break;
 
             case SIM:
@@ -127,6 +136,8 @@ public class RobotContainer {
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
+        configureNamedCommands();
+
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Autos", AutoBuilder.buildAutoChooser());
 
@@ -147,6 +158,67 @@ public class RobotContainer {
         }
     }
 
+    private void configureNamedCommands() {
+        Trigger Lockout = new Trigger(() -> vision.getPoseObv(drive.target) != null
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.3);
+
+        Logger.recordOutput("Lockout", Lockout);
+
+        Command Stow = elevator.setGoal(Elevator.STOW).andThen(new WaitUntilCommand(elevator.atSetpointTrigger()));
+
+        NamedCommands.registerCommand("Stow", Stow);
+
+        Command align = DriveCommands.reefAlign(
+                drive,
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)),
+                () -> Optional.empty());
+
+        Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)));
+        //
+        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
+                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+                        .deadlineFor(intake.runVoltsRoller(-4)))
+                .finallyDo(() -> intake.holding = false);
+        //
+        Command autoScore = new SequentialCommandGroup(
+                new WaitUntilCommand(Lockout),
+                elevator.setGoal(Elevator.L4),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                align.until(reefAlignTrigger),
+                drive.runOnce(() -> vision.getTagID(drive.target)
+                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
+                outakeCommand);
+
+        NamedCommands.registerCommand("autoScore", autoScore);
+
+        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
+                elevator.setGoal(Elevator.INTAKE),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
+                elevator.setGoal(Elevator.STOW),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                intake.setHolding(true));
+
+        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 1));
+        NamedCommands.registerCommand("scoreLeft", drive.runOnce(() -> drive.target = 0));
+        NamedCommands.registerCommand("Intake", intakeCommand);
+    }
+
     /**
      * Use this method to define your button->command mappings. Buttons can be created by
      * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -154,35 +226,44 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureBindings() {
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
+        Command driveCommand = DriveCommands.joystickDrive(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+
+        Command intakeAngle = DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                () -> -controller.getRightX(),
-                () -> drive.speedModifer));
+                () -> ClosestHPStation.getClosestStation(drive.getPose())
+                        .getRotation()
+                        .rotateBy(Rotation2d.k180deg));
+
+        drive.setDefaultCommand(driveCommand);
+
+        controller.leftBumper().whileTrue(intakeAngle);
 
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
 
         // run intake motor until sensor
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
+                elevator.setGoal(Elevator.INTAKE),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                intake.runVoltsRoller(1).until(intake.topSensorTrigger().negate()));
+                elevator.setGoal(Elevator.STOW),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                intake.setHolding(true));
 
+        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
+                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+                        .deadlineFor(intake.runVoltsRoller(-4)))
+                .finallyDo(() -> intake.holding = false);
+
+        controller.rightTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
         controller
                 .leftTrigger()
-                .and(intake.frontSensorTrigger()
-                        .negate()
-                        .and(intake.topSensorTrigger().negate()))
+                .and(intake.holdingTrigger().negate())
+                .and(elevator.atSetpointTrigger(Elevator.STOW))
                 .onTrue(intakeCommand);
-
-        controller
-                .leftTrigger()
-                .and(intake.frontSensorTrigger())
-                .onTrue(intake.runVoltsRoller(-6)
-                        .until(intake.topSensorTrigger()
-                                .negate()
-                                .and(intake.frontSensorTrigger().negate())));
 
         controller.start().toggleOnTrue(drive.runOnce(() -> {
             if (drive.speedModifer != 1) {
@@ -192,59 +273,89 @@ public class RobotContainer {
             }
         }));
 
-        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
-        controller.a().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
-        controller.y().onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.INTAKE)));
-        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
+        Trigger L4 = new Trigger(() -> vision.getPoseObv(drive.target) != null
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45);
+
         controller
-                .leftBumper()
-                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
-        Command align = DriveCommands.reefAlign(
-                drive,
-                () -> vision.getTarget(drive.target).tx(),
-                () -> vision.getTarget(drive.target).ty(),
-                () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target],
-                () -> vision.tag().orElse(new Pose2d()));
-        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
-        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
-        controller.rightTrigger().whileTrue(align);
-    }
+                .a()
+                // .and(L4)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
 
-    private void configureTuningBindings() {
-        controller.leftStick().onTrue(drive.zeroPose());
-        controller.rightStick().onTrue(drive.zeroPose());
+        // controller.y().onTrue(drive.runOnce(() -> drive.speedModifer =
+        // 1).andThen(elevator.setGoal(Elevator.INTAKE)));
 
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX(),
-                () -> drive.speedModifer));
+        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2A)));
+
+        controller.x().and(controller.leftTrigger()).whileTrue(intake.runVoltsRoller(4));
+
+        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
+
+        BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
+                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
 
         Command align = DriveCommands.reefAlign(
                 drive,
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> VisionConstants.ty[drive.target],
-                () -> vision.tag().orElse(new Pose2d()));
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)),
+                () -> vision.getTagID(drive.target)
+                        .flatMap((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.aprilTagLayout
+                                        .getTagPose(id)
+                                        .flatMap((pose) ->
+                                                Optional.of(pose.getRotation().toRotation2d()))
+                                : Optional.empty()));
 
-        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 1));
-        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 0));
+        Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
+                () -> vision.getTarget(drive.target).tx(),
+                () -> vision.getTarget(drive.target).ty(),
+                () -> VisionConstants.tx[drive.target],
+                () -> vision.getTagID(drive.target)
+                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
+                                ? VisionConstants.getTy(id, drive.target)
+                                : Rotation2d.fromDegrees(0))
+                        .orElse(Rotation2d.fromDegrees(0)));
 
-        controller.a().onTrue(climber.setPivotServoPosition(0).andThen(climber.setGoal(Climber.CLIMB)));
-        controller.x().onTrue(climber.setPivotServoPosition(0).andThen(climber.setGoal(Climber.STOW)));
-        controller
-                .b()
-                .onTrue(climber.setPivotServoPosition(1)
-                        .andThen(climber.setPivotVoltage(10)
-                                .andThen(new WaitCommand(7.5))
-                                .andThen(climber.setPivotVoltage(0))));
+        Command autoScoreL4 = new SequentialCommandGroup(
+                new WaitUntilCommand(Lockout),
+                elevator.setGoal(Elevator.L4),
+                align.until(reefAlignTrigger),
+                drive.runOnce(() -> vision.getTagID(drive.target)
+                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
+                outakeCommand);
 
-        controller.rightTrigger().onTrue(climber.setIntakeVoltage(-5));
-        controller.rightTrigger().onFalse(climber.setIntakeVoltage(0));
+        CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
+        CommandScheduler.getInstance().removeComposedCommand(align);
+
+        Command autoScoreL3 = new SequentialCommandGroup(
+                elevator.setGoal(Elevator.L3),
+                align.until(reefAlignTrigger),
+                drive.runOnce(() -> vision.getTagID(drive.target)
+                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
+                new WaitUntilCommand(elevator.atSetpointTrigger()),
+                outakeCommand);
+
+        CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
+        CommandScheduler.getInstance().removeComposedCommand(align);
+
+        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
+        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
+
+        controller.y().whileTrue(autoScoreL4);
+
+        controller.b().whileTrue(autoScoreL3);
+
+        controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+
+        // controller.start().controller.y().and(isManual).onTrue(elevator.setGoal(Elevator.L4));
     }
+
+    private void configureTuningBindings() {}
 
     public Command getAutonomousCommand() {
         return autoChooser.get();

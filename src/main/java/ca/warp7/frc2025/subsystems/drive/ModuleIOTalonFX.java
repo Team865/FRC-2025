@@ -121,7 +121,7 @@ public class ModuleIOTalonFX implements ModuleIO {
                 ? SensorDirectionValue.Clockwise_Positive
                 : SensorDirectionValue.CounterClockwise_Positive;
 
-        PhoenixUtil.tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig, 025));
+        PhoenixUtil.tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig, 0.25));
 
         timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
@@ -150,7 +150,19 @@ public class ModuleIOTalonFX implements ModuleIO {
                 turnAppliedVolts,
                 turnCurrent);
 
-        ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
+        PhoenixUtil.tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon));
+
+        PhoenixUtil.registerSignals(
+                true,
+                drivePosition,
+                driveVelocity,
+                driveAppliedVolts,
+                driveCurrent,
+                turnAbsolutePosition,
+                turnPosition,
+                turnVelocity,
+                turnAppliedVolts,
+                turnCurrent);
     }
 
     @Override
