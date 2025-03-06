@@ -44,7 +44,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -198,12 +197,13 @@ public class RobotContainer {
                                 ? VisionConstants.getTy(id, drive.target)
                                 : Rotation2d.fromDegrees(0))
                         .orElse(Rotation2d.fromDegrees(0)));
-        //
-        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
-                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+
+        Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
+                                .negate()
+                                .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
                 .finallyDo(() -> intake.holding = false);
-        //
+
         Command autoScore = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
@@ -218,7 +218,7 @@ public class RobotContainer {
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
+                intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
                 elevator.setGoal(Elevator.STOW),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
@@ -254,23 +254,22 @@ public class RobotContainer {
         controller.rightStick().onTrue(drive.zeroPose());
 
         // run intake motor until sensor
-        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.INTAKE),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                elevator.setGoal(Elevator.STOW),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.setHolding(true));
+        Command intakeCommand = new SequentialCommandGroup(
+                        elevator.setGoal(Elevator.INTAKE),
+                        intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
+                        elevator.setGoal(Elevator.STOW))
+                .finallyDo(() -> intake.holding = true);
 
-        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
-                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+        Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
+                                .negate()
+                                .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
                 .finallyDo(() -> intake.holding = false);
 
-        controller.rightTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
+        controller.rightTrigger().onTrue(outakeCommand);
         controller
                 .leftTrigger()
-                .and(intake.holdingTrigger().negate())
+                .and(intake.middleSensorTrigger().negate())
                 .and(elevator.atSetpointTrigger(Elevator.STOW))
                 .onTrue(intakeCommand);
 
@@ -296,8 +295,6 @@ public class RobotContainer {
         controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2A)));
 
         controller.x().and(controller.leftTrigger()).whileTrue(intake.runVoltsRoller(4));
-
-        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
 
         BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
