@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
-    public static final boolean tuningMode = true;
+    public static final boolean tuningMode = false;
 
     public static final double PERIOD = 0.02;
 
