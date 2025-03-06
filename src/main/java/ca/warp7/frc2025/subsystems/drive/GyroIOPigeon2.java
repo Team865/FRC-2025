@@ -4,6 +4,7 @@ import ca.warp7.frc2025.util.PhoenixUtil;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,6 +27,9 @@ public class GyroIOPigeon2 implements GyroIO {
 
     public GyroIOPigeon2(int Pigeon2Id, String CANBus) {
         pigeon = new Pigeon2(Pigeon2Id, CANBus);
+
+        Pigeon2Configuration config = new Pigeon2Configuration();
+        config.MountPose = new MountPoseConfigs().withMountPoseYaw(180);
 
         PhoenixUtil.tryUntilOk(5, () -> pigeon.getConfigurator().apply(new Pigeon2Configuration(), 0.25));
         PhoenixUtil.tryUntilOk(5, () -> pigeon.getConfigurator().setYaw(0.0));

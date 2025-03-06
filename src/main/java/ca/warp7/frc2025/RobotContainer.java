@@ -236,12 +236,12 @@ public class RobotContainer {
      */
     private void configureBindings() {
         Command driveCommand = DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+                drive, () -> controller.getLeftY(), () -> controller.getLeftX(), () -> -controller.getRightX());
 
         Command intakeAngle = DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> controller.getLeftY(),
+                () -> controller.getLeftX(),
                 () -> ClosestHPStation.getClosestStation(drive.getPose())
                         .getRotation()
                         .rotateBy(Rotation2d.k180deg));
