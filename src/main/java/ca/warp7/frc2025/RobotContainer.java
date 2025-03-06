@@ -356,7 +356,23 @@ public class RobotContainer {
 
         controller.b().whileTrue(autoScoreL3);
 
-        controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+        // controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+
+        controller
+                .povDown()
+                .onTrue(climber.setPivotServoPosition(0)
+                        .andThen(climber.setPivotPosition(Climber.CLIMB))
+                        .andThen(climber.setIntakeVoltage(-8)));
+
+        controller
+                .povUp()
+                .onTrue(climber.setPivotServoPosition(1)
+                        .andThen(climber.setIntakeVoltage(0))
+                        .andThen(climber.setPivotVoltage(10)
+                                .andThen(new WaitCommand(7.5))
+                                .andThen(climber.setPivotVoltage(0))));
+
+        controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
 
         // controller.start().controller.y().and(isManual).onTrue(elevator.setGoal(Elevator.L4));
     }
