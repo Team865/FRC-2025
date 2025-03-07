@@ -378,7 +378,7 @@ public class RobotContainer {
                 .onTrue(climber.setPivotServoPosition(1)
                         .andThen(climber.setIntakeVoltage(0))
                         .andThen(climber.setPivotVoltage(10)
-                                .andThen(new WaitCommand(7.5))
+                                .andThen(new WaitCommand(6.5))
                                 .andThen(climber.setPivotVoltage(0))));
 
         controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
