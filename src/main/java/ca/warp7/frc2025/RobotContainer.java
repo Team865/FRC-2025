@@ -186,9 +186,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
+                        .map((id) -> VisionConstants.getTy(id, drive.target))
                         .orElse(Rotation2d.fromDegrees(0)),
                 () -> Optional.empty());
 
@@ -197,9 +195,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
+                        .map((id) -> VisionConstants.getTy(id, drive.target))
                         .orElse(Rotation2d.fromDegrees(0)));
 
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
@@ -209,7 +205,6 @@ public class RobotContainer {
                 .finallyDo(() -> intake.holding = false);
 
         Command autoScore = new SequentialCommandGroup(
-                new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 align.until(reefAlignTrigger),
@@ -315,9 +310,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> 
-                                VisionConstants.getTy(id, drive.target)
-                            )
+                        .map((id) -> VisionConstants.getTy(id, drive.target))
                         .orElse(Rotation2d.fromDegrees(0)),
                 () -> vision.getTagID(drive.target)
                         .flatMap((id) -> VisionUtil.validId(id, drive.getRotation())
