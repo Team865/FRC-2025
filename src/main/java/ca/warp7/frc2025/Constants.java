@@ -63,9 +63,11 @@ public final class Constants {
         public static final Distance STOW = Inches.of(0);
         public static final Distance L4 = Inches.of(28.5);
         public static final Distance INTAKE = Inches.of(3);
-        public static final Distance L3 = Inches.of(19.625 - 0.25);
+        public static final Distance L3 = Inches.of(19.625 - 0.75);
         public static final Distance L2 = Inches.of(11.75);
-        public static final Distance L2A = Inches.of(12);
+        // public static final Distance L2A = Inches.of(12);
+        public static final Distance L2A = Inches.of(11.00);
+        public static final Distance L1A = Inches.of(9.9);
     }
 
     public static final class Intake {

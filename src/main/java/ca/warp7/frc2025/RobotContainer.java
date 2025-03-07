@@ -353,11 +353,19 @@ public class RobotContainer {
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
-        controller.y().whileTrue(autoScoreL4);
+        controller.y().and(isManual.negate()).whileTrue(autoScoreL4);
 
-        controller.b().whileTrue(autoScoreL3);
+        controller.b().and(isManual.negate()).whileTrue(autoScoreL3);
 
-        // controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+        controller
+                .y()
+                .and(isManual)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
+
+        controller
+                .b()
+                .and(isManual)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
 
         controller
                 .povDown()
@@ -375,7 +383,9 @@ public class RobotContainer {
 
         controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
 
-        // controller.start().controller.y().and(isManual).onTrue(elevator.setGoal(Elevator.L4));
+        controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+
+        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A));
     }
 
     private void configureTuningBindings() {}
