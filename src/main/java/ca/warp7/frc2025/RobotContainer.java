@@ -40,9 +40,10 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -259,13 +260,18 @@ public class RobotContainer {
                         elevator.setGoal(Elevator.INTAKE),
                         intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
                         elevator.setGoal(Elevator.STOW))
-                .finallyDo(() -> intake.holding = true);
+                .finallyDo(() -> {
+                    intake.holding = true;
+                });
 
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                                 .negate()
                                 .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
-                .finallyDo(() -> intake.holding = false);
+                .finallyDo(() -> {
+                    intake.holding = false;
+                    controller.setRumble(RumbleType.kBothRumble, 0.7);
+                });
 
         controller.rightTrigger().onTrue(outakeCommand);
         controller
