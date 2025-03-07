@@ -68,6 +68,15 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
+    public enum ControlMode {
+        MANUAL,
+        ASSIST,
+    }
+
+    private ControlMode controlMode = ControlMode.ASSIST;
+
+    private Trigger isManual = new Trigger(() -> controlMode.MANUAL == ControlMode.MANUAL);
+
     public RobotContainer() {
         switch (Constants.currentMode) {
             case REAL:
@@ -189,12 +198,13 @@ public class RobotContainer {
                                 ? VisionConstants.getTy(id, drive.target)
                                 : Rotation2d.fromDegrees(0))
                         .orElse(Rotation2d.fromDegrees(0)));
-        //
-        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
-                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+
+        Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
+                                .negate()
+                                .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
                 .finallyDo(() -> intake.holding = false);
-        //
+
         Command autoScore = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
@@ -209,7 +219,7 @@ public class RobotContainer {
         SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.INTAKE),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
+                intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
                 elevator.setGoal(Elevator.STOW),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
@@ -227,12 +237,12 @@ public class RobotContainer {
      */
     private void configureBindings() {
         Command driveCommand = DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+                drive, () -> controller.getLeftY(), () -> controller.getLeftX(), () -> -controller.getRightX());
 
         Command intakeAngle = DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> controller.getLeftY(),
+                () -> controller.getLeftX(),
                 () -> ClosestHPStation.getClosestStation(drive.getPose())
                         .getRotation()
                         .rotateBy(Rotation2d.k180deg));
@@ -245,23 +255,22 @@ public class RobotContainer {
         controller.rightStick().onTrue(drive.zeroPose());
 
         // run intake motor until sensor
-        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.INTAKE),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.runVoltsRoller(-4).until(intake.topSensorTrigger()),
-                elevator.setGoal(Elevator.STOW),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.setHolding(true));
+        Command intakeCommand = new SequentialCommandGroup(
+                        elevator.setGoal(Elevator.INTAKE),
+                        intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
+                        elevator.setGoal(Elevator.STOW))
+                .finallyDo(() -> intake.holding = true);
 
-        Command outakeCommand = new SequentialCommandGroup(new WaitCommand(0.5)
-                        .andThen(new WaitUntilCommand(intake.topSensorTrigger().negate()))
+        Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
+                                .negate()
+                                .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
                 .finallyDo(() -> intake.holding = false);
 
-        controller.rightTrigger().and(intake.holdingTrigger()).onTrue(outakeCommand);
+        controller.rightTrigger().onTrue(outakeCommand);
         controller
                 .leftTrigger()
-                .and(intake.holdingTrigger().negate())
+                .and(intake.middleSensorTrigger().negate())
                 .and(elevator.atSetpointTrigger(Elevator.STOW))
                 .onTrue(intakeCommand);
 
@@ -287,8 +296,6 @@ public class RobotContainer {
         controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2A)));
 
         controller.x().and(controller.leftTrigger()).whileTrue(intake.runVoltsRoller(4));
-
-        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
 
         BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
@@ -346,13 +353,39 @@ public class RobotContainer {
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
-        controller.y().whileTrue(autoScoreL4);
+        controller.y().and(isManual.negate()).whileTrue(autoScoreL4);
 
-        controller.b().whileTrue(autoScoreL3);
+        controller.b().and(isManual.negate()).whileTrue(autoScoreL3);
+
+        controller
+                .y()
+                .and(isManual)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
+
+        controller
+                .b()
+                .and(isManual)
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
+
+        controller
+                .povDown()
+                .onTrue(climber.setPivotServoPosition(0)
+                        .andThen(climber.setPivotPosition(Climber.CLIMB))
+                        .andThen(climber.setIntakeVoltage(-8)));
+
+        controller
+                .povUp()
+                .onTrue(climber.setPivotServoPosition(1)
+                        .andThen(climber.setIntakeVoltage(0))
+                        .andThen(climber.setPivotVoltage(10)
+                                .andThen(new WaitCommand(6.5))
+                                .andThen(climber.setPivotVoltage(0))));
+
+        controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
 
         controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
 
-        // controller.start().controller.y().and(isManual).onTrue(elevator.setGoal(Elevator.L4));
+        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A));
     }
 
     private void configureTuningBindings() {}

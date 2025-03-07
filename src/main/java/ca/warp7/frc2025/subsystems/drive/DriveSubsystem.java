@@ -213,9 +213,9 @@ public class DriveSubsystem extends SubsystemBase {
 
             if (DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red) {
-                rotation = Rotation2d.fromDegrees(180);
+                rotation = Rotation2d.fromDegrees(0);
             } else {
-                rotation = new Rotation2d();
+                rotation = Rotation2d.k180deg;
             }
 
             setPose(new Pose2d(getPose().getTranslation(), rotation));

@@ -62,4 +62,8 @@ public class ClimberSubsystem extends SubsystemBase {
     public Command setPivotSpeed(double speed) {
         return this.runOnce(() -> io.setPivotSpeed(speed));
     }
+
+    public Command setPivotPosition(double position) {
+        return this.runOnce(() -> io.setPivotPosition(position));
+    }
 }

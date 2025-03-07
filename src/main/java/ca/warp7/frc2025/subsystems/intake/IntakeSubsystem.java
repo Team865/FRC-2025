@@ -24,7 +24,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final Alert disconnectedMotor;
 
     private final double topDistanceToCoral = 95;
-    private final double frontTopDistanceToCoral = 145;
+    private final double frontTopDistanceToCoral = 50;
 
     public boolean holding = false;
 
@@ -50,12 +50,12 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     @AutoLogOutput
-    public Trigger topSensorTrigger() {
+    public Trigger bottomSensorTrigger() {
         return new Trigger(() -> MathUtil.isNear(topDistanceToCoral, topSensorInputs.objectDistanceMM, 50));
     }
 
     @AutoLogOutput
-    public Trigger frontSensorTrigger() {
+    public Trigger middleSensorTrigger() {
         return new Trigger(() -> MathUtil.isNear(frontTopDistanceToCoral, frontSensorInputs.objectDistanceMM, 30));
     }
 
