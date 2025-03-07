@@ -24,7 +24,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final Alert disconnectedMotor;
 
     private final double topDistanceToCoral = 95;
-    private final double frontTopDistanceToCoral = 145;
+    private final double frontTopDistanceToCoral = 50;
 
     public boolean holding = false;
 
