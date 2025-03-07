@@ -73,6 +73,10 @@ public class IntakeSubsystem extends SubsystemBase {
         return startEnd(() -> rollersIO.setVolts(inputVolts), () -> rollersIO.setVolts(0));
     }
 
+    public Command setVoltsRoller(double volts) {
+        return runOnce(() -> rollersIO.setVolts(volts));
+    }
+
     @AutoLogOutput
     public Command runTorqueAmpsRoller(double inputAmps) {
         return runOnce(() -> rollersIO.setVolts(inputAmps));

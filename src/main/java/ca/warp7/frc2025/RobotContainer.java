@@ -43,7 +43,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -62,6 +61,7 @@ public class RobotContainer {
     private final ElevatorSubsystem elevator;
     private final ClimberSubsystem climber;
     private final VisionSubsystem vision;
+    // private final LEDSubsystem leds;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -144,6 +144,8 @@ public class RobotContainer {
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
+                // leds = new LEDSubsystem(0);
         }
 
         configureNamedCommands();
@@ -257,9 +259,11 @@ public class RobotContainer {
 
         // run intake motor until sensor
         Command intakeCommand = new SequentialCommandGroup(
+                        // leds.solidColorCommand(SparkColor.HOT_PINK),
                         elevator.setGoal(Elevator.INTAKE),
                         intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
                         elevator.setGoal(Elevator.STOW))
+                // leds.setBlinkingCmd(SparkColor.HOT_PINK, SparkColor.BLACK, 10))
                 .finallyDo(() -> {
                     intake.holding = true;
                 });
@@ -294,14 +298,13 @@ public class RobotContainer {
         controller
                 .a()
                 // .and(L4)
-                .onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 1)
+                        .andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0))));
 
         // controller.y().onTrue(drive.runOnce(() -> drive.speedModifer =
         // 1).andThen(elevator.setGoal(Elevator.INTAKE)));
 
-        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2A)));
-
-        controller.x().and(controller.leftTrigger()).whileTrue(intake.runVoltsRoller(4));
+        controller.x().onTrue(elevator.setGoal(Elevator.L2A).andThen(intake.setVoltsRoller(-4)));
 
         BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
@@ -312,9 +315,9 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
+                        .map((id) -> 
+                                VisionConstants.getTy(id, drive.target)
+                            )
                         .orElse(Rotation2d.fromDegrees(0)),
                 () -> vision.getTagID(drive.target)
                         .flatMap((id) -> VisionUtil.validId(id, drive.getRotation())
@@ -384,14 +387,14 @@ public class RobotContainer {
                 .onTrue(climber.setPivotServoPosition(1)
                         .andThen(climber.setIntakeVoltage(0))
                         .andThen(climber.setPivotVoltage(10)
-                                .andThen(new WaitCommand(6.5))
+                                .andThen(new WaitCommand(4.5))
                                 .andThen(climber.setPivotVoltage(0))));
 
         controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
 
-        controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+        controller.rightBumper().whileTrue(intake.runVoltsRoller(4));
 
-        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A));
+        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A).andThen(intake.setVoltsRoller(4)));
     }
 
     private void configureTuningBindings() {}
