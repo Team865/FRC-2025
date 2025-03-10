@@ -24,21 +24,21 @@ public class VisionConstants {
     static {
         // Defaults
 
-        // Red
-        reefTy.put(6, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(7, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(8, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(9, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(10, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(11, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-
-        // Blue
-        reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(18, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(19, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(20, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(21, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
-        reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // // Red
+        // reefTy.put(6, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(7, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(8, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(9, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(10, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(11, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        //
+        // // Blue
+        // reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(18, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(19, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(20, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(21, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
+        // reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(-0.001), Rotation2d.fromDegrees(-0.001)));
 
         // At home field
 
