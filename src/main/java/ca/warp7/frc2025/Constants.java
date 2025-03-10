@@ -83,8 +83,8 @@ public final class Constants {
 
     public static final class Climber {
         public static final int PIVOT_ID = 61;
-        public static final int INTAKE_ID = 59;
-        public static final int Servo_PWM = 0;
+        public static final int INTAKE_ID = 58;
+        public static final int Servo_PWM = 1;
 
         public static final double CLIMB = -110.28759;
         public static final double STOW = 0.0;

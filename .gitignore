@@ -188,3 +188,7 @@ compile_commands.json
 
 # Version file
 src/main/java/ca/warp7/frc2025/BuildConstants.java
+
+
+# Git hooks
+temp/*

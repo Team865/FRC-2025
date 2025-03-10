@@ -99,6 +99,7 @@ public class DriveSubsystem extends SubsystemBase {
     // Sysid
     private final SysIdRoutine sysId;
 
+    @AutoLogOutput
     public double speedModifer = 1;
 
     @AutoLogOutput
@@ -238,7 +239,7 @@ public class DriveSubsystem extends SubsystemBase {
      */
     public void runVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
-        speeds.times(speedModifer);
+        speeds = speeds.times(speedModifer);
 
         lastSetpoint = setpointGenerator.generateSetpoint(lastSetpoint, speeds, Drivetrain.PERIOD);
         SwerveModuleState[] setpointStates = lastSetpoint.moduleStates();

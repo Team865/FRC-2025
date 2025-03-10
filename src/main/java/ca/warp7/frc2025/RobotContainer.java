@@ -40,7 +40,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -61,6 +61,7 @@ public class RobotContainer {
     private final ElevatorSubsystem elevator;
     private final ClimberSubsystem climber;
     private final VisionSubsystem vision;
+    // private final LEDSubsystem leds;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -143,6 +144,8 @@ public class RobotContainer {
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
+                // leds = new LEDSubsystem(0);
         }
 
         configureNamedCommands();
@@ -183,9 +186,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
+                        .map((id) -> VisionConstants.getTy(id, drive.target))
                         .orElse(Rotation2d.fromDegrees(0)),
                 () -> Optional.empty());
 
@@ -194,9 +195,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
+                        .map((id) -> VisionConstants.getTy(id, drive.target))
                         .orElse(Rotation2d.fromDegrees(0)));
 
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
@@ -206,7 +205,6 @@ public class RobotContainer {
                 .finallyDo(() -> intake.holding = false);
 
         Command autoScore = new SequentialCommandGroup(
-                new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 align.until(reefAlignTrigger),
@@ -256,16 +254,23 @@ public class RobotContainer {
 
         // run intake motor until sensor
         Command intakeCommand = new SequentialCommandGroup(
+                        // leds.solidColorCommand(SparkColor.HOT_PINK),
                         elevator.setGoal(Elevator.INTAKE),
                         intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
                         elevator.setGoal(Elevator.STOW))
-                .finallyDo(() -> intake.holding = true);
+                // leds.setBlinkingCmd(SparkColor.HOT_PINK, SparkColor.BLACK, 10))
+                .finallyDo(() -> {
+                    intake.holding = true;
+                });
 
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                                 .negate()
                                 .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
-                .finallyDo(() -> intake.holding = false);
+                .finallyDo(() -> {
+                    intake.holding = false;
+                    controller.setRumble(RumbleType.kBothRumble, 0.7);
+                });
 
         controller.rightTrigger().onTrue(outakeCommand);
         controller
@@ -288,14 +293,13 @@ public class RobotContainer {
         controller
                 .a()
                 // .and(L4)
-                .onTrue(drive.runOnce(() -> drive.speedModifer = 1).andThen(elevator.setGoal(Elevator.STOW)));
+                .onTrue(drive.runOnce(() -> drive.speedModifer = 1)
+                        .andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0))));
 
         // controller.y().onTrue(drive.runOnce(() -> drive.speedModifer =
         // 1).andThen(elevator.setGoal(Elevator.INTAKE)));
 
-        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2A)));
-
-        controller.x().and(controller.leftTrigger()).whileTrue(intake.runVoltsRoller(4));
+        controller.x().onTrue(elevator.setGoal(Elevator.L2A).andThen(intake.setVoltsRoller(-4)));
 
         BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
@@ -306,9 +310,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
                 () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
+                        .map((id) -> VisionConstants.getTy(id, drive.target))
                         .orElse(Rotation2d.fromDegrees(0)),
                 () -> vision.getTagID(drive.target)
                         .flatMap((id) -> VisionUtil.validId(id, drive.getRotation())
@@ -353,18 +355,18 @@ public class RobotContainer {
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
-        controller.y().and(isManual.negate()).whileTrue(autoScoreL4);
-
-        controller.b().and(isManual.negate()).whileTrue(autoScoreL3);
+        // controller.y().and(isManual.negate()).whileTrue(autoScoreL4);
+        //
+        // controller.b().and(isManual.negate()).whileTrue(autoScoreL3);
 
         controller
                 .y()
-                .and(isManual)
+                // .and(isManual)
                 .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L4)));
 
         controller
                 .b()
-                .and(isManual)
+                // .and(isManual)
                 .onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
 
         controller
@@ -378,14 +380,14 @@ public class RobotContainer {
                 .onTrue(climber.setPivotServoPosition(1)
                         .andThen(climber.setIntakeVoltage(0))
                         .andThen(climber.setPivotVoltage(10)
-                                .andThen(new WaitCommand(6.5))
+                                .andThen(new WaitCommand(1))
                                 .andThen(climber.setPivotVoltage(0))));
 
         controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
 
-        controller.rightBumper().whileTrue(intake.runVoltsRoller(8));
+        controller.rightBumper().whileTrue(intake.runVoltsRoller(4));
 
-        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A));
+        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A).andThen(intake.setVoltsRoller(4)));
     }
 
     private void configureTuningBindings() {}
