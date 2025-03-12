@@ -339,7 +339,7 @@ public class RobotContainer {
                 elevator.setGoal(Elevator.L4),
                 align.until(reefAlignTrigger),
                 drive.runOnce(() -> vision.getTagID(drive.target)
-                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
+                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
                 outakeCommand);
 
         CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
@@ -349,7 +349,7 @@ public class RobotContainer {
                 elevator.setGoal(Elevator.L3),
                 align.until(reefAlignTrigger),
                 drive.runOnce(() -> vision.getTagID(drive.target)
-                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 1)))),
+                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 outakeCommand);
 
