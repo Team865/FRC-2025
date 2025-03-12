@@ -76,7 +76,7 @@ public class RobotContainer {
 
     private ControlMode controlMode = ControlMode.ASSIST;
 
-    private Trigger isManual = new Trigger(() -> controlMode.MANUAL == ControlMode.MANUAL);
+    private Trigger isManual = new Trigger(() -> controlMode == ControlMode.MANUAL);
 
     public RobotContainer() {
         switch (Constants.currentMode) {
