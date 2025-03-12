@@ -3,6 +3,7 @@
 
 package ca.warp7.frc2025.subsystems.Vision;
 
+import ca.warp7.frc2025.Constants;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class VisionConstants {
     public static Rotation2d[] tx = {Rotation2d.fromDegrees(0.002), Rotation2d.fromDegrees(0.001)};
@@ -19,6 +21,9 @@ public class VisionConstants {
     public static HashMap<Integer, Tuple<Rotation2d, Rotation2d>> reefTy = new HashMap<>();
 
     public static record Tuple<L, R>(L l, R r) {}
+
+    public static final Rotation2d fallbackAngle =
+            Constants.currentMode == Constants.Mode.REAL ? Rotation2d.fromDegrees(2.25) : Rotation2d.fromDegrees(-5);
 
     // first value is limelight on the right 2nd is the limelight on the left
     static {
@@ -65,13 +70,17 @@ public class VisionConstants {
         reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(1.48), Rotation2d.fromDegrees(3.22)));
     }
 
-    public static Rotation2d getTy(int id, int camera) {
+    public static Optional<Rotation2d> getTy(int id, int camera) {
         Tuple<Rotation2d, Rotation2d> tys = reefTy.get(id);
 
+        if (tys == null) {
+            return Optional.empty();
+        }
+
         if (camera == 0) {
-            return tys.l();
+            return Optional.of(tys.l());
         } else {
-            return tys.r();
+            return Optional.of(tys.r());
         }
     }
 

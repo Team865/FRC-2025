@@ -185,18 +185,24 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(Rotation2d.fromDegrees(0)),
-                () -> Optional.empty());
+                () -> vision.getTagIDS(drive.target)
+                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
+                        .orElse(VisionConstants.fallbackAngle),
+                () -> vision.getTagIDS(drive.target)
+                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                        .flatMap((id) -> VisionConstants.aprilTagLayout
+                                .getTagPose(id)
+                                .map((pose) -> pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg))));
 
         Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(Rotation2d.fromDegrees(0)));
+                () -> vision.getTagIDS(drive.target)
+                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
+                        .orElse(VisionConstants.fallbackAngle));
 
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                                 .negate()
@@ -309,26 +315,24 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(Rotation2d.fromDegrees(0)),
-                () -> vision.getTagID(drive.target)
-                        .flatMap((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.aprilTagLayout
-                                        .getTagPose(id)
-                                        .flatMap((pose) ->
-                                                Optional.of(pose.getRotation().toRotation2d()))
-                                : Optional.empty()));
+                () -> vision.getTagIDS(drive.target)
+                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
+                        .orElse(VisionConstants.fallbackAngle),
+                () -> vision.getTagIDS(drive.target)
+                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                        .flatMap((id) -> VisionConstants.aprilTagLayout
+                                .getTagPose(id)
+                                .map((pose) -> pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg))));
 
         Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagID(drive.target)
-                        .map((id) -> VisionUtil.validId(id, drive.getRotation())
-                                ? VisionConstants.getTy(id, drive.target)
-                                : Rotation2d.fromDegrees(0))
-                        .orElse(Rotation2d.fromDegrees(0)));
+                () -> vision.getTagIDS(drive.target)
+                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
+                        .orElse(VisionConstants.fallbackAngle));
 
         Command autoScoreL4 = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),

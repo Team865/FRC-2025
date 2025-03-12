@@ -4,12 +4,16 @@ import static edu.wpi.first.units.Units.Meter;
 
 import ca.warp7.frc2025.Constants.Drivetrain;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
+import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
+import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
+import java.util.Optional;
+import org.littletonrobotics.junction.Logger;
 
 public class VisionUtil {
     /* Checks if a tag is is a valid reading, based on the robot's rotation */
@@ -37,5 +41,26 @@ public class VisionUtil {
         pose = pose.transformBy(transformer);
 
         return pose;
+    }
+
+    public static boolean isReefTag(int id) {
+        switch (id) {
+            case 6 | 7 | 8 | 9 | 10 | 11 | 17 | 18 | 19 | 20 | 21 | 22:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static Optional<Integer> firstReefId(int[] ids) {
+        for (int id : ids) {
+            if (isReefTag(id)) {
+                System.out.println(id);
+                Logger.recordOutput("id", id);
+                return Optional.of(id);
+            }
+        }
+
+        return Optional.empty();
     }
 }

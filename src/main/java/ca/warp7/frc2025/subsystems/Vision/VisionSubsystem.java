@@ -162,9 +162,10 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
-    public Optional<Pose2d> getTag(int camera) {
+    @AutoLogOutput
+    public Optional<int[]> getTagIDS(int camera) {
         if (inputs[camera].tagIds.length > 0) {
-            return aprilTagLayout.getTagPose(inputs[camera].tagIds[0]).map((pose3d) -> pose3d.toPose2d());
+            return Optional.of(inputs[camera].tagIds);
         } else {
             return Optional.empty();
         }
