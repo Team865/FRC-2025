@@ -15,7 +15,7 @@ public class ModuleIOSim implements ModuleIO {
     // Sim constants
     private static final DCMotor DRIVE_GEARBOX = DCMotor.getKrakenX60Foc(1);
     private static final DCMotor TURN_GEARBOX = DCMotor.getKrakenX60Foc(1);
-    private static final double DRIVE_KP = 0.05;
+    private static final double DRIVE_KP = 0.0;
     private static final double DRIVE_KD = 0.0;
     private static final double DRIVE_KS = 0.0;
     private static final double DRIVE_KV_ROT = 0.91035; // Same units as TunerConstants: (volt * secs) / rotation
@@ -39,7 +39,7 @@ public class ModuleIOSim implements ModuleIO {
     public ModuleIOSim(SwerveModuleConstants constants) {
         driveSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                        DRIVE_GEARBOX, constants.DriveInertia, constants.SteerMotorGearRatio),
+                        DRIVE_GEARBOX, constants.DriveInertia, constants.DriveMotorGearRatio),
                 DRIVE_GEARBOX);
         turnSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(TURN_GEARBOX, constants.SteerInertia, constants.SteerMotorGearRatio),
