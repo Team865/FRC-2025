@@ -147,33 +147,43 @@ public class DriveCommands {
             Supplier<Rotation2d> yGoal,
             Supplier<Optional<Rotation2d>> targetAngleSupplier) {
         // final PIDController xController = new PIDController(0.08, 0.0, 0.0);
-        final PIDController xController = new PIDController(0.12, 0.0, 0);
+        // final PIDController xController = new PIDController(0.12, 0.0, 0);
+        // final PIDController yController = new PIDController(0.025, 0.0, 0.1);
+        final PIDController xController = new PIDController(0.25, 0.0, 0);
         final PIDController yController = new PIDController(0.025, 0.0, 0.1);
         ProfiledPIDController thetaController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        return drive.run(() -> {
-            Pose2d currentPose = drive.getPose();
-            Optional<Rotation2d> targetAngle = targetAngleSupplier.get();
-            Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
-            Logger.recordOutput("Swerve/tx", tx.get().getDegrees());
-            Logger.recordOutput("Swerve/tx-goal", xGoal.get().getDegrees());
-            Logger.recordOutput("Swerve/ty-goal", yGoal.get().getDegrees());
-            Logger.recordOutput("Swerve/Current-Pose", currentPose.getRotation().getDegrees());
-            targetAngle.ifPresent((angle) -> Logger.recordOutput("Swerve/Target", angle));
-            Logger.recordOutput(
-                    "Swerve/output",
-                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()));
-            final ChassisSpeeds speeds = new ChassisSpeeds(
-                    xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
-                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
-                    targetAngle.isPresent()
-                            ? thetaController.calculate(
-                                    currentPose.getRotation().getRadians(),
-                                    targetAngle.get().getRadians())
-                            : 0);
-            drive.runVelocity(speeds);
-        });
+
+        return Commands.runOnce(() -> {
+                    thetaController.reset(drive.getRotation().getRadians());
+                })
+                .andThen(drive.run(() -> {
+                    Pose2d currentPose = drive.getPose();
+                    Optional<Rotation2d> targetAngle = targetAngleSupplier.get();
+                    Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
+                    Logger.recordOutput("Swerve/tx", tx.get().getDegrees());
+                    Logger.recordOutput("Swerve/tx-goal", xGoal.get().getDegrees());
+                    Logger.recordOutput("Swerve/ty-goal", yGoal.get().getDegrees());
+                    Logger.recordOutput(
+                            "Swerve/Current-Pose", currentPose.getRotation().getDegrees());
+                    targetAngle.ifPresent((angle) -> Logger.recordOutput("Swerve/Target", angle));
+                    Logger.recordOutput(
+                            "Swerve/output",
+                            yController.calculate(
+                                    tx.get().getDegrees(), xGoal.get().getDegrees()));
+                    final ChassisSpeeds speeds = new ChassisSpeeds(
+                            xController.calculate(
+                                    ty.get().getDegrees(), yGoal.get().getDegrees()),
+                            yController.calculate(
+                                    tx.get().getDegrees(), xGoal.get().getDegrees()),
+                            targetAngle.isPresent()
+                                    ? thetaController.calculate(
+                                            currentPose.getRotation().getRadians(),
+                                            targetAngle.get().getRadians())
+                                    : 0);
+                    drive.runVelocity(speeds);
+                }));
     }
 
     public static Trigger isReefAlignedTigger(
