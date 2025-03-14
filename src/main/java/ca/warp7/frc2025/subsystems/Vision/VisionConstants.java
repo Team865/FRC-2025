@@ -30,20 +30,20 @@ public class VisionConstants {
         switch (Constants.currentField) {
             case SIM:
                 // Red
-                reefTy.put(6, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(7, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(8, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(9, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(10, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(11, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
+                reefTy.put(6, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(7, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(8, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(9, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(10, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(11, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
 
                 // Blue
-                reefTy.put(17, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(18, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(19, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(20, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(21, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
-                reefTy.put(22, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.320)));
+                reefTy.put(17, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(18, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(19, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(20, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(21, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
+                reefTy.put(22, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
                 break;
             case HOME:
                 reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(0.1), Rotation2d.fromDegrees(1.8)));

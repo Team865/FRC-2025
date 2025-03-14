@@ -76,7 +76,7 @@ public class VisionIOPhotonVision implements VisionIO {
                                 (target) -> {
                                     inputs.latestTargetObservation = new TargetObservation(
                                             Rotation2d.fromDegrees(target.getYaw() * (flip ? -1 : 1)),
-                                            Rotation2d.fromDegrees(target.getPitch()));
+                                            Rotation2d.fromDegrees(target.getPitch() * (flip ? -1 : 1)));
                                 },
                                 () -> {
                                     inputs.latestTargetObservation =
