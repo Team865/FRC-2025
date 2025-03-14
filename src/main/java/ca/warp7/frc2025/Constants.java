@@ -61,6 +61,7 @@ public final class Constants {
 
         public static final Mass ROBOT_MASS = Pounds.of(137.965);
         public static final Distance WIDTH = Meters.of(0.819);
+        public static final Distance LENGTH = Meters.of(1.1);
         public static final double ROBOT_MOI_SI = 6.8554906507;
         public static final double WHEEL_COF = 1.1;
     }

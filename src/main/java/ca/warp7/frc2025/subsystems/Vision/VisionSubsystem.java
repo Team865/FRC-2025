@@ -13,6 +13,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class VisionSubsystem extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
-    private Optional<Pose3d> currentTag = Optional.empty();
+    private final List<Integer> tags = new ArrayList<Integer>();
 
     public VisionSubsystem(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
@@ -56,6 +57,10 @@ public class VisionSubsystem extends SubsystemBase {
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
+        if (inputs[0].tagIds.length > 0) {
+            tags.clear();
+        }
+
         for (int index = 0; index < io.length; index++) {
             disconnectedAlerts[index].set(!inputs[index].connected);
 
@@ -67,6 +72,8 @@ public class VisionSubsystem extends SubsystemBase {
 
             // Add tag poses
             for (int tagId : inputs[index].tagIds) {
+                tags.add(tagId);
+
                 var tagPose = aprilTagLayout.getTagPose(tagId);
                 if (tagPose.isPresent()) {
                     tagPoses.add(tagPose.get());
@@ -137,10 +144,6 @@ public class VisionSubsystem extends SubsystemBase {
             allRobotPosesAccepted.addAll(robotPosesAccepted);
             allRobotPosesRejected.addAll(robotPosesRejected);
 
-            if (inputs[0].tagIds.length > 0) {
-                currentTag = aprilTagLayout.getTagPose(inputs[0].tagIds[0]);
-            }
-
             // Log summary data
             Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
             Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
@@ -163,12 +166,8 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     @AutoLogOutput
-    public Optional<int[]> getTagIDS(int camera) {
-        if (inputs[camera].tagIds.length > 0) {
-            return Optional.of(inputs[camera].tagIds);
-        } else {
-            return Optional.empty();
-        }
+    public int[] getTagIDS(int camera) {
+        return tags.stream().mapToInt(i -> (int) i).toArray();
     }
 
     /**

@@ -35,8 +35,9 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
      * @param name The name of the camera.
      * @param poseSupplier Supplier for the robot pose to use in simulation.
      */
-    public VisionIOPhotonVisionSim(String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
-        super(name, robotToCamera);
+    public VisionIOPhotonVisionSim(
+            String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier, boolean flip) {
+        super(name, robotToCamera, poseSupplier, flip);
         this.poseSupplier = poseSupplier;
 
         // Initialize vision sim

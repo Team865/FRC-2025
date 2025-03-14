@@ -128,9 +128,15 @@ public class RobotContainer {
                 vision = new VisionSubsystem(
                         drive::addVisionMeasurement,
                         new VisionIOPhotonVisionSim(
-                                VisionConstants.camera0Name, VisionConstants.robotToCamera0, () -> drive.getPose()),
-                        new VisionIOPhotonVisionSim(
-                                VisionConstants.camera1Name, VisionConstants.robotToCamera1, () -> drive.getPose()));
+                                VisionConstants.camera0Name,
+                                VisionConstants.robotToCamera0,
+                                () -> drive.getPose(),
+                                false));
+                // new VisionIOPhotonVisionSim(
+                //         VisionConstants.camera1Name,
+                //         VisionConstants.robotToCamera1,
+                //         () -> drive.getPose(),
+                //         false));
                 break;
             case REPLAY:
             default:
@@ -185,12 +191,8 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagIDS(drive.target)
-                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
-                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(VisionConstants.fallbackAngle),
-                () -> vision.getTagIDS(drive.target)
-                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                () -> VisionUtil.getTy(drive, vision),
+                () -> VisionUtil.firstValidReefId(vision.getTagIDS(drive.target), drive.getRotation())
                         .flatMap((id) -> VisionConstants.aprilTagLayout
                                 .getTagPose(id)
                                 .map((pose) -> pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg))));
@@ -199,11 +201,8 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagIDS(drive.target)
-                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
-                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(VisionConstants.fallbackAngle));
-
+                () -> VisionUtil.getTy(drive, vision));
+        //
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                                 .negate()
                                 .and(intake.middleSensorTrigger().negate()))
@@ -315,12 +314,8 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagIDS(drive.target)
-                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
-                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(VisionConstants.fallbackAngle),
-                () -> vision.getTagIDS(drive.target)
-                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
+                () -> VisionUtil.getTy(drive, vision),
+                () -> VisionUtil.firstValidReefId(vision.getTagIDS(drive.target), drive.getRotation())
                         .flatMap((id) -> VisionConstants.aprilTagLayout
                                 .getTagPose(id)
                                 .map((pose) -> pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg))));
@@ -329,10 +324,7 @@ public class RobotContainer {
                 () -> vision.getTarget(drive.target).tx(),
                 () -> vision.getTarget(drive.target).ty(),
                 () -> VisionConstants.tx[drive.target],
-                () -> vision.getTagIDS(drive.target)
-                        .flatMap((ids) -> VisionUtil.firstReefId(ids))
-                        .flatMap((id) -> VisionConstants.getTy(id, drive.target))
-                        .orElse(VisionConstants.fallbackAngle));
+                () -> VisionUtil.getTy(drive, vision));
 
         Command autoScoreL4 = new SequentialCommandGroup(
                 new WaitUntilCommand(Lockout),
