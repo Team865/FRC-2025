@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
+    public static final Field currentField = RobotBase.isReal() ? Field.HOME : Field.SIM;
     public static final boolean tuningMode = false;
 
     public static final double PERIOD = 0.02;
@@ -42,6 +43,17 @@ public final class Constants {
 
         // Replaying log file on the robot
         REPLAY
+    }
+
+    public static enum Field {
+        // Running in sim,
+        SIM,
+
+        // Running at field in shop
+        HOME,
+
+        // Running centennial field
+        CENT,
     }
 
     public static final class Drivetrain {
