@@ -26,7 +26,7 @@ public class VisionSubsystem extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
-    private final List<Integer> tags = new ArrayList<Integer>();
+    public final List<Integer> tags = new ArrayList<Integer>();
 
     public VisionSubsystem(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
@@ -57,7 +57,7 @@ public class VisionSubsystem extends SubsystemBase {
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
-        if (inputs[0].tagIds.length > 0) {
+        if (inputs[0].tagIds.length > 0 || inputs[1].tagIds.length > 0) {
             tags.clear();
         }
 
@@ -153,6 +153,9 @@ public class VisionSubsystem extends SubsystemBase {
             Logger.recordOutput(
                     "Vision/Summary/RobotPosesRejected",
                     allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+
+            Logger.recordOutput(
+                    "Vision/tags", tags.stream().mapToInt((o) -> (int) o).toArray());
         }
     }
 

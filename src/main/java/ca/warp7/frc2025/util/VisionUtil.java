@@ -4,8 +4,6 @@ import static edu.wpi.first.units.Units.Meter;
 
 import ca.warp7.frc2025.Constants.Drivetrain;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
-import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
-import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,7 +24,7 @@ public class VisionUtil {
                         .toRotation2d()
                         .getDegrees(),
                 pose.rotateBy(Rotation2d.k180deg).getDegrees(),
-                40,
+                30,
                 -180,
                 180);
     }
@@ -58,15 +56,5 @@ public class VisionUtil {
         }
 
         return Optional.empty();
-    }
-
-    public static Rotation2d getTy(DriveSubsystem drive, VisionSubsystem vision) {
-        int[] ids = vision.getTagIDS(drive.target);
-
-        Optional<Integer> id = VisionUtil.firstValidReefId(ids, drive.getRotation());
-
-        Optional<Rotation2d> angle = id.flatMap((b) -> VisionConstants.getTy(b, drive.target));
-
-        return angle.orElse(Rotation2d.fromDegrees(-5));
     }
 }

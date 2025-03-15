@@ -3,88 +3,13 @@
 
 package ca.warp7.frc2025.subsystems.Vision;
 
-import ca.warp7.frc2025.Constants;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import java.util.HashMap;
-import java.util.Optional;
 
 public class VisionConstants {
-    public static Rotation2d[] tx = {Rotation2d.fromDegrees(0.002), Rotation2d.fromDegrees(0.001)};
-
-    public static Rotation2d[] ty = {Rotation2d.fromRadians(-0.001), Rotation2d.fromRadians(-0.001)};
-
-    public static HashMap<Integer, Tuple<Rotation2d, Rotation2d>> reefTy = new HashMap<>();
-
-    public static record Tuple<L, R>(L l, R r) {}
-
-    public static final Rotation2d fallbackAngle =
-            Constants.currentMode == Constants.Mode.REAL ? Rotation2d.fromDegrees(2.25) : Rotation2d.fromDegrees(-5);
-
-    // first value is limelight on the right 2nd is the limelight on the left
-    static {
-        switch (Constants.currentField) {
-            case SIM:
-                // Red
-                reefTy.put(6, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(7, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(8, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(9, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(10, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(11, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-
-                // Blue
-                reefTy.put(17, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(18, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(19, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(20, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(21, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                reefTy.put(22, new Tuple<>(Rotation2d.fromRadians(-0.320), Rotation2d.fromRadians(-0.077)));
-                break;
-            case HOME:
-                reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(0.1), Rotation2d.fromDegrees(1.8)));
-                reefTy.put(18, new Tuple<>(Rotation2d.fromDegrees(-1.27), Rotation2d.fromDegrees(-0.80)));
-                reefTy.put(19, new Tuple<>(Rotation2d.fromDegrees(1), Rotation2d.fromDegrees(2.5)));
-                reefTy.put(20, new Tuple<>(Rotation2d.fromDegrees(0.45), Rotation2d.fromDegrees(2)));
-                reefTy.put(21, new Tuple<>(Rotation2d.fromDegrees(0.75), Rotation2d.fromDegrees(2.51)));
-                reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(1.58), Rotation2d.fromDegrees(2.69)));
-            case CENT:
-                // Red
-                reefTy.put(6, new Tuple<>(Rotation2d.fromDegrees(1.82), Rotation2d.fromDegrees(3.09)));
-                reefTy.put(7, new Tuple<>(Rotation2d.fromDegrees(1.61), Rotation2d.fromDegrees(2.95)));
-                reefTy.put(8, new Tuple<>(Rotation2d.fromDegrees(1.67), Rotation2d.fromDegrees(3.27)));
-                reefTy.put(9, new Tuple<>(Rotation2d.fromDegrees(1.83), Rotation2d.fromDegrees(3.07)));
-                reefTy.put(10, new Tuple<>(Rotation2d.fromDegrees(1.60), Rotation2d.fromDegrees(3.15)));
-                reefTy.put(11, new Tuple<>(Rotation2d.fromDegrees(1.53), Rotation2d.fromDegrees(2.90)));
-
-                // Blue
-                reefTy.put(17, new Tuple<>(Rotation2d.fromDegrees(1.59), Rotation2d.fromDegrees(3.04)));
-                reefTy.put(18, new Tuple<>(Rotation2d.fromDegrees(1.63), Rotation2d.fromDegrees(3.26)));
-                reefTy.put(19, new Tuple<>(Rotation2d.fromDegrees(1.78), Rotation2d.fromDegrees(3.35)));
-                reefTy.put(20, new Tuple<>(Rotation2d.fromDegrees(1.43), Rotation2d.fromDegrees(3.12)));
-                reefTy.put(21, new Tuple<>(Rotation2d.fromDegrees(1.85), Rotation2d.fromDegrees(3.24)));
-                reefTy.put(22, new Tuple<>(Rotation2d.fromDegrees(1.48), Rotation2d.fromDegrees(3.22)));
-        }
-    }
-
-    public static Optional<Rotation2d> getTy(int id, int camera) {
-        Tuple<Rotation2d, Rotation2d> tys = reefTy.get(id);
-
-        if (tys == null) {
-            return Optional.empty();
-        }
-
-        if (camera == 0) {
-            return Optional.of(tys.l());
-        } else {
-            return Optional.of(tys.r());
-        }
-    }
-
     // AprilTag layout
     public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 

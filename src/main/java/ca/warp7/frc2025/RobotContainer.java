@@ -49,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -185,35 +186,33 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Stow", Stow);
 
-        Command align = DriveCommands.reefAlign(
-                drive,
-                () -> vision.getTarget(drive.target).tx(),
-                () -> vision.getTarget(drive.target).ty(),
-                () -> VisionConstants.tx[drive.target],
-                () -> VisionUtil.getTy(drive, vision),
-                () -> VisionUtil.firstValidReefId(vision.getTagIDS(drive.target), drive.getRotation())
-                        .flatMap((id) -> VisionConstants.aprilTagLayout
-                                .getTagPose(id)
-                                .map((pose) -> pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg))));
+        Command align = DriveCommands.poseLockDriveCommand(drive, () -> {
+            if (vision.tags.size() > 0) {
+                return VisionUtil.firstValidReefId(
+                                vision.tags.stream().mapToInt((a) -> (int) a).toArray(), drive.getRotation())
+                        .map((tag) -> VisionUtil.tagIdToRobotPose(tag, drive.target == 0));
+            } else {
+                return Optional.empty();
+            }
+        });
 
-        Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
-                () -> vision.getTarget(drive.target).tx(),
-                () -> vision.getTarget(drive.target).ty(),
-                () -> VisionConstants.tx[drive.target],
-                () -> VisionUtil.getTy(drive, vision));
-        //
+        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+            if (vision.tags.size() > 0) {
+                return Optional.of(VisionUtil.tagIdToRobotPose(vision.tags.get(0), drive.target == 0));
+            } else {
+                return Optional.empty();
+            }
+        });
+
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                                 .negate()
                                 .and(intake.middleSensorTrigger().negate()))
                         .deadlineFor(intake.runVoltsRoller(-4)))
                 .finallyDo(() -> intake.holding = false);
-
         Command autoScore = new SequentialCommandGroup(
                 elevator.setGoal(Elevator.L4),
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
-                align.until(reefAlignTrigger),
-                drive.runOnce(() -> vision.getTagID(drive.target)
-                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
+                align.until(alignedTrigger),
                 outakeCommand);
 
         NamedCommands.registerCommand("autoScore", autoScore);
@@ -226,7 +225,7 @@ public class RobotContainer {
                 new WaitUntilCommand(elevator.atSetpointTrigger()),
                 intake.setHolding(true));
 
-        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 1));
+        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 0));
         NamedCommands.registerCommand("scoreLeft", drive.runOnce(() -> drive.target = 0));
         NamedCommands.registerCommand("Intake", intakeCommand);
     }
@@ -308,41 +307,34 @@ public class RobotContainer {
         BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
                 && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
 
-        Command align = DriveCommands.reefAlign(
-                drive,
-                () -> vision.getTarget(drive.target).tx(),
-                () -> vision.getTarget(drive.target).ty(),
-                () -> VisionConstants.tx[drive.target],
-                () -> VisionUtil.getTy(drive, vision),
-                () -> VisionUtil.firstValidReefId(vision.getTagIDS(drive.target), drive.getRotation())
-                        .flatMap((id) -> VisionConstants.aprilTagLayout
-                                .getTagPose(id)
-                                .map((pose) -> pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg))));
+        Command align = DriveCommands.poseLockDriveCommand(drive, () -> {
+            if (vision.tags.size() > 0) {
+                return VisionUtil.firstValidReefId(
+                                vision.tags.stream().mapToInt((a) -> (int) a).toArray(), drive.getRotation())
+                        .map((tag) -> VisionUtil.tagIdToRobotPose(tag, drive.target == 0));
+            } else {
+                return Optional.empty();
+            }
+        });
 
-        Trigger reefAlignTrigger = DriveCommands.isReefAlignedTigger(
-                () -> vision.getTarget(drive.target).tx(),
-                () -> vision.getTarget(drive.target).ty(),
-                () -> VisionConstants.tx[drive.target],
-                () -> VisionUtil.getTy(drive, vision));
+        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+            if (vision.tags.size() > 0) {
+                return Optional.of(VisionUtil.tagIdToRobotPose(vision.tags.get(0), drive.target == 0));
+            } else {
+                return Optional.empty();
+            }
+        });
 
         Command autoScoreL4 = new SequentialCommandGroup(
-                new WaitUntilCommand(Lockout),
                 elevator.setGoal(Elevator.L4),
-                align.until(reefAlignTrigger),
-                drive.runOnce(() -> vision.getTagID(drive.target)
-                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
+                new WaitUntilCommand(elevator.atSetpoint()),
+                align.until(alignedTrigger),
                 outakeCommand);
 
         CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
         CommandScheduler.getInstance().removeComposedCommand(align);
 
-        Command autoScoreL3 = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.L3),
-                align.until(reefAlignTrigger),
-                drive.runOnce(() -> vision.getTagID(drive.target)
-                        .ifPresent((id) -> drive.setPose(VisionUtil.tagIdToRobotPose(id, drive.target == 0)))),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                outakeCommand);
+        Command autoScoreL3 = new SequentialCommandGroup(align.until(alignedTrigger), outakeCommand);
 
         CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
         CommandScheduler.getInstance().removeComposedCommand(align);

@@ -259,8 +259,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-    private ChassisSpeeds getChassisSpeeds() {
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
+    }
+
+    /** Returns the measured chassis speeds of the robot. */
+    @AutoLogOutput(key = "SwerveChassisSpeedsField/Measured")
+    public ChassisSpeeds getChassisSpeedsField() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
     }
 
     /** Runs the drive in a straight line with the specified drive output. */
@@ -295,7 +301,7 @@ public class DriveSubsystem extends SubsystemBase {
     /** Adds a new timestamped vision measurement. */
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        // poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
     @Override
