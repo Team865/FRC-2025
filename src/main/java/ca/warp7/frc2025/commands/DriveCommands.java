@@ -3,7 +3,6 @@ package ca.warp7.frc2025.commands;
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
 import ca.warp7.frc2025.util.SensitivityGainAdjustment;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +33,8 @@ public class DriveCommands {
     private static final double ANGLE_KD = 0.4;
     private static final double ANGLE_MAX_VELOCITY = 8.0;
     private static final double ANGLE_MAX_ACCELERATION = 20.0;
+    private static final double AUTOAIM_MAX_VELOCITY = 2.0;
+    private static final double AUTOAIM_MAX_ACCELERATION = 3.0;
     private static final double FF_START_DELAY = 2.0; // Secs
     private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -139,73 +140,50 @@ public class DriveCommands {
                 .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
     }
 
-    public static Command reefAlign(
-            DriveSubsystem drive,
-            Supplier<Rotation2d> tx,
-            Supplier<Rotation2d> ty,
-            Supplier<Rotation2d> xGoal,
-            Supplier<Rotation2d> yGoal,
-            Supplier<Optional<Rotation2d>> targetAngleSupplier) {
-        // final PIDController xController = new PIDController(0.08, 0.0, 0.0);
-        final PIDController xController = new PIDController(0.12, 0.0, 0);
-        final PIDController yController = new PIDController(0.025, 0.0, 0.1);
-        ProfiledPIDController thetaController = new ProfiledPIDController(
+    public static Command poseLockDriveCommand(DriveSubsystem drive, Supplier<Optional<Pose2d>> targetSupplier) {
+        final ProfiledPIDController xController = new ProfiledPIDController(
+                2.5, 0.0, 0.0, new TrapezoidProfile.Constraints(AUTOAIM_MAX_VELOCITY, AUTOAIM_MAX_ACCELERATION));
+        final ProfiledPIDController yController = new ProfiledPIDController(
+                5.0, 0.0, 0.0, new TrapezoidProfile.Constraints(AUTOAIM_MAX_VELOCITY, AUTOAIM_MAX_ACCELERATION));
+        final ProfiledPIDController thetaController = new ProfiledPIDController(
                 ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        return drive.run(() -> {
-            Pose2d currentPose = drive.getPose();
-            Optional<Rotation2d> targetAngle = targetAngleSupplier.get();
-            Logger.recordOutput("Swerve/ty", ty.get().getDegrees());
-            Logger.recordOutput("Swerve/tx", tx.get().getDegrees());
-            Logger.recordOutput("Swerve/tx-goal", xGoal.get().getDegrees());
-            Logger.recordOutput("Swerve/ty-goal", yGoal.get().getDegrees());
-            Logger.recordOutput("Swerve/Current-Pose", currentPose.getRotation().getDegrees());
-            targetAngle.ifPresent((angle) -> Logger.recordOutput("Swerve/Target", angle));
-            Logger.recordOutput(
-                    "Swerve/output",
-                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()));
-            final ChassisSpeeds speeds = new ChassisSpeeds(
-                    xController.calculate(ty.get().getDegrees(), yGoal.get().getDegrees()),
-                    yController.calculate(tx.get().getDegrees(), xGoal.get().getDegrees()),
-                    targetAngle.isPresent()
-                            ? thetaController.calculate(
-                                    currentPose.getRotation().getRadians(),
-                                    targetAngle.get().getRadians())
-                            : 0);
-            drive.runVelocity(speeds);
-        });
+        return Commands.runOnce(() -> {
+                    final var speeds = drive.getChassisSpeedsField();
+                    final var pose = drive.getPose();
+
+                    yController.reset(pose.getY(), speeds.vyMetersPerSecond);
+                    xController.reset(pose.getX(), speeds.vxMetersPerSecond);
+                    thetaController.reset(pose.getRotation().getRadians(), speeds.omegaRadiansPerSecond);
+                })
+                .andThen(drive.run(() -> {
+                    targetSupplier.get().ifPresent((target) -> {
+                        final var pose = drive.getPose();
+                        Logger.recordOutput("Swerve/Target Pose", target);
+                        final ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                                new ChassisSpeeds(
+                                        xController.calculate(pose.getX(), target.getX()),
+                                        yController.calculate(pose.getY(), target.getY()),
+                                        thetaController.calculate(
+                                                        pose.getRotation().getRadians(),
+                                                        target.getRotation().getRadians())
+                                                + thetaController.getSetpoint().velocity),
+                                drive.getRotation());
+                        drive.runVelocity(speeds);
+                    });
+                }));
     }
 
-    public static Trigger isReefAlignedTigger(
-            Supplier<Rotation2d> tx, Supplier<Rotation2d> ty, Supplier<Rotation2d> xGoal, Supplier<Rotation2d> yGoal) {
-        return new Trigger(
-                () -> MathUtil.isNear(xGoal.get().getDegrees(), tx.get().getDegrees(), 5)
-                        && MathUtil.isNear(yGoal.get().getDegrees(), ty.get().getDegrees(), 0.5));
-    }
-
-    public static Command poseLockDriveCommand(DriveSubsystem drive, Supplier<Optional<Pose2d>> targetSupplier) {
-        final PIDController xController = new PIDController(1.0, 0.0, 0.0);
-        final PIDController yController = new PIDController(1.0, 0.0, 0.0);
-        final PIDController thetaController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        return drive.run(() -> {
-            targetSupplier.get().ifPresent((target) -> {
-                final var pose = drive.getPose();
-                Logger.recordOutput("Swerve/Target Pose", target);
-                final ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                        new ChassisSpeeds(
-                                -xController.calculate(pose.getX(), target.getX()) * 0.3,
-                                -yController.calculate(pose.getY(), target.getY()) * 0.3,
-                                0),
-                        // -thetaController.calculate(
-                        //                 pose.getRotation().getRadians(),
-                        //                 target.getRotation().getRadians())
-                        //         * 0.3),
-                        drive.getRotation());
-                Logger.recordOutput("Choreo/Feedback + FF Target Speeds Robot Relative", speeds);
-                drive.runVelocity(speeds);
-            });
-        });
+    public static Trigger isAligned(Supplier<Pose2d> pos, Supplier<Optional<Pose2d>> targetSupplier) {
+        return new Trigger(() -> targetSupplier
+                .get()
+                .map((target) -> MathUtil.isNear(
+                                pos.get().getRotation().getDegrees(),
+                                target.getRotation().getDegrees(),
+                                1)
+                        && MathUtil.isNear(pos.get().getX(), target.getX(), 0.05)
+                        && MathUtil.isNear(pos.get().getY(), target.getY(), 0.05))
+                .orElse(false));
     }
 
     // courtesy of 6238

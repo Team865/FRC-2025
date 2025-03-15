@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.RobotBase;
  * 1_ intake
  */
 public final class Constants {
-    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
+    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
     public static final boolean tuningMode = false;
 
     public static final double PERIOD = 0.02;
@@ -48,7 +48,8 @@ public final class Constants {
         public static final double PERIOD = 0.02;
 
         public static final Mass ROBOT_MASS = Pounds.of(137.965);
-        public static final Distance WIDTH = Meters.of(0.819);
+        public static final Distance WIDTH = Meters.of(0.8763);
+        public static final Distance LENGTH = Meters.of(0.978);
         public static final double ROBOT_MOI_SI = 6.8554906507;
         public static final double WHEEL_COF = 1.1;
     }

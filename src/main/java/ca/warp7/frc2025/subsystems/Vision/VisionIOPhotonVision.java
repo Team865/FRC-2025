@@ -15,19 +15,27 @@ package ca.warp7.frc2025.subsystems.Vision;
 
 import static ca.warp7.frc2025.subsystems.Vision.VisionConstants.*;
 
+import ca.warp7.frc2025.util.VisionUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
+
+    private final boolean flip;
+    private final Supplier<Pose2d> poseSupplier;
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -35,9 +43,20 @@ public class VisionIOPhotonVision implements VisionIO {
      * @param name The configured name of the camera.
      * @param rotationSupplier The 3D position of the camera relative to the robot.
      */
-    public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
+    public VisionIOPhotonVision(String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier, boolean flip) {
         camera = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
+        this.flip = flip;
+        this.poseSupplier = poseSupplier;
+    }
+
+    // uses area of tag to get closest tag to camera
+    private Optional<PhotonTrackedTarget> filterTarget(List<PhotonTrackedTarget> targets) {
+        return targets.stream()
+                .filter((target) -> VisionUtil.isReefTag(target.getFiducialId()))
+                .min((a, b) -> Double.compare(
+                        a.bestCameraToTarget.getTranslation().getNorm(),
+                        b.bestCameraToTarget.getTranslation().getNorm()));
     }
 
     @Override
@@ -50,11 +69,21 @@ public class VisionIOPhotonVision implements VisionIO {
         for (var result : camera.getAllUnreadResults()) {
             // Update latest target observation
             if (result.hasTargets()) {
-                inputs.latestTargetObservation = new TargetObservation(
-                        Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-                        Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
+
+                // safe to use get since we check if there is targets above
+                filterTarget(result.getTargets())
+                        .ifPresentOrElse(
+                                (target) -> {
+                                    inputs.latestTargetObservation = new TargetObservation(
+                                            Rotation2d.fromDegrees(target.getYaw() * (flip ? -1 : 1)),
+                                            Rotation2d.fromDegrees(target.getPitch() * (flip ? -1 : 1)));
+                                },
+                                () -> {
+                                    inputs.latestTargetObservation =
+                                            new TargetObservation(new Rotation2d(), new Rotation2d());
+                                });
+
             } else {
-                inputs.latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
             }
 
             // Add pose observation

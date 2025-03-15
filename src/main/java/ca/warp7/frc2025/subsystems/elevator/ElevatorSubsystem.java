@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -65,12 +66,20 @@ public class ElevatorSubsystem extends SubsystemBase {
         return sysIdRoutine.dynamic(direction);
     }
 
+    public BooleanSupplier atSetpoint() {
+        return () -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25));
+    }
+
+    public BooleanSupplier atSetpoint(Distance goal) {
+        return () -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25));
+    }
+
     public Trigger atSetpointTrigger() {
-        return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
+        return new Trigger(atSetpoint());
     }
 
     public Trigger atSetpointTrigger(Distance goal) {
-        return new Trigger(() -> MathUtil.isNear(goal.in(Meters), inputs.positionMeters, Units.inchesToMeters(0.25)));
+        return new Trigger(atSetpoint(goal));
     }
 
     @Override
