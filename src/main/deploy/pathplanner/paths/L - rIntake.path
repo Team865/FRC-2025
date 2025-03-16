@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5275596217105267,
-        "y": 5.684513774671052
+        "x": 3.666070180590005,
+        "y": 5.121922792711125
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4645468011977063,
-        "y": 6.510154800312078
+        "x": 2.727935124910285,
+        "y": 5.398446156128758
       },
       "isLocked": false,
       "linkedName": "Reef L"
     },
     {
       "anchor": {
-        "x": 1.1263414884868421,
-        "y": 7.029147820723685
+        "x": 1.172877261513158,
+        "y": 6.959806743421052
       },
       "prevControl": {
-        "x": 2.0242261038714577,
-        "y": 6.265429872005735
+        "x": 1.6204185725176976,
+        "y": 6.474524201088877
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "Stow",
-      "waypointRelativePos": 0.07140997023809524,
+      "waypointRelativePos": 0.1357886904761905,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -45,8 +45,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 740.0,
     "nominalVoltage": 12.0,

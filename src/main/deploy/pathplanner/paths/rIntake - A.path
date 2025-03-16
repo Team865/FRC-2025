@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1263414884868421,
-        "y": 7.029147820723685
+        "x": 1.172877261513158,
+        "y": 6.959806743421052
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8900594372047905,
-        "y": 6.172545256621121
+        "x": 2.002910428238723,
+        "y": 6.423331564824189
       },
       "isLocked": false,
       "linkedName": "Right Human Player"
     },
     {
       "anchor": {
-        "x": 3.1812820512820514,
-        "y": 4.138525641025641
+        "x": 3.129687037889305,
+        "y": 4.189750912904394
       },
       "prevControl": {
-        "x": 2.747820512820512,
-        "y": 4.799038461538461
+        "x": 2.4901663214686964,
+        "y": 5.071034546824586
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,27 +33,20 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "evStow",
-      "waypointRelativePos": 0.2,
+      "name": "L4",
+      "waypointRelativePos": 0.6453497023809522,
       "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "evL4",
-      "waypointRelativePos": 0.8,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "hpOuttake",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "L4"
+        }
+      }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 740.0,
     "nominalVoltage": 12.0,
