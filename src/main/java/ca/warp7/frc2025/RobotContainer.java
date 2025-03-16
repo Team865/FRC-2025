@@ -182,10 +182,10 @@ public class RobotContainer {
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                         .negate()
                         .and(intake.middleSensorTrigger().negate()))
-                .deadlineFor(intake.runVoltsRoller(-4)));
+                .deadlineFor(intake.runVoltsRoller(-6)));
 
         Command intakeCommand = new SequentialCommandGroup(
-                        intake.runVoltsRoller(-4).until(intake.middleSensorTrigger()), elevator.setGoal(Elevator.STOW))
+                        intake.runVoltsRoller(-8).until(intake.middleSensorTrigger()), elevator.setGoal(Elevator.STOW))
                 .finallyDo(() -> intake.holding = true);
 
         NamedCommands.registerCommand("Stow", Stow);
