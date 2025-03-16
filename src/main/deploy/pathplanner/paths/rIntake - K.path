@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1263414884868421,
-        "y": 7.029147820723685
+        "x": 1.172877261513158,
+        "y": 6.959806743421052
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.9416620013073547,
-        "y": 6.4305580771339415
+        "x": 1.6954908894142497,
+        "y": 5.9580452928360605
       },
       "isLocked": false,
       "linkedName": "Right Human Player"
@@ -20,42 +20,40 @@
         "y": 5.263461538461538
       },
       "prevControl": {
-        "x": 3.1296794871794855,
-        "y": 6.109743589743589
+        "x": 3.1475949344288154,
+        "y": 5.6848267894654585
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Reef K"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3383564003006012,
+      "rotationDegrees": -59.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "evStow",
-      "waypointRelativePos": 0.2,
+      "name": "L4",
+      "waypointRelativePos": 0.5592912946428572,
       "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "evL4",
-      "waypointRelativePos": 0.8,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "hpOuttake",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "L4"
+        }
+      }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.25,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 740.0,
+    "maxAngularAcceleration": 1100.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },

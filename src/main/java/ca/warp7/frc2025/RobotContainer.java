@@ -51,7 +51,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -131,12 +130,12 @@ public class RobotContainer {
                                 VisionConstants.camera0Name,
                                 VisionConstants.robotToCamera0,
                                 () -> drive.getPose(),
+                                false),
+                        new VisionIOPhotonVisionSim(
+                                VisionConstants.camera1Name,
+                                VisionConstants.robotToCamera1,
+                                () -> drive.getPose(),
                                 false));
-                // new VisionIOPhotonVisionSim(
-                //         VisionConstants.camera1Name,
-                //         VisionConstants.robotToCamera1,
-                //         () -> drive.getPose(),
-                //         false));
                 break;
             case REPLAY:
             default:
@@ -177,57 +176,22 @@ public class RobotContainer {
     }
 
     private void configureNamedCommands() {
-        Trigger Lockout = new Trigger(() -> vision.getPoseObv(drive.target) != null
-                && vision.getPoseObv(drive.target).averageTagDistance() > 0.3);
-
-        Logger.recordOutput("Lockout", Lockout);
-
         Command Stow = elevator.setGoal(Elevator.STOW).andThen(new WaitUntilCommand(elevator.atSetpointTrigger()));
 
-        NamedCommands.registerCommand("Stow", Stow);
-
-        Command align = DriveCommands.poseLockDriveCommand(drive, () -> {
-            if (vision.tags.size() > 0) {
-                return VisionUtil.firstValidReefId(
-                                vision.tags.stream().mapToInt((a) -> (int) a).toArray(), drive.getRotation())
-                        .map((tag) -> VisionUtil.tagIdToRobotPose(tag, drive.target == 0));
-            } else {
-                return Optional.empty();
-            }
-        });
-
-        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
-            if (vision.tags.size() > 0) {
-                return Optional.of(VisionUtil.tagIdToRobotPose(vision.tags.get(0), drive.target == 0));
-            } else {
-                return Optional.empty();
-            }
-        });
-
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
-                                .negate()
-                                .and(intake.middleSensorTrigger().negate()))
-                        .deadlineFor(intake.runVoltsRoller(-4)))
-                .finallyDo(() -> intake.holding = false);
-        Command autoScore = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.L4),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                align.until(alignedTrigger),
-                outakeCommand);
+                        .negate()
+                        .and(intake.middleSensorTrigger().negate()))
+                .deadlineFor(intake.runVoltsRoller(-6)));
 
-        NamedCommands.registerCommand("autoScore", autoScore);
+        Command intakeCommand = new SequentialCommandGroup(
+                        intake.runVoltsRoller(-8).until(intake.middleSensorTrigger()), elevator.setGoal(Elevator.STOW))
+                .finallyDo(() -> intake.holding = true);
 
-        SequentialCommandGroup intakeCommand = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.INTAKE),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
-                elevator.setGoal(Elevator.STOW),
-                new WaitUntilCommand(elevator.atSetpointTrigger()),
-                intake.setHolding(true));
-
-        NamedCommands.registerCommand("scoreRight", drive.runOnce(() -> drive.target = 0));
-        NamedCommands.registerCommand("scoreLeft", drive.runOnce(() -> drive.target = 0));
+        NamedCommands.registerCommand("Stow", Stow);
+        NamedCommands.registerCommand("L4", elevator.setGoal(Elevator.L4));
         NamedCommands.registerCommand("Intake", intakeCommand);
+        NamedCommands.registerCommand("evIntake", elevator.setGoal(Elevator.STOW));
+        NamedCommands.registerCommand("Outake", outakeCommand);
     }
 
     /**

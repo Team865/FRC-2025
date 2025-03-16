@@ -11,22 +11,9 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "scoreRight"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "autoScore"
-                }
-              }
-            ]
+            "name": "Outake"
           }
         },
         {
@@ -44,19 +31,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "rIntake - L"
+            "pathName": "rIntake - K"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "scoreRight"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoScore"
+            "name": "Outake"
           }
         }
       ]

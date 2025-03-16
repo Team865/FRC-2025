@@ -51,6 +51,42 @@
           "data": {
             "name": "Intake"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rIntake - L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L - rIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rIntake - A"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outake"
+          }
         }
       ]
     }
