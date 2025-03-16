@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "L4",
-      "waypointRelativePos": 0.5803013392857144,
+      "waypointRelativePos": 0.43882998511904775,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -46,9 +46,9 @@
   ],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxAcceleration": 3.25,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 740.0,
+    "maxAngularAcceleration": 1100.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
