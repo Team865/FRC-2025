@@ -313,21 +313,16 @@ public class RobotContainer {
 
         controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
 
-        controller
-                .povDown()
-                .onTrue(climber.setPivotServoPosition(0)
-                        .andThen(climber.setPivotPosition(Climber.CLIMB))
-                        .andThen(climber.setIntakeVoltage(-8)));
+        controller.povDown().onTrue(climber.setPivotServoPosition(0).andThen(climber.setPivotPosition(Climber.CLIMB)));
 
         controller
                 .povUp()
                 .onTrue(climber.setPivotServoPosition(1)
-                        .andThen(climber.setIntakeVoltage(0))
                         .andThen(climber.setPivotVoltage(10)
                                 .andThen(new WaitCommand(1))
                                 .andThen(climber.setPivotVoltage(0))));
 
-        controller.back().onTrue(climber.setPivotPosition(Climber.STOW).andThen(climber.setIntakeVoltage(0)));
+        controller.back().onTrue(climber.setPivotPosition(1).andThen(climber.setPivotPosition(Climber.STOW)));
 
         controller.rightBumper().whileTrue(intake.runVoltsRoller(4));
 

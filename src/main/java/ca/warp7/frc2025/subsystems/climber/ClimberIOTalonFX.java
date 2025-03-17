@@ -10,8 +10,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -22,7 +20,6 @@ import edu.wpi.first.wpilibj.Servo;
 
 public class ClimberIOTalonFX implements ClimberIO {
     private final TalonFX pivotMoter;
-    private final SparkMax intake;
     private final Servo pivotServo;
 
     private final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -42,7 +39,6 @@ public class ClimberIOTalonFX implements ClimberIO {
 
     public ClimberIOTalonFX(int pivotMoterID, int intakeMoterID, int servoPWM) {
         pivotMoter = new TalonFX(pivotMoterID, "Drivetrain");
-        intake = new SparkMax(intakeMoterID, MotorType.kBrushless);
         pivotServo = new Servo(servoPWM);
 
         position = pivotMoter.getPosition();
@@ -83,10 +79,6 @@ public class ClimberIOTalonFX implements ClimberIO {
         inputs.pivotVoltage = pivotVolts.getValueAsDouble();
         inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
         inputs.pivotTempC = temp.getValueAsDouble();
-
-        inputs.intakeVoltage = intake.getBusVoltage();
-        inputs.intakeAmps = intake.getOutputCurrent();
-        inputs.intakeTempC = intake.getMotorTemperature();
     }
 
     @Override
@@ -109,11 +101,6 @@ public class ClimberIOTalonFX implements ClimberIO {
     @Override
     public void setPivotVoltage(double volts) {
         pivotMoter.setControl(voltageOut.withOutput(volts));
-    }
-
-    @Override
-    public void setIntakeVoltage(double volts) {
-        intake.setVoltage(volts);
     }
 
     @Override

@@ -47,10 +47,6 @@ public class ClimberSubsystem extends SubsystemBase {
                 kD);
     }
 
-    public Command setIntakeVoltage(double volts) {
-        return this.runOnce(() -> io.setIntakeVoltage(volts));
-    }
-
     public Command setPivotVoltage(double volts) {
         return this.runOnce(() -> io.setPivotVoltage(volts));
     }
