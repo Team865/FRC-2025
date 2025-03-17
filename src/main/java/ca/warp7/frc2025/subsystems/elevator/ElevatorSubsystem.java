@@ -7,6 +7,8 @@ import ca.warp7.frc2025.util.LoggedTunableNumber;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -14,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 public class ElevatorSubsystem extends SubsystemBase {
     // Logging
@@ -33,9 +38,20 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final LoggedTunableNumber jerk = new LoggedTunableNumber("Elevator/maxJerk", 0);
     // Control
 
+    @AutoLogOutput
     private Distance goal = Inches.of(0);
 
     private final SysIdRoutine sysIdRoutine;
+
+    // Visualization
+    @AutoLogOutput
+    private final LoggedMechanism2d canvas = new LoggedMechanism2d(3, 3);
+
+    private final LoggedMechanismRoot2d root = canvas.getRoot("root", 1.7, 0);
+    private final LoggedMechanismLigament2d elevatorLigament = root.append(new LoggedMechanismLigament2d(
+            "elevator", Units.inchesToMeters(7.531), 81, 11, new Color8Bit(Color.kOrange)));
+    private final LoggedMechanismLigament2d intakeLigament = elevatorLigament.append(
+            new LoggedMechanismLigament2d("intake", Units.inchesToMeters(24.464), 0, 20, new Color8Bit(Color.kBlue)));
 
     public ElevatorSubsystem(ElevatorIO io) {
         this.io = io;
@@ -53,7 +69,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         io.setMotionProfile(velocity.get(), accel.get(), accel.get());
     }
 
-    @AutoLogOutput(key = "Elevator/goal")
     public Command setGoal(Distance goal) {
         return this.runOnce(() -> this.goal = goal);
     }
@@ -86,6 +101,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Elevator/inputs", inputs);
+
+        elevatorLigament.setLength(Units.inchesToMeters(7.531) + inputs.positionMeters * 2);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
