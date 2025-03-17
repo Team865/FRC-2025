@@ -42,7 +42,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -50,7 +49,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -212,12 +211,13 @@ public class RobotContainer {
                         .getRotation()
                         .rotateBy(Rotation2d.k180deg));
 
-        drive.setDefaultCommand(driveCommand);
-
-        controller.leftBumper().whileTrue(intakeAngle);
-
-        controller.leftStick().onTrue(drive.zeroPose());
-        controller.rightStick().onTrue(drive.zeroPose());
+        Command slowModeToggle = drive.runOnce(() -> {
+            if (drive.speedModifer != 1) {
+                drive.speedModifer = 1;
+            } else {
+                drive.speedModifer = 0.5;
+            }
+        });
 
         // run intake motor until sensor
         Command intakeCommand = new SequentialCommandGroup(
@@ -230,45 +230,19 @@ public class RobotContainer {
                     intake.holding = true;
                 });
 
-        Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
-                                .negate()
-                                .and(intake.middleSensorTrigger().negate()))
-                        .deadlineFor(intake.runVoltsRoller(-4)))
+        Supplier<Command> outakeCommand = () -> new WaitUntilCommand(intake.bottomSensorTrigger()
+                        .negate()
+                        .and(intake.middleSensorTrigger().negate()))
+                .deadlineFor(intake.runVoltsRoller(-4))
                 .finallyDo(() -> {
                     intake.holding = false;
                     controller.setRumble(RumbleType.kBothRumble, 0.7);
                 });
 
-        controller.rightTrigger().onTrue(outakeCommand);
-        controller
-                .leftTrigger()
-                .and(intake.middleSensorTrigger().negate())
-                .and(elevator.atSetpointTrigger(Elevator.STOW))
-                .onTrue(intakeCommand);
+        Command stow =
+                drive.setSpeedModifer(1).andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0)));
 
-        controller.start().toggleOnTrue(drive.runOnce(() -> {
-            if (drive.speedModifer != 1) {
-                drive.speedModifer = 1;
-            } else {
-                drive.speedModifer = 0.5;
-            }
-        }));
-
-        Trigger L4 = new Trigger(() -> vision.getPoseObv(drive.target) != null
-                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45);
-
-        controller
-                .a()
-                // .and(L4)
-                .onTrue(drive.runOnce(() -> drive.speedModifer = 1)
-                        .andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0))));
-
-        // controller.x().onTrue(elevator.setGoal(Elevator.L2A).andThen(intake.setVoltsRoller(-4)));
-
-        BooleanSupplier Lockout = () -> vision.getPoseObv(drive.target) != null
-                && vision.getPoseObv(drive.target).averageTagDistance() > 0.45;
-
-        Command align = DriveCommands.poseLockDriveCommand(drive, () -> {
+        Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
             if (vision.tags.size() > 0) {
                 return VisionUtil.firstValidReefId(
                                 vision.tags.stream().mapToInt((a) -> (int) a).toArray(), drive.getRotation())
@@ -286,47 +260,84 @@ public class RobotContainer {
             }
         });
 
-        Command autoScoreL4 = new SequentialCommandGroup(
-                elevator.setGoal(Elevator.L4),
-                new WaitUntilCommand(elevator.atSetpoint()),
-                align.until(alignedTrigger),
-                outakeCommand);
+        Trigger holdingCoral = intake.middleSensorTrigger();
 
-        CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
-        CommandScheduler.getInstance().removeComposedCommand(align);
+        Trigger notHoldingCoral = holdingCoral.negate();
 
-        // Command autoScoreL3 = new SequentialCommandGroup(
-        //         elevator.setGoal(Elevator.L3),
-        //         new WaitUntilCommand(elevator.atSetpoint()),
-        //         align.until(alignedTrigger),
-        //         outakeCommand);
+        Trigger atStow = elevator.atSetpointTrigger(Elevator.STOW);
 
-        CommandScheduler.getInstance().removeComposedCommand(outakeCommand);
-        CommandScheduler.getInstance().removeComposedCommand(align);
+        Command autoScoreL4 = elevator.setGoal(Elevator.L4)
+                .andThen(new WaitUntilCommand(elevator.atSetpoint()))
+                .andThen(align.get().until(alignedTrigger))
+                .andThen(outakeCommand.get());
+
+        Command autoScoreL3 = elevator.setGoal(Elevator.L3)
+                .andThen(new WaitUntilCommand(elevator.atSetpoint()))
+                .andThen(align.get().until(alignedTrigger))
+                .andThen(outakeCommand.get());
+
+        Command autoScoreL2 = elevator.setGoal(Elevator.L2)
+                .andThen(new WaitUntilCommand(elevator.atSetpoint()))
+                .andThen(align.get().until(alignedTrigger))
+                .andThen(outakeCommand.get());
+
+        Command algaeClearHigh = drive.setSpeedModifer(0.25)
+                .andThen(elevator.setGoal(Elevator.L2A))
+                .andThen(intake.setVoltsRoller(-4));
+
+        Command algaeClearLow = drive.setSpeedModifer(0.25)
+                .andThen(elevator.setGoal(Elevator.L1A))
+                .andThen(intake.setVoltsRoller(-4));
+
+        Command climberDown = climber.setPivotServoPosition(0).andThen(climber.setPivotPosition(Climber.CLIMB));
+
+        Command climberStow = climber.setPivotPosition(1).andThen(climber.setPivotPosition(Climber.STOW));
+
+        Command climb = climber.setPivotServoPosition(1)
+                .andThen(climber.setPivotVoltage(10))
+                .andThen(new WaitCommand(1))
+                .andThen(climber.setPivotVoltage(0));
+
+        drive.setDefaultCommand(driveCommand);
+
+        controller.leftBumper().whileTrue(intakeAngle);
+
+        controller.leftStick().onTrue(drive.zeroPose());
+        controller.rightStick().onTrue(drive.zeroPose());
+
+        controller.rightTrigger().onTrue(outakeCommand.get());
+
+        controller
+                .leftTrigger()
+                .and(intake.middleSensorTrigger().negate())
+                .and(elevator.atSetpointTrigger(Elevator.STOW))
+                .onTrue(intakeCommand);
+
+        // Coral & Algae set points
+        controller.a().onTrue(stow);
+
+        controller.y().whileTrue(autoScoreL4);
+
+        controller.b().whileTrue(autoScoreL3);
+
+        controller.x().whileTrue(autoScoreL2);
+
+        // controller.b().and(atStow).and(notHoldingCoral).toggleOnTrue(a
+        //
+        // controller.x().and(atStow).and(notHoldingCoral).onTrue(algaeClearLow);
 
         controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
         controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
-        controller.y().and(isManual.negate()).whileTrue(autoScoreL4);
+        controller.povDown().onTrue(climberDown);
 
-        controller.b().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L3)));
+        controller.povUp().onTrue(climb);
 
-        controller.x().onTrue(drive.runOnce(() -> drive.speedModifer = 0.25).andThen(elevator.setGoal(Elevator.L2)));
-
-        controller.povDown().onTrue(climber.setPivotServoPosition(0).andThen(climber.setPivotPosition(Climber.CLIMB)));
-
-        controller
-                .povUp()
-                .onTrue(climber.setPivotServoPosition(1)
-                        .andThen(climber.setPivotVoltage(10)
-                                .andThen(new WaitCommand(1))
-                                .andThen(climber.setPivotVoltage(0))));
-
-        controller.back().onTrue(climber.setPivotPosition(1).andThen(climber.setPivotPosition(Climber.STOW)));
+        controller.back().onTrue(climberStow);
 
         controller.rightBumper().whileTrue(intake.runVoltsRoller(4));
 
-        controller.leftStick().onTrue(elevator.setGoal(Elevator.L1A).andThen(intake.setVoltsRoller(4)));
+        controller.start().toggleOnTrue(slowModeToggle);
     }
 
     private void configureTuningBindings() {}
