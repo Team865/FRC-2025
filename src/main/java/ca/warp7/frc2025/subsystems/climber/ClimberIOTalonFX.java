@@ -5,6 +5,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -28,6 +29,7 @@ public class ClimberIOTalonFX implements ClimberIO {
             new VoltageOut(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
     private final PositionVoltage positionVoltage =
             new PositionVoltage(0).withUpdateFreqHz(50).withEnableFOC(true);
+    private final NeutralOut neutralOut = new NeutralOut();
 
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
@@ -111,5 +113,10 @@ public class ClimberIOTalonFX implements ClimberIO {
     @Override
     public void setPivotSpeed(double speed) {
         pivotMoter.set(speed);
+    }
+
+    @Override
+    public void stop() {
+        pivotMoter.setControl(neutralOut);
     }
 }

@@ -25,4 +25,12 @@ public interface ClimberIO {
     public default void setPivotPosition(final double position) {}
 
     public default void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {}
+
+    public default void setPD(double kP, double kD) {
+        setControlConstants(0, 0, 0, 0, kP, kD);
+    }
+
+    public default void stop() {
+        setPivotVoltage(0);
+    }
 }

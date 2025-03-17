@@ -87,7 +87,14 @@ public final class Constants {
         public static final int INTAKE_ID = 58;
         public static final int Servo_PWM = 1;
 
-        public static final double CLIMB = -110.28759;
+        public static final double DOWN = -110.28759;
+        public static final double CLIMB = -70;
         public static final double STOW = 0.0;
+
+        public static final double kPNormal = 50.0;
+        public static final double kDNormal = 10.0;
+
+        public static final double kPClimbing = 50.0;
+        public static final double kDClimbing = 10.0;
     }
 }
