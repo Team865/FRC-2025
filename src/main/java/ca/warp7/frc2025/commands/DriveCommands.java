@@ -181,8 +181,8 @@ public class DriveCommands {
                                 pos.get().getRotation().getDegrees(),
                                 target.getRotation().getDegrees(),
                                 1)
-                        && MathUtil.isNear(pos.get().getX(), target.getX(), 0.05)
-                        && MathUtil.isNear(pos.get().getY(), target.getY(), 0.05))
+                        && MathUtil.isNear(pos.get().getX(), target.getX(), Units.inchesToMeters(1))
+                        && MathUtil.isNear(pos.get().getY(), target.getY(), Units.inchesToMeters(1)))
                 .orElse(false));
     }
 
