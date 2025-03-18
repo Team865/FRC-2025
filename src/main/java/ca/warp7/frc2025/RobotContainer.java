@@ -306,9 +306,14 @@ public class RobotContainer {
         drive.setDefaultCommand(driveCommand);
 
         controller.leftTrigger().whileTrue(autoScoreL4);
-        controller.rightTrigger().whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral).onlyIf(canMoveElevator));
+        controller
+                .rightTrigger()
+                .whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral)
+                        .onlyIf(canMoveElevator));
         controller.leftBumper().whileTrue(autoScoreL2);
-        controller.rightBumper().onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral).onlyIf(canMoveElevator));
+        controller
+                .rightBumper()
+                .onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral).onlyIf(canMoveElevator));
 
         controller.a().onTrue(stow);
 
@@ -316,12 +321,13 @@ public class RobotContainer {
 
         controller.b().onTrue(scoreRight);
 
-        controller.y()
+        controller
+                .y()
                 .and(atStow)
                 .and(intake.middleSensorTrigger().negate())
                 .and(elevator.atSetpointTrigger(Elevator.STOW))
-            .whileTrue(intakeAngle)
-            .onTrue(intakeCommand);
+                .whileTrue(intakeAngle)
+                .onTrue(intakeCommand);
 
         controller.leftBumper().whileTrue(intakeAngle);
 
