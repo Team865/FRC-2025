@@ -3,6 +3,7 @@ package ca.warp7.frc2025.subsystems.Vision;
 import static ca.warp7.frc2025.subsystems.Vision.VisionConstants.*;
 
 import ca.warp7.frc2025.subsystems.Vision.VisionIO.PoseObservation;
+import ca.warp7.frc2025.subsystems.Vision.VisionIO.PoseObservationType;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO.TargetObservation;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -92,7 +93,8 @@ public class VisionSubsystem extends SubsystemBase {
                         || observation.pose().getX() < 0.0
                         || observation.pose().getX() > aprilTagLayout.getFieldLength()
                         || observation.pose().getY() < 0.0
-                        || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+                        || observation.pose().getY() > aprilTagLayout.getFieldWidth()
+                        || observation.type() == PoseObservationType.MEGATAG_1;
 
                 // Add pose to log
                 robotPoses.add(observation.pose());
