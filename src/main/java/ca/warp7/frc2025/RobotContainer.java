@@ -43,6 +43,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -241,6 +242,9 @@ public class RobotContainer {
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
         });
 
+        Command scoreLeft = drive.runOnce(() -> drive.target = 0);
+        Command scoreRight = drive.runOnce(() -> drive.target = 1);
+
         Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
             return Optional.of(FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
@@ -288,6 +292,8 @@ public class RobotContainer {
                 .andThen(elevator.setGoal(Elevator.L1A))
                 .andThen(intake.setVoltsRoller(-4));
 
+        Command spitCoral = intake.runVoltsRoller(4).until(intake.middleSensorTrigger());
+
         Command climberDown = climber.setPivotServoPosition(0).andThen(climber.setPivotPosition(Climber.CLIMB));
 
         Command climberStow = climber.setPivotPosition(1).andThen(climber.setPivotPosition(Climber.STOW));
@@ -299,35 +305,28 @@ public class RobotContainer {
 
         drive.setDefaultCommand(driveCommand);
 
+        controller.leftTrigger().whileTrue(autoScoreL4);
+        controller.rightTrigger().whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral).onlyIf(canMoveElevator));
+        controller.leftBumper().whileTrue(autoScoreL2);
+        controller.rightBumper().onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral).onlyIf(canMoveElevator));
+
+        controller.a().onTrue(stow);
+
+        controller.x().onTrue(scoreLeft);
+
+        controller.b().onTrue(scoreRight);
+
+        controller.y()
+                .and(atStow)
+                .and(intake.middleSensorTrigger().negate())
+                .and(elevator.atSetpointTrigger(Elevator.STOW))
+            .whileTrue(intakeAngle)
+            .onTrue(intakeCommand);
+
         controller.leftBumper().whileTrue(intakeAngle);
 
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
-
-        controller.rightTrigger().onTrue(outakeCommand.get());
-
-        controller
-                .leftTrigger()
-                .and(atStow)
-                .and(intake.middleSensorTrigger().negate())
-                .and(elevator.atSetpointTrigger(Elevator.STOW))
-                .onTrue(intakeCommand);
-
-        // Coral & Algae set points
-        controller.a().onTrue(stow);
-
-        controller.y().whileTrue(autoScoreL4);
-
-        controller.b().whileTrue(autoScoreL3);
-
-        controller.x().whileTrue(autoScoreL2);
-
-        // controller.b().and(atStow).and(notHoldingCoral).toggleOnTrue(a
-        //
-        // controller.x().and(atStow).and(notHoldingCoral).onTrue(algaeClearLow);
-
-        controller.povLeft().onTrue(drive.runOnce(() -> drive.target = 0));
-        controller.povRight().onTrue(drive.runOnce(() -> drive.target = 1));
 
         controller.povDown().onTrue(climberDown);
 
@@ -335,39 +334,10 @@ public class RobotContainer {
 
         controller.back().onTrue(climberStow);
 
-        controller.rightBumper().whileTrue(intake.runVoltsRoller(4));
-
         controller.start().toggleOnTrue(slowModeToggle);
     }
 
-    private void configureTuningBindings() {
-        // leds.setDefaultCommand(leds.cycle().ignoringDisable(true));
-        leds.setDefaultCommand(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 15));
-        // controller
-        //         .leftTrigger()
-        // .whileTrue(
-        //         .withTimeout(10));
-        // controller.rightTrigger().onTrue(leds.solidColorCommand(SparkColor.WHITE));
-        // Command intakeCommand = leds.solidColorCommand(SparkColor.VIOLET);
-        // .withTimeout(5)
-        // .andThen(leds.setToDefault());
-        // .raceWith(intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()))
-        // .andThen(leds.setBlinkingCmd(SparkColor.HOT_PINK, SparkColor.BLACK, 100)
-        //         .withTimeout(0.4))
-        // .andThen(leds.setToDefault())
-        // .finallyDo(() -> {
-        //     intake.holding = true;
-        // });
-
-        // Command outakeCommand = leds.solidColorCommand(SparkColor.RED);
-
-        // new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
-        //         .negate()
-        //         .and(intake.middleSensorTrigger().negate()))
-        // .deadlineFor(intake.runVoltsRoller(-6)));
-
-        // controller.rightTrigger().onTrue(outakeCommand);
-    }
+    private void configureTuningBindings() {}
 
     public Command getAutonomousCommand() {
         return autoChooser.get();
