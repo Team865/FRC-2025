@@ -304,6 +304,7 @@ public class RobotContainer {
 
         controller
                 .leftTrigger()
+                .and(atStow)
                 .and(intake.middleSensorTrigger().negate())
                 .and(elevator.atSetpointTrigger(Elevator.STOW))
                 .onTrue(intakeCommand);
