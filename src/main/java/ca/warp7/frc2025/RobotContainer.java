@@ -294,14 +294,17 @@ public class RobotContainer {
 
         Command spitCoral = intake.runVoltsRoller(4).until(intake.middleSensorTrigger());
 
-        Command climberDown = climber.setPivotServoPosition(0).andThen(climber.setPivotPosition(Climber.CLIMB));
+        Command climberDown = climber.setPivotServoPosition(0)
+                .andThen(new WaitCommand(0.5))
+                .andThen(climber.setPivotPosition(Climber.DOWN));
 
-        Command climberStow = climber.setPivotPosition(1).andThen(climber.setPivotPosition(Climber.STOW));
+        Command climberStow = climber.setPivotServoPosition(1)
+                .andThen(new WaitCommand(0.5))
+                .andThen(climber.setPivotPosition(Climber.STOW));
 
         Command climb = climber.setPivotServoPosition(1)
-                .andThen(climber.setPivotVoltage(10))
-                .andThen(new WaitCommand(1))
-                .andThen(climber.setPivotVoltage(0));
+                .andThen(new WaitCommand(0.5))
+                .andThen(climber.setPivotPosition(Climber.CLIMB));
 
         drive.setDefaultCommand(driveCommand);
 

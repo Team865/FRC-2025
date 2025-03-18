@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 
 import com.ctre.phoenix6.CANBus;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -87,11 +88,11 @@ public final class Constants {
         public static final int INTAKE_ID = 58;
         public static final int Servo_PWM = 1;
 
-        public static final double DOWN = -110.28759;
-        public static final double CLIMB = -70;
-        public static final double STOW = 0.0;
+        public static final Rotation2d DOWN = Rotation2d.fromDegrees(90);
+        public static final Rotation2d CLIMB = Rotation2d.fromDegrees(20);
+        public static final Rotation2d STOW = Rotation2d.kZero;
 
-        public static final double kPNormal = 50.0;
+        public static final double kPNormal = 60.0;
         public static final double kDNormal = 10.0;
 
         public static final double kPClimbing = 50.0;
