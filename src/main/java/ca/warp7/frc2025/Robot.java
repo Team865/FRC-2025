@@ -6,6 +6,7 @@ package ca.warp7.frc2025;
 
 import au.grapplerobotics.CanBridge;
 import ca.warp7.frc2025.util.PhoenixUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -49,6 +50,7 @@ public class Robot extends LoggedRobot {
         }
 
         RobotController.setBrownoutVoltage(6.0);
+        DriverStation.silenceJoystickConnectionWarning(true);
 
         // Start logger
         Logger.start();
