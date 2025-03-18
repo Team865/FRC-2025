@@ -220,11 +220,10 @@ public class RobotContainer {
         });
 
         // run intake motor until sensor
-        Command intakeCommand = new SequentialCommandGroup(
-                        // leds.solidColorCommand(SparkColor.HOT_PINK),
-                        elevator.setGoal(Elevator.INTAKE),
-                        intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()),
-                        elevator.setGoal(Elevator.STOW))
+        Command intakeCommand = intake.runVoltsRoller(-4)
+                .until(intake.bottomSensorTrigger())
+                // leds.solidColorCommand(SparkColor.HOT_PINK),
+
                 // leds.setBlinkingCmd(SparkColor.HOT_PINK, SparkColor.BLACK, 10))
                 .finallyDo(() -> {
                     intake.holding = true;
