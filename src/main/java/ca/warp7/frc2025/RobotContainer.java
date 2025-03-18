@@ -33,6 +33,8 @@ import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
+import ca.warp7.frc2025.subsystems.leds.LEDSubsystem;
+import ca.warp7.frc2025.subsystems.leds.LEDSubsystem.SparkColor;
 import ca.warp7.frc2025.util.FieldConstantsHelper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -40,7 +42,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -59,7 +60,7 @@ public class RobotContainer {
     private final ElevatorSubsystem elevator;
     private final ClimberSubsystem climber;
     private final VisionSubsystem vision;
-    // private final LEDSubsystem leds;
+    private final LEDSubsystem leds;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -148,10 +149,10 @@ public class RobotContainer {
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-
-                // leds = new LEDSubsystem(0);
         }
 
+        leds = new LEDSubsystem(2);
+        leds.setToDefault();
         configureNamedCommands();
 
         // Set up auto routines
@@ -183,8 +184,7 @@ public class RobotContainer {
                 .deadlineFor(intake.runVoltsRoller(-6)));
 
         Command intakeCommand = new SequentialCommandGroup(
-                        intake.runVoltsRoller(-8).until(intake.middleSensorTrigger()), elevator.setGoal(Elevator.STOW))
-                .finallyDo(() -> intake.holding = true);
+                intake.runVoltsRoller(-8).until(intake.middleSensorTrigger()), elevator.setGoal(Elevator.STOW));
 
         NamedCommands.registerCommand("Stow", Stow);
         NamedCommands.registerCommand("L4", elevator.setGoal(Elevator.L4));
@@ -221,22 +221,16 @@ public class RobotContainer {
 
         // run intake motor until sensor
         Command intakeCommand = intake.runVoltsRoller(-4)
+                .raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
                 .until(intake.bottomSensorTrigger())
-                // leds.solidColorCommand(SparkColor.HOT_PINK),
-
-                // leds.setBlinkingCmd(SparkColor.HOT_PINK, SparkColor.BLACK, 10))
-                .finallyDo(() -> {
-                    intake.holding = true;
-                });
+                .andThen(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20)
+                        .withTimeout(0.75))
+                .andThen(leds.setToDefault());
 
         Supplier<Command> outakeCommand = () -> new WaitUntilCommand(intake.bottomSensorTrigger()
                         .negate()
                         .and(intake.middleSensorTrigger().negate()))
-                .deadlineFor(intake.runVoltsRoller(-4))
-                .finallyDo(() -> {
-                    intake.holding = false;
-                    controller.setRumble(RumbleType.kBothRumble, 0.7);
-                });
+                .deadlineFor(intake.runVoltsRoller(-4));
 
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
             return Optional.of(FieldConstantsHelper.faceToRobotPose(
@@ -341,7 +335,34 @@ public class RobotContainer {
         controller.start().toggleOnTrue(slowModeToggle);
     }
 
-    private void configureTuningBindings() {}
+    private void configureTuningBindings() {
+        // leds.setDefaultCommand(leds.cycle().ignoringDisable(true));
+        leds.setDefaultCommand(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 15));
+        // controller
+        //         .leftTrigger()
+        // .whileTrue(
+        //         .withTimeout(10));
+        // controller.rightTrigger().onTrue(leds.solidColorCommand(SparkColor.WHITE));
+        // Command intakeCommand = leds.solidColorCommand(SparkColor.VIOLET);
+        // .withTimeout(5)
+        // .andThen(leds.setToDefault());
+        // .raceWith(intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()))
+        // .andThen(leds.setBlinkingCmd(SparkColor.HOT_PINK, SparkColor.BLACK, 100)
+        //         .withTimeout(0.4))
+        // .andThen(leds.setToDefault())
+        // .finallyDo(() -> {
+        //     intake.holding = true;
+        // });
+
+        // Command outakeCommand = leds.solidColorCommand(SparkColor.RED);
+
+        // new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
+        //         .negate()
+        //         .and(intake.middleSensorTrigger().negate()))
+        // .deadlineFor(intake.runVoltsRoller(-6)));
+
+        // controller.rightTrigger().onTrue(outakeCommand);
+    }
 
     public Command getAutonomousCommand() {
         return autoChooser.get();

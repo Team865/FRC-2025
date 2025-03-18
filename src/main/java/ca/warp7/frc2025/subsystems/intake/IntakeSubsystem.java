@@ -26,8 +26,6 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double topDistanceToCoral = 95;
     private final double frontTopDistanceToCoral = 50;
 
-    public boolean holding = false;
-
     public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
         this.topSensorIO = topSensorIO;
@@ -57,15 +55,6 @@ public class IntakeSubsystem extends SubsystemBase {
     @AutoLogOutput
     public Trigger middleSensorTrigger() {
         return new Trigger(() -> MathUtil.isNear(frontTopDistanceToCoral, frontSensorInputs.objectDistanceMM, 30));
-    }
-
-    @AutoLogOutput
-    public Trigger holdingTrigger() {
-        return new Trigger(() -> holding);
-    }
-
-    public Command setHolding(boolean state) {
-        return runOnce(() -> holding = state);
     }
 
     @AutoLogOutput

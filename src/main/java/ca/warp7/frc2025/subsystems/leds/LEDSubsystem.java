@@ -5,10 +5,12 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
     private Spark blinkin;
@@ -21,7 +23,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     @RequiredArgsConstructor
     public enum SparkColor {
-        HOT_PINK(0.57),
+        WHITE(0.57), // Actually HOT_PINK
         DARK_RED(0.59),
         RED(0.61),
         RED_ORANGE(0.63),
@@ -31,15 +33,15 @@ public class LEDSubsystem extends SubsystemBase {
         LAWN_GREEN(0.71),
         LIME(0.73),
         DARK_GREEN(0.75),
-        GREEN(0.77),
+        BLUE(0.77), // Actually green
         BLUE_GREEN(0.79),
         AQUA(0.81),
         SKY_BLUE(0.83),
         DARK_BLUE(0.85),
-        BLUE(0.87),
+        GREEN(0.87), // Actually blue
         BLUE_VIOLET(0.89),
         VIOLET(0.91),
-        WHITE(0.93),
+        HOT_PINK(0.93),
         GRAY(0.95),
         DARK_GRAY(0.97),
         BLACK(0.99);
@@ -59,9 +61,8 @@ public class LEDSubsystem extends SubsystemBase {
     public LEDSubsystem(int port) {
         blinkin = new Spark(port);
 
-        // defaultColor = DriverStation.getAlliance()
-        //         .map(alliance -> alliance == Alliance.Blue ? SparkColor.BLUE : SparkColor.RED)
-        //         .orElse(SparkColor.WHITE);
+        defaultColor = SparkColor.AQUA;
+        // .map(alliance -> alliance == Alliance.Blue ? SparkColor.BLUE : SparkColor.RED)
 
         color = defaultColor;
     }
@@ -69,6 +70,7 @@ public class LEDSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         blinkin.set(color.sparkOutput);
+        Logger.recordOutput("Leds/color", color);
     }
 
     private void solidColor(SparkColor color) {
@@ -88,6 +90,10 @@ public class LEDSubsystem extends SubsystemBase {
         return this.runOnce(() -> solidColor(color));
     }
 
+    public Command runSolidColorCommand(SparkColor color) {
+        return this.run(() -> solidColor(color));
+    }
+
     public Command blinkColorCommand(SparkColor color, double interval, double duration) {
         return this.run(() -> blinkColor(color, interval))
                 .withTimeout(duration)
@@ -96,8 +102,8 @@ public class LEDSubsystem extends SubsystemBase {
 
     public Command setBlinkingCmd(SparkColor onColor, SparkColor offColor, double frequency) {
         return Commands.repeatingSequence(
-                solidColorCommand(onColor).withTimeout(1.0 / frequency),
-                solidColorCommand(offColor).withTimeout(1.0 / frequency));
+                runSolidColorCommand(onColor).withTimeout(1.0 / frequency),
+                runSolidColorCommand(offColor).withTimeout(1.0 / frequency));
     }
 
     public Command setBlinkingCmd(Supplier<SparkColor> onColor, Supplier<SparkColor> offColor, double frequency) {
@@ -108,5 +114,19 @@ public class LEDSubsystem extends SubsystemBase {
 
     public Command setLEDState(LEDState state) {
         return this.runOnce(() -> currentLEDState = state);
+    }
+
+    public Command setToDefault() {
+        return runOnce(() -> color = defaultColor);
+    }
+
+    public Command cycle() {
+        Command command = Commands.sequence();
+
+        for (var color : SparkColor.values()) {
+            command = command.andThen(solidColorCommand(color).andThen(new WaitCommand(10)));
+        }
+
+        return command;
     }
 }
