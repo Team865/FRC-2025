@@ -33,7 +33,7 @@ import ca.warp7.frc2025.subsystems.intake.ObjectDectionIOLaserCAN;
 import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
-import ca.warp7.frc2025.util.ClosestHPStation;
+import ca.warp7.frc2025.util.FieldConstantsHelper;
 import ca.warp7.frc2025.util.VisionUtil;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -205,9 +205,9 @@ public class RobotContainer {
 
         Command intakeAngle = DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> controller.getLeftY(),
-                () -> controller.getLeftX(),
-                () -> ClosestHPStation.getClosestStation(drive.getPose())
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> FieldConstantsHelper.getClosestStation(drive.getPose())
                         .getRotation()
                         .rotateBy(Rotation2d.k180deg));
 
@@ -243,13 +243,8 @@ public class RobotContainer {
                 drive.setSpeedModifer(1).andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0)));
 
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
-            if (vision.tags.size() > 0) {
-                return VisionUtil.firstValidReefId(
-                                vision.tags.stream().mapToInt((a) -> (int) a).toArray(), drive.getRotation())
-                        .map((tag) -> VisionUtil.tagIdToRobotPose(tag, drive.target == 0));
-            } else {
-                return Optional.empty();
-            }
+            return Optional.of(FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
         });
 
         Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
