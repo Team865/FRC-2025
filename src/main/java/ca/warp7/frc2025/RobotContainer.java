@@ -261,17 +261,14 @@ public class RobotContainer {
         Trigger atStow = elevator.atSetpointTrigger(Elevator.STOW);
 
         Command autoScoreL4 = elevator.setGoal(Elevator.L4)
-                .andThen(new WaitUntilCommand(elevator.atSetpoint()))
                 .andThen(align.get().until(alignedTrigger))
                 .andThen(outakeCommand.get());
 
         Command autoScoreL3 = elevator.setGoal(Elevator.L3)
-                .andThen(new WaitUntilCommand(elevator.atSetpoint()))
                 .andThen(align.get().until(alignedTrigger))
                 .andThen(outakeCommand.get());
 
         Command autoScoreL2 = elevator.setGoal(Elevator.L2)
-                .andThen(new WaitUntilCommand(elevator.atSetpoint()))
                 .andThen(align.get().until(alignedTrigger))
                 .andThen(outakeCommand.get());
 
