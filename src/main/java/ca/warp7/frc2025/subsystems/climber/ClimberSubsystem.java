@@ -41,7 +41,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Trigger atSetpointTrigger() {
-        return new Trigger(() -> MathUtil.isNear(this.goal.getDegrees(), inputs.pivotPositionRads.getDegrees(), 3));
+        return new Trigger(() -> MathUtil.isNear(this.goal.getDegrees(), inputs.pivotPositionRads.getDegrees(), 0.5));
     }
 
     public Command setNormalGains() {
@@ -58,10 +58,10 @@ public class ClimberSubsystem extends SubsystemBase {
         Logger.processInputs("Climber", inputs);
         Logger.recordOutput("Climber/goal", goal);
 
+        io.setPivotPosition(goal);
+
         if (atSetpointTrigger().getAsBoolean()) {
             io.stop();
-        } else {
-            io.setPivotPosition(goal);
         }
     }
 }
