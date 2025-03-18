@@ -230,7 +230,11 @@ public class RobotContainer {
         Supplier<Command> outakeCommand = () -> new WaitUntilCommand(intake.bottomSensorTrigger()
                         .negate()
                         .and(intake.middleSensorTrigger().negate()))
-                .deadlineFor(intake.runVoltsRoller(-4));
+                .deadlineFor(
+                        intake.runVoltsRoller(-10).raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5)))
+                .andThen(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20))
+                .withTimeout(0.75)
+                .andThen(leds.setToDefault());
 
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
             return Optional.of(FieldConstantsHelper.faceToRobotPose(
