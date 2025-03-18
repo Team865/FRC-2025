@@ -19,6 +19,7 @@ public class SensitivityGainAdjustment {
      * @return Adjusted steer gain
      */
     public static double steerGainAdjustment(double input) {
-        return ((0.75) * (input)) + ((.25) * (Math.pow(input, 3)));
+        return ((0.45) * (input)) + ((.55) * (Math.pow(input, 3)));
+        // return ((0.75) * (input)) + ((.25) * (Math.pow(input, 3)));
     }
 }
