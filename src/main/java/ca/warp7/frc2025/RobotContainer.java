@@ -125,11 +125,11 @@ public class RobotContainer {
 
                 vision = new VisionSubsystem(
                         drive::addVisionMeasurement,
-                        new VisionIOPhotonVisionSim(
-                                VisionConstants.camera0Name,
-                                VisionConstants.robotToCamera0,
-                                () -> drive.getPose(),
-                                false),
+                        // new VisionIOPhotonVisionSim(
+                        //         VisionConstants.camera0Name,
+                        //         VisionConstants.robotToCamera0,
+                        //         () -> drive.getPose(),
+                        //         false),
                         new VisionIOPhotonVisionSim(
                                 VisionConstants.camera1Name,
                                 VisionConstants.robotToCamera1,
