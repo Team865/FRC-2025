@@ -58,8 +58,11 @@ public class VisionSubsystem extends SubsystemBase {
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
-        if (inputs[0].tagIds.length > 0 || inputs[1].tagIds.length > 0) {
-            tags.clear();
+        for (var input : inputs) {
+            if (input.tagIds.length > 0) {
+                tags.clear();
+                break;
+            }
         }
 
         for (int index = 0; index < io.length; index++) {
