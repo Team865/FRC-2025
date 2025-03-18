@@ -97,6 +97,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         return new Trigger(atSetpoint(goal));
     }
 
+    public Trigger goalIsTrigger(Distance goal) {
+        return new Trigger(() -> this.goal == goal);
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);

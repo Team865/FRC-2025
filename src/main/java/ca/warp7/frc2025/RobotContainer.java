@@ -34,9 +34,9 @@ import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import ca.warp7.frc2025.util.FieldConstantsHelper;
-import ca.warp7.frc2025.util.VisionUtil;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -238,21 +238,29 @@ public class RobotContainer {
                     controller.setRumble(RumbleType.kBothRumble, 0.7);
                 });
 
-        Command stow =
-                drive.setSpeedModifer(1).andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0)));
-
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
             return Optional.of(FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
         });
 
         Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
-            if (vision.tags.size() > 0) {
-                return Optional.of(VisionUtil.tagIdToRobotPose(vision.tags.get(0), drive.target == 0));
-            } else {
-                return Optional.empty();
-            }
+            return Optional.of(FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
         });
+
+        Trigger canMoveElevator = new Trigger(() -> drive.getPose()
+                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                        .getTranslation()
+                        .minus(FieldConstantsHelper.faceToRobotPose(
+                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
+                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                                .getTranslation())
+                        .getNorm()
+                > 0.12);
+
+        Command stow = drive.setSpeedModifer(1)
+                .andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0)))
+                .unless(elevator.goalIsTrigger(Elevator.L4).and(canMoveElevator.negate()));
 
         Trigger holdingCoral = intake.middleSensorTrigger();
 
@@ -261,10 +269,12 @@ public class RobotContainer {
         Trigger atStow = elevator.atSetpointTrigger(Elevator.STOW);
 
         Command autoScoreL4 = elevator.setGoal(Elevator.L4)
+                .onlyIf(canMoveElevator)
                 .andThen(align.get().until(alignedTrigger))
                 .andThen(outakeCommand.get());
 
         Command autoScoreL3 = elevator.setGoal(Elevator.L3)
+                .onlyIf(canMoveElevator)
                 .andThen(align.get().until(alignedTrigger))
                 .andThen(outakeCommand.get());
 
