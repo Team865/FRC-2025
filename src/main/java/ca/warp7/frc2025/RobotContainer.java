@@ -329,8 +329,6 @@ public class RobotContainer {
                 .whileTrue(intakeAngle)
                 .onTrue(intakeCommand);
 
-        controller.leftBumper().whileTrue(intakeAngle);
-
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());
 
