@@ -1,51 +1,28 @@
 package ca.warp7.frc2025.subsystems.climber;
 
-import ca.warp7.frc2025.util.LoggedTunableNumber;
+import ca.warp7.frc2025.Constants.Climber;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.AutoLogOutput;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.Logger;
 
 public class ClimberSubsystem extends SubsystemBase {
     private final ClimberIO io;
     private final ClimberIOInputsAutoLogged inputs;
-    public double goal = 0.0;
-
-    private final LoggedTunableNumber kG = new LoggedTunableNumber("Climber/kG", 0.0);
-    private final LoggedTunableNumber kS = new LoggedTunableNumber("Climber/kS", 0.0);
-    private final LoggedTunableNumber kV = new LoggedTunableNumber("Clibmer/kV", 0.0);
-    private final LoggedTunableNumber kA = new LoggedTunableNumber("Climber/kA", 0.0);
-
-    private final LoggedTunableNumber kP = new LoggedTunableNumber("Climber/kP", 50);
-    private final LoggedTunableNumber kD = new LoggedTunableNumber("Climber/kD", 10);
+    public Rotation2d goal = Rotation2d.kZero;
 
     public ClimberSubsystem(ClimberIO io) {
         this.io = io;
         inputs = new ClimberIOInputsAutoLogged();
-        io.setControlConstants(kG.get(), kS.get(), kV.get(), kA.get(), kP.get(), kD.get());
+        io.setPD(Climber.kPNormal, Climber.kDNormal);
     }
 
-    @AutoLogOutput(key = "Climber/goal")
-    public Command setGoal(double goal) {
-        return this.runOnce(() -> io.setPivotPosition(goal));
-    }
-
-    @Override
-    public void periodic() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Climber", inputs);
-        Logger.recordOutput("Climber/goal", goal);
-        LoggedTunableNumber.ifChanged(
-                hashCode(),
-                (constants) -> io.setControlConstants(
-                        constants[0], constants[1], constants[2], constants[3], constants[4], constants[5]),
-                kG,
-                kS,
-                kV,
-                kA,
-                kP,
-                kD);
-    }
+    // @AutoLogOutput(key = "Climber/goal")
+    // public Command setGoal(Rotation2d goal) {
+    //     return this.runOnce(() -> io.setPivotPosition(goal));
+    // }
 
     public Command setPivotVoltage(double volts) {
         return this.runOnce(() -> io.setPivotVoltage(volts));
@@ -59,7 +36,32 @@ public class ClimberSubsystem extends SubsystemBase {
         return this.runOnce(() -> io.setPivotSpeed(speed));
     }
 
-    public Command setPivotPosition(double position) {
-        return this.runOnce(() -> io.setPivotPosition(position));
+    public Command setPivotPosition(Rotation2d position) {
+        return this.runOnce(() -> goal = position);
+    }
+
+    public Trigger atSetpointTrigger() {
+        return new Trigger(() -> MathUtil.isNear(this.goal.getDegrees(), inputs.pivotPositionRads.getDegrees(), 0.5));
+    }
+
+    public Command setNormalGains() {
+        return runOnce(() -> io.setPD(Climber.kPNormal, Climber.kDNormal));
+    }
+
+    public Command setClimbGains() {
+        return runOnce(() -> io.setPD(Climber.kPClimbing, Climber.kDClimbing));
+    }
+
+    @Override
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Climber", inputs);
+        Logger.recordOutput("Climber/goal", goal);
+
+        io.setPivotPosition(goal);
+
+        if (atSetpointTrigger().getAsBoolean()) {
+            io.stop();
+        }
     }
 }

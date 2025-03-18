@@ -294,21 +294,32 @@ public class RobotContainer {
 
         Command spitCoral = intake.runVoltsRoller(4).until(intake.middleSensorTrigger());
 
-        Command climberDown = climber.setPivotServoPosition(0).andThen(climber.setPivotPosition(Climber.CLIMB));
+        Command climberDown = climber.setPivotServoPosition(0)
+                .andThen(new WaitCommand(1))
+                .andThen(climber.setNormalGains())
+                .andThen(climber.setPivotPosition(Climber.DOWN));
 
-        Command climberStow = climber.setPivotPosition(1).andThen(climber.setPivotPosition(Climber.STOW));
+        Command climberStow = climber.setPivotServoPosition(1)
+                .andThen(new WaitCommand(1))
+                .andThen(climber.setNormalGains())
+                .andThen(climber.setPivotPosition(Climber.STOW));
 
         Command climb = climber.setPivotServoPosition(1)
-                .andThen(climber.setPivotVoltage(10))
                 .andThen(new WaitCommand(1))
-                .andThen(climber.setPivotVoltage(0));
+                .andThen(climber.setClimbGains())
+                .andThen(climber.setPivotPosition(Climber.CLIMB));
 
         drive.setDefaultCommand(driveCommand);
 
         controller.leftTrigger().whileTrue(autoScoreL4);
-        controller.rightTrigger().whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral).onlyIf(canMoveElevator));
+        controller
+                .rightTrigger()
+                .whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral)
+                        .onlyIf(canMoveElevator));
         controller.leftBumper().whileTrue(autoScoreL2);
-        controller.rightBumper().onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral).onlyIf(canMoveElevator));
+        controller
+                .rightBumper()
+                .onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral).onlyIf(canMoveElevator));
 
         controller.a().onTrue(stow);
 
@@ -316,14 +327,13 @@ public class RobotContainer {
 
         controller.b().onTrue(scoreRight);
 
-        controller.y()
+        controller
+                .y()
                 .and(atStow)
                 .and(intake.middleSensorTrigger().negate())
                 .and(elevator.atSetpointTrigger(Elevator.STOW))
-            .whileTrue(intakeAngle)
-            .onTrue(intakeCommand);
-
-        controller.leftBumper().whileTrue(intakeAngle);
+                .whileTrue(intakeAngle)
+                .onTrue(intakeCommand);
 
         controller.leftStick().onTrue(drive.zeroPose());
         controller.rightStick().onTrue(drive.zeroPose());

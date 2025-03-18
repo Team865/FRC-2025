@@ -5,12 +5,15 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -28,6 +31,7 @@ public class ClimberIOTalonFX implements ClimberIO {
             new VoltageOut(0.0).withUpdateFreqHz(50.0).withEnableFOC(true);
     private final PositionVoltage positionVoltage =
             new PositionVoltage(0).withUpdateFreqHz(50).withEnableFOC(true);
+    private final NeutralOut neutralOut = new NeutralOut();
 
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
@@ -60,11 +64,14 @@ public class ClimberIOTalonFX implements ClimberIO {
         config.Slot0.kP = 0;
         config.Slot0.kD = 0;
 
+        config.Feedback.SensorToMechanismRatio = 400;
         config.CurrentLimits.SupplyCurrentLimit = 80;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         config.CurrentLimits.StatorCurrentLimit = 100.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
+
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
         PhoenixUtil.tryUntilOk(5, () -> pivotMoter.getConfigurator().apply(config));
         PhoenixUtil.tryUntilOk(5, () -> pivotMoter.setPosition(0));
@@ -74,8 +81,8 @@ public class ClimberIOTalonFX implements ClimberIO {
     public void updateInputs(ClimberIOInputsAutoLogged inputs) {
         StatusCode talonCode = BaseStatusSignal.refreshAll(position, velocity, pivotVolts, pivotCurrent, temp);
         inputs.motorConnected = debouncer.calculate(talonCode.isOK());
-        inputs.pivotRotation = position.getValueAsDouble();
-        inputs.pivotVelocityRotationsPerSecond = velocity.getValueAsDouble();
+        inputs.pivotPositionRads = Rotation2d.fromRotations(position.getValueAsDouble());
+        inputs.pivotVelocityRadsPerSecond = Rotation2d.fromRotations(velocity.getValueAsDouble());
         inputs.pivotVoltage = pivotVolts.getValueAsDouble();
         inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
         inputs.pivotTempC = temp.getValueAsDouble();
@@ -94,8 +101,8 @@ public class ClimberIOTalonFX implements ClimberIO {
     }
 
     @Override
-    public void setPivotPosition(double position) {
-        pivotMoter.setControl(positionVoltage.withPosition(position));
+    public void setPivotPosition(Rotation2d position) {
+        pivotMoter.setControl(positionVoltage.withPosition(position.getRotations()));
     }
 
     @Override
@@ -111,5 +118,10 @@ public class ClimberIOTalonFX implements ClimberIO {
     @Override
     public void setPivotSpeed(double speed) {
         pivotMoter.set(speed);
+    }
+
+    @Override
+    public void stop() {
+        pivotMoter.setControl(neutralOut);
     }
 }
