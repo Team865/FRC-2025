@@ -296,8 +296,10 @@ public class RobotContainer {
                 .andThen(elevator.setGoal(Elevator.L1A))
                 .andThen(intake.setVoltsRoller(-4));
 
-        Command spitCoral =
-                intake.setVoltsRoller(5).andThen(new WaitCommand(1)).andThen(new WaitUntilCommand(notHoldingCoral)).andThen(intake.setVoltsRoller(0));
+        Command spitCoral = intake.setVoltsRoller(5)
+                .andThen(new WaitCommand(1))
+                .andThen(new WaitUntilCommand(notHoldingCoral))
+                .andThen(intake.setVoltsRoller(0));
 
         Command climberDown = climber.setPivotServoPosition(0)
                 .andThen(new WaitCommand(1))

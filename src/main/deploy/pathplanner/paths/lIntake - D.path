@@ -3,46 +3,50 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.3920512820512805,
-        "y": 7.348205128205128
+        "x": 1.2507761101973685,
+        "y": 0.9899054276315792
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.421923076923076,
-        "y": 6.677371794871794
+        "x": 2.026028092141272,
+        "y": 2.458534395466244
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Left Human Player"
     },
     {
       "anchor": {
-        "x": 5.302084262441133,
-        "y": 5.117086524738973
+        "x": 3.9557925355307337,
+        "y": 2.795941863203021
       },
       "prevControl": {
-        "x": 5.910994518856551,
-        "y": 5.787919858072305
+        "x": 3.8382002654857197,
+        "y": 2.3721781434866807
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Reef I"
+      "linkedName": "Reef D"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.33295497244488986,
+      "rotationDegrees": 59.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "evL4",
-      "waypointRelativePos": 0.6,
+      "name": "L4",
+      "waypointRelativePos": 0.5448660714285715,
       "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "hpOuttake",
-      "waypointRelativePos": 1,
-      "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "L4"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -55,13 +59,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 59.99999999999999
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -125.21759296819265
+    "rotation": -125.00000000000001
   },
   "useDefaultConstraints": true
 }
