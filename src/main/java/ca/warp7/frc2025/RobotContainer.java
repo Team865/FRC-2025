@@ -262,7 +262,7 @@ public class RobotContainer {
 
         Command stow = drive.setSpeedModifer(1)
                 .andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0)))
-                .unless(elevator.goalIsTrigger(Elevator.L4).and(canMoveElevator.negate()));
+                .onlyIf(canMoveElevator);
 
         Trigger holdingCoral = intake.middleSensorTrigger();
 
@@ -271,24 +271,28 @@ public class RobotContainer {
         Trigger atStow = elevator.atSetpointTrigger(Elevator.STOW);
 
         Command autoScoreL4 = elevator.setGoal(Elevator.L4)
-                .onlyIf(canMoveElevator)
                 .andThen(align.get().until(alignedTrigger))
-                .andThen(outakeCommand.get());
+                .andThen(outakeCommand.get())
+                .onlyIf(canMoveElevator);
 
         Command autoScoreL3 = elevator.setGoal(Elevator.L3)
-                .onlyIf(canMoveElevator)
                 .andThen(align.get().until(alignedTrigger))
-                .andThen(outakeCommand.get());
+                .andThen(outakeCommand.get())
+                .onlyIf(canMoveElevator);
 
         Command autoScoreL2 = elevator.setGoal(Elevator.L2)
+                .onlyIf(canMoveElevator)
                 .andThen(align.get().until(alignedTrigger))
-                .andThen(outakeCommand.get());
+                .andThen(outakeCommand.get())
+                .onlyIf(canMoveElevator);
 
         Command algaeClearHigh = drive.setSpeedModifer(0.25)
+                .onlyIf(canMoveElevator)
                 .andThen(elevator.setGoal(Elevator.L2A))
                 .andThen(intake.setVoltsRoller(-4));
 
         Command algaeClearLow = drive.setSpeedModifer(0.25)
+                .onlyIf(canMoveElevator)
                 .andThen(elevator.setGoal(Elevator.L1A))
                 .andThen(intake.setVoltsRoller(-4));
 
@@ -312,14 +316,11 @@ public class RobotContainer {
         drive.setDefaultCommand(driveCommand);
 
         controller.leftTrigger().whileTrue(autoScoreL4);
-        controller
-                .rightTrigger()
-                .whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral)
-                        .onlyIf(canMoveElevator));
+
+        controller.rightTrigger().whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral));
+
         controller.leftBumper().whileTrue(autoScoreL2);
-        controller
-                .rightBumper()
-                .onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral).onlyIf(canMoveElevator));
+        controller.rightBumper().onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral));
 
         controller.a().onTrue(stow);
 
