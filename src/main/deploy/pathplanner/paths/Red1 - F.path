@@ -28,7 +28,12 @@
       "linkedName": "Reef F"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3026991482965932,
+      "rotationDegrees": 119.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
@@ -45,7 +50,7 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 3.0,
     "maxAcceleration": 3.25,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1100.0,
@@ -62,5 +67,5 @@
     "velocity": 0.0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

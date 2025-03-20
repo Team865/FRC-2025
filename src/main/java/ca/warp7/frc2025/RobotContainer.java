@@ -185,7 +185,7 @@ public class RobotContainer {
                 .deadlineFor(intake.runVoltsRoller(-6)));
 
         Command intakeCommand = new SequentialCommandGroup(
-                intake.runVoltsRoller(-8).until(intake.middleSensorTrigger()), elevator.setGoal(Elevator.STOW));
+                intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()), elevator.setGoal(Elevator.STOW));
 
         NamedCommands.registerCommand("Stow", Stow);
         NamedCommands.registerCommand("L4", elevator.setGoal(Elevator.L4));
