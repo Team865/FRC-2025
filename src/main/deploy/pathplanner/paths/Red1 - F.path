@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.629898326181425,
-        "y": 2.4786504363616464
+        "x": 6.0185556808200324,
+        "y": 2.5347152958563877
       },
       "isLocked": false,
       "linkedName": "Red 1"
     },
     {
       "anchor": {
-        "x": 5.015587669637437,
-        "y": 2.7827334475105623
+        "x": 5.297175129766415,
+        "y": 2.949589531510634
       },
       "prevControl": {
-        "x": 5.260212326134379,
-        "y": 2.8342967817099027
+        "x": 5.5469282701228515,
+        "y": 2.9606966860561563
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Reef E"
+      "linkedName": "Reef F"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 1.0,
     "maxAcceleration": 3.25,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1100.0,
@@ -62,5 +62,5 @@
     "velocity": 0.0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
