@@ -289,12 +289,12 @@ public class RobotContainer {
         Command algaeClearHigh = drive.setSpeedModifer(0.25)
                 .onlyIf(canMoveElevator)
                 .andThen(elevator.setGoal(Elevator.L2A))
-                .andThen(intake.setVoltsRoller(-4));
+                .andThen(intake.setVoltsRoller(6));
 
         Command algaeClearLow = drive.setSpeedModifer(0.25)
                 .onlyIf(canMoveElevator)
                 .andThen(elevator.setGoal(Elevator.L1A))
-                .andThen(intake.setVoltsRoller(-4));
+                .andThen(intake.setVoltsRoller(6));
 
         Command spitCoral = intake.setVoltsRoller(5)
                 .andThen(new WaitCommand(1))
