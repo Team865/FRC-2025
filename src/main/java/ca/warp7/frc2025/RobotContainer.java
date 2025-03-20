@@ -224,7 +224,7 @@ public class RobotContainer {
         Command intakeCommand = intake.runVoltsRoller(-4)
                 .raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
                 .until(intake.bottomSensorTrigger())
-                .andThen(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20)
+                .andThen(leds.setBlinkingCmd(SparkColor.LIME, SparkColor.BLACK, 20)
                         .withTimeout(0.75))
                 .andThen(leds.setToDefault());
 
@@ -296,7 +296,10 @@ public class RobotContainer {
                 .andThen(elevator.setGoal(Elevator.L1A))
                 .andThen(intake.setVoltsRoller(-4));
 
-        Command spitCoral = intake.runVoltsRoller(4).until(intake.middleSensorTrigger());
+        Command spitCoral = intake.setVoltsRoller(5)
+                .andThen(new WaitCommand(1))
+                .andThen(new WaitUntilCommand(notHoldingCoral))
+                .andThen(intake.setVoltsRoller(0));
 
         Command climberDown = climber.setPivotServoPosition(0)
                 .andThen(new WaitCommand(1))

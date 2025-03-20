@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.3920512820512805,
-        "y": 7.348205128205128
+        "x": 7.107760123313918,
+        "y": 2.573477346094604
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.421923076923076,
-        "y": 6.677371794871794
+        "x": 6.0185556808200324,
+        "y": 2.5347152958563877
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Red 1"
     },
     {
       "anchor": {
-        "x": 5.302084262441133,
-        "y": 5.117086524738973
+        "x": 5.297175129766415,
+        "y": 2.949589531510634
       },
       "prevControl": {
-        "x": 5.910994518856551,
-        "y": 5.787919858072305
+        "x": 5.5469282701228515,
+        "y": 2.9606966860561563
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Reef I"
+      "linkedName": "Reef F"
     }
   ],
   "rotationTargets": [],
@@ -33,20 +33,19 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "evL4",
-      "waypointRelativePos": 0.6,
+      "name": "L4",
+      "waypointRelativePos": 0.20327380952380966,
       "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "hpOuttake",
-      "waypointRelativePos": 1,
-      "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "L4"
+        }
+      }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 1.0,
     "maxAcceleration": 3.25,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1100.0,
@@ -54,14 +53,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -119.99999999999999
+    "velocity": 0.0,
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": -125.21759296819265
+    "velocity": 0.0,
+    "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

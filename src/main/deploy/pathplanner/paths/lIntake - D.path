@@ -8,29 +8,29 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8700068794281375,
-        "y": 1.5575336327597848
+        "x": 2.026028092141272,
+        "y": 2.458534395466244
       },
       "isLocked": false,
       "linkedName": "Left Human Player"
     },
     {
       "anchor": {
-        "x": 3.6766666666666663,
-        "y": 2.961987179487179
+        "x": 3.9557925355307337,
+        "y": 2.795941863203021
       },
       "prevControl": {
-        "x": 3.0574358974358966,
-        "y": 2.19826923076923
+        "x": 3.8382002654857197,
+        "y": 2.3721781434866807
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Reef C"
+      "linkedName": "Reef D"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.625289641783567,
+      "waypointRelativePos": 0.33295497244488986,
       "rotationDegrees": 59.99999999999999
     }
   ],
@@ -39,7 +39,7 @@
   "eventMarkers": [
     {
       "name": "L4",
-      "waypointRelativePos": 0.5431175595238101,
+      "waypointRelativePos": 0.5448660714285715,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
