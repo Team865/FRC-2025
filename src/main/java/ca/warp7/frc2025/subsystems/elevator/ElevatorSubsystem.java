@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
+import ca.warp7.frc2025.util.pitchecks.PitCheckable;
+import ca.warp7.frc2025.util.pitchecks.PitChecker;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
@@ -20,7 +22,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
-public class ElevatorSubsystem extends SubsystemBase {
+public class ElevatorSubsystem extends SubsystemBase implements PitCheckable {
     // Logging
     private final ElevatorIO io;
     private final ElevatorIOInputAutoLogged inputs = new ElevatorIOInputAutoLogged();
@@ -67,6 +69,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         io.setControlConstants(kG.get(), kS.get(), kV.get(), kA.get(), kP.get(), kD.get());
 
         io.setMotionProfile(velocity.get(), accel.get(), accel.get());
+
+        PitChecker.registerCheck(this);
     }
 
     public Command setGoal(Distance goal) {
@@ -137,5 +141,17 @@ public class ElevatorSubsystem extends SubsystemBase {
         } else {
             io.setPosition(goal.in(Meters));
         }
+    }
+
+    @Override
+    public Command check() {
+        return rampCheck(
+                12,
+                20.0,
+                0.25,
+                () -> Units.metersToInches(inputs.positionMeters),
+                (inches) -> io.setPosition(Units.inchesToMeters(inches)),
+                10.0,
+                "Elevator");
     }
 }

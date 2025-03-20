@@ -2,6 +2,8 @@ package ca.warp7.frc2025.subsystems.intake;
 
 import ca.warp7.frc2025.Robot;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
+import ca.warp7.frc2025.util.pitchecks.PitCheckable;
+import ca.warp7.frc2025.util.pitchecks.PitChecker;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
@@ -16,7 +18,7 @@ import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase implements PitCheckable {
     private final double rollerGearRatio = 36 / 16;
     private final double rollerKt = rollerGearRatio / DCMotor.getKrakenX60Foc(1).KtNMPerAmp;
 
@@ -44,6 +46,8 @@ public class IntakeSubsystem extends SubsystemBase {
         this.frontSensorIO = frontSensorIO;
 
         disconnectedMotor = new Alert("Intake motor disconnected", AlertType.kError);
+
+        PitChecker.registerCheck(this);
     }
 
     @Override
@@ -137,5 +141,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public Command setTorque(DoubleSupplier nM) {
         return setTorque(nM.getAsDouble());
+    }
+
+    @Override
+    public Command check() {
+        return rampCheck(
+                0.75,
+                10.0,
+                0.1,
+                () -> rollersInputs.appliedVoltage,
+                (volts) -> rollersIO.setVolts(volts),
+                10,
+                "Intake");
     }
 }

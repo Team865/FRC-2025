@@ -41,12 +41,15 @@ import ca.warp7.frc2025.subsystems.superstructure.Superstructure.AlgaeLevel;
 import ca.warp7.frc2025.subsystems.superstructure.Superstructure.AlgaeTarget;
 import ca.warp7.frc2025.subsystems.superstructure.Superstructure.SuperState;
 import ca.warp7.frc2025.util.FieldConstantsHelper;
+import ca.warp7.frc2025.util.pitchecks.PitChecker;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -225,6 +228,12 @@ public class RobotContainer {
                     "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
             autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+            if (DriverStation.getMatchType() == MatchType.None) {
+                autoChooser.addOption("Pit Checks", PitChecker.runChecks());
+                autoChooser.addOption("Intake Checks", intake.check());
+                autoChooser.addOption("Elevator Checks", elevator.check());
+            }
         }
         configureBindings();
     }
