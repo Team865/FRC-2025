@@ -1,5 +1,7 @@
 package ca.warp7.frc2025.subsystems.intake;
 
+import ca.warp7.frc2025.util.pitchecks.PitCheckable;
+import ca.warp7.frc2025.util.pitchecks.PitChecker;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -9,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeSubsystem extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase implements PitCheckable {
     // Roller io
     private final RollersIO rollersIO;
     private final RollersIOInputsAutoLogged rollersInputs = new RollersIOInputsAutoLogged();
@@ -32,6 +34,8 @@ public class IntakeSubsystem extends SubsystemBase {
         this.frontSensorIO = frontSensorIO;
 
         disconnectedMotor = new Alert("Intake motor disconnected", AlertType.kError);
+
+        PitChecker.registerCheck(this);
     }
 
     @Override
@@ -69,5 +73,17 @@ public class IntakeSubsystem extends SubsystemBase {
     @AutoLogOutput
     public Command runTorqueAmpsRoller(double inputAmps) {
         return runOnce(() -> rollersIO.setVolts(inputAmps));
+    }
+
+    @Override
+    public Command check() {
+        return rampCheck(
+                0.75,
+                10.0,
+                0.1,
+                () -> rollersInputs.appliedVoltage,
+                (volts) -> rollersIO.setVolts(volts),
+                10,
+                "Intake");
     }
 }
