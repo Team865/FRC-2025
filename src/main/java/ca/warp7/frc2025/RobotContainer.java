@@ -237,6 +237,7 @@ public class RobotContainer {
                 .withTimeout(0.75)
                 .andThen(leds.setToDefault());
 
+
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
             return Optional.of(FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
@@ -270,6 +271,11 @@ public class RobotContainer {
 
         Trigger atStow = elevator.atSetpointTrigger(Elevator.STOW);
 
+        Command spitCoral = intake.setVoltsRoller(5)
+                .andThen(new WaitCommand(1))
+                .andThen(new WaitUntilCommand(notHoldingCoral))
+                .andThen(intake.setVoltsRoller(0));
+
         Command autoScoreL4 = elevator.setGoal(Elevator.L4)
                 .andThen(align.get().until(alignedTrigger))
                 .andThen(outakeCommand.get())
@@ -286,6 +292,10 @@ public class RobotContainer {
                 .andThen(outakeCommand.get())
                 .onlyIf(canMoveElevator);
 
+        Command autoScoreL1 = align.get().until(alignedTrigger)
+            .andThen(spitCoral)
+            .onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
+
         Command algaeClearHigh = drive.setSpeedModifer(0.25)
                 .onlyIf(canMoveElevator)
                 .andThen(elevator.setGoal(Elevator.L2A))
@@ -295,11 +305,6 @@ public class RobotContainer {
                 .onlyIf(canMoveElevator)
                 .andThen(elevator.setGoal(Elevator.L1A))
                 .andThen(intake.setVoltsRoller(4.5));
-
-        Command spitCoral = intake.setVoltsRoller(5)
-                .andThen(new WaitCommand(1))
-                .andThen(new WaitUntilCommand(notHoldingCoral))
-                .andThen(intake.setVoltsRoller(0));
 
         Command climberDown = climber.setPivotServoPosition(0)
                 .andThen(new WaitCommand(1))
@@ -323,7 +328,7 @@ public class RobotContainer {
         controller.rightTrigger().whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral));
 
         controller.leftBumper().whileTrue(autoScoreL2);
-        controller.rightBumper().onTrue(Commands.either(spitCoral, algaeClearLow, holdingCoral));
+        controller.rightBumper().whileTrue(Commands.either(autoScoreL1, algaeClearLow, holdingCoral));
 
         controller.a().onTrue(stow);
 
