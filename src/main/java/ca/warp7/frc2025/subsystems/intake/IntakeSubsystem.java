@@ -1,10 +1,14 @@
 package ca.warp7.frc2025.subsystems.intake;
 
+import ca.warp7.frc2025.Robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -69,5 +73,45 @@ public class IntakeSubsystem extends SubsystemBase {
     @AutoLogOutput
     public Command runTorqueAmpsRoller(double inputAmps) {
         return runOnce(() -> rollersIO.setVolts(inputAmps));
+    }
+
+    private void setBottomSensor(boolean value) {
+        if (Robot.isSimulation() && value) {
+            topSensorInputs.objectDistanceMM = topDistanceToCoral;
+        } else {
+            topSensorInputs.objectDistanceMM = 0;
+        }
+    }
+
+    private void setMiddleSensor(boolean value) {
+        if (Robot.isSimulation() && value) {
+            frontSensorInputs.objectDistanceMM = frontTopDistanceToCoral;
+        } else {
+            frontSensorInputs.objectDistanceMM = 0;
+        }
+    }
+
+    public Command intake() {
+        return (Robot.isSimulation()
+                        ? new WaitCommand(0.5)
+                                .andThen(() -> setMiddleSensor(true))
+                                .andThen(() -> setBottomSensor(true))
+                                .andThen(new PrintCommand("Simulating intake"))
+                        : Commands.none())
+                .andThen(runVoltsRoller(-4).until(bottomSensorTrigger()));
+    }
+
+    public Command outake() {
+        return (Robot.isSimulation()
+                        ? new WaitCommand(0.5)
+                                .andThen(() -> setMiddleSensor(false))
+                                .andThen(() -> setBottomSensor(false))
+                                .andThen(new PrintCommand("Simulating outake"))
+                        : Commands.none())
+                .andThen(runVoltsRoller(-10)
+                        .until(bottomSensorTrigger()
+                                .negate()
+                                .and(middleSensorTrigger())
+                                .negate()));
     }
 }

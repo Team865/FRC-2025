@@ -44,7 +44,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -183,19 +182,10 @@ public class RobotContainer {
     private void configureNamedCommands() {
         Command Stow = elevator.setGoal(Elevator.STOW).andThen(new WaitUntilCommand(elevator.atSetpointTrigger()));
 
-        Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
-                        .negate()
-                        .and(intake.middleSensorTrigger().negate()))
-                .deadlineFor(intake.runVoltsRoller(-10)));
-
-        Command intakeCommand = new SequentialCommandGroup(
-                intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()), elevator.setGoal(Elevator.STOW));
-
         NamedCommands.registerCommand("Stow", Stow);
         NamedCommands.registerCommand("L4", elevator.setGoal(Elevator.L4));
-        NamedCommands.registerCommand("Intake", intakeCommand);
-        NamedCommands.registerCommand("evIntake", elevator.setGoal(Elevator.STOW));
-        NamedCommands.registerCommand("Outake", outakeCommand);
+        NamedCommands.registerCommand("Intake", intake.intake());
+        NamedCommands.registerCommand("Outake", intake.outake());
     }
 
     /**
@@ -225,18 +215,14 @@ public class RobotContainer {
         });
 
         // run intake motor until sensor
-        Command intakeCommand = intake.runVoltsRoller(-4)
+        Command intakeCommand = intake.intake()
                 .raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
-                .until(intake.bottomSensorTrigger())
                 .andThen(leds.setBlinkingCmd(SparkColor.LIME, SparkColor.BLACK, 20)
                         .withTimeout(0.75))
                 .andThen(leds.setToDefault());
 
-        Supplier<Command> outakeCommand = () -> new WaitUntilCommand(intake.bottomSensorTrigger()
-                        .negate()
-                        .and(intake.middleSensorTrigger().negate()))
-                .deadlineFor(
-                        intake.runVoltsRoller(-10).raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5)))
+        Supplier<Command> outakeCommand = () -> intake.outake()
+                .raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
                 .andThen(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20))
                 .withTimeout(0.75)
                 .andThen(leds.setToDefault());
