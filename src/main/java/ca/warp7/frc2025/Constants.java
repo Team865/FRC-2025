@@ -89,7 +89,7 @@ public final class Constants {
         public static final int Servo_PWM = 1;
 
         public static final Rotation2d DOWN = Rotation2d.fromDegrees(90);
-        public static final Rotation2d CLIMB = Rotation2d.fromDegrees(0);
+        public static final Rotation2d CLIMB = Rotation2d.fromDegrees(-3);
         public static final Rotation2d STOW = Rotation2d.kZero;
 
         public static final double kPNormal = 110.0;
