@@ -237,7 +237,6 @@ public class RobotContainer {
                 .withTimeout(0.75)
                 .andThen(leds.setToDefault());
 
-
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
             return Optional.of(FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
@@ -292,9 +291,8 @@ public class RobotContainer {
                 .andThen(outakeCommand.get())
                 .onlyIf(canMoveElevator);
 
-        Command autoScoreL1 = align.get().until(alignedTrigger)
-            .andThen(spitCoral)
-            .onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
+        Command autoScoreL1 =
+                align.get().until(alignedTrigger).andThen(spitCoral).onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
 
         Command algaeClearHigh = drive.setSpeedModifer(0.25)
                 .onlyIf(canMoveElevator)
@@ -320,6 +318,9 @@ public class RobotContainer {
                 .andThen(new WaitCommand(1))
                 .andThen(climber.setClimbGains())
                 .andThen(climber.setPivotPosition(Climber.CLIMB));
+
+        Command reverseRollers = intake.runVoltsRoller(-4);
+        Command forwardRollers = intake.runVoltsRoller(4);
 
         drive.setDefaultCommand(driveCommand);
 
@@ -350,6 +351,9 @@ public class RobotContainer {
         controller.povDown().onTrue(climberDown);
 
         controller.povUp().onTrue(climb);
+
+        controller.povRight().whileTrue(reverseRollers);
+        controller.povLeft().whileTrue(forwardRollers);
 
         controller.back().onTrue(climberStow);
 
