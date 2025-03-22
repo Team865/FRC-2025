@@ -306,8 +306,11 @@ public class RobotContainer {
                 .andThen(outakeCommand.get())
                 .onlyIf(canMoveElevator);
 
-        Command autoScoreL1 =
-                align.get().until(alignedTrigger).andThen(spitCoral).onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
+        Command autoScoreL1 = align.get()
+                .until(alignedTrigger)
+                .andThen(elevator.setGoal(Elevator.L1))
+                .andThen(intake.runVoltsRoller(-2).until(notHoldingCoral))
+                .onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
 
         Command algaeClearHigh = drive.setSpeedModifer(0.25)
                 .onlyIf(canMoveElevator)
