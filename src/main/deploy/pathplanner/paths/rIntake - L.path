@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.638821964186504,
-        "y": 5.9255152667102164
+        "x": 2.438918585526316,
+        "y": 7.000190172697367
       },
       "isLocked": false,
       "linkedName": "Right Human Player"
@@ -20,8 +20,8 @@
         "y": 5.108090049342105
       },
       "prevControl": {
-        "x": 3.272173352074121,
-        "y": 5.466210652357691
+        "x": 2.6631321957236844,
+        "y": 6.817100123355263
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.3303247119238476,
+      "waypointRelativePos": 0.3936936372745491,
       "rotationDegrees": -59.99999999999999
     }
   ],
