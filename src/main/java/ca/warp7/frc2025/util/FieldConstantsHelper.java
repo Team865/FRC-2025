@@ -14,8 +14,11 @@ import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class FieldConstantsHelper {
-    private static List<Pose2d> stations =
-            List.of(FieldConstants.CoralStation.leftCenterFace, FieldConstants.CoralStation.rightCenterFace, FieldConstants.CoralStation.rightCenterFaceRed, FieldConstants.CoralStation.leftCenterFaceRed);
+    private static List<Pose2d> stations = List.of(
+            FieldConstants.CoralStation.leftCenterFace,
+            FieldConstants.CoralStation.rightCenterFace,
+            FieldConstants.CoralStation.rightCenterFaceRed,
+            FieldConstants.CoralStation.leftCenterFaceRed);
 
     private static List<Pose2d> faces = List.of(FieldConstants.Reef.centerFaces);
     // private static List<Pose2d> facesRed = List.of(FieldConstants.Reef.centerFacesBlue);
