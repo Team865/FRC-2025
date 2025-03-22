@@ -319,8 +319,8 @@ public class RobotContainer {
                 .andThen(climber.setClimbGains())
                 .andThen(climber.setPivotPosition(Climber.CLIMB));
 
-        Command reverseRollers = intake.runVoltsRoller(-4);
-        Command forwardRollers = intake.runVoltsRoller(4);
+        Command reverseRollers = intake.runVoltsRoller(-10);
+        Command forwardRollers = intake.runVoltsRoller(10);
 
         drive.setDefaultCommand(driveCommand);
 
