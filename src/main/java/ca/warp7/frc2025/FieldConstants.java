@@ -63,6 +63,14 @@ public class FieldConstants {
                 rightCenterFace.getX(),
                 fieldWidth - rightCenterFace.getY(),
                 Rotation2d.fromRadians(-rightCenterFace.getRotation().getRadians()));
+        public static final Pose2d rightCenterFaceRed = new Pose2d(
+                fieldLength - rightCenterFace.getX(),
+                rightCenterFace.getY(),
+                Rotation2d.fromRadians(rightCenterFace.getRotation().plus(Rotation2d.kCCW_90deg).getRadians()));
+        public static final Pose2d leftCenterFaceRed = new Pose2d(
+                rightCenterFaceRed.getX(),
+                leftCenterFace.getY(),
+                Rotation2d.fromRadians(leftCenterFace.getRotation().minus(Rotation2d.kCCW_90deg).getRadians()));
     }
 
     public static class Reef {

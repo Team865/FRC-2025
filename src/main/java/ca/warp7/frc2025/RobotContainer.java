@@ -335,7 +335,7 @@ public class RobotContainer {
                 .andThen(climber.setPivotPosition(Climber.CLIMB));
 
         Command reverseRollers = intake.runVoltsRoller(-10);
-        Command forwardRollers = intake.runVoltsRoller(10);
+        Command forwardRollers = intake.runVoltsRoller(5);
 
         drive.setDefaultCommand(driveCommand);
 
