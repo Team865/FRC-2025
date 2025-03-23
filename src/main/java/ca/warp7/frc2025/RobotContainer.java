@@ -52,6 +52,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -62,6 +63,9 @@ public class RobotContainer {
     private final ClimberSubsystem climber;
     private final VisionSubsystem vision;
     private final LEDSubsystem leds;
+
+    public Trigger alignedTrigger;
+    public Supplier<Pose2d> alignedGoal;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -237,17 +241,28 @@ public class RobotContainer {
                 .withTimeout(0.75)
                 .andThen(leds.setToDefault());
 
+        alignedGoal = () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPoseGoal", pose2d);
+            return pose2d;
+        };
+
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
-            return Optional.of(FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPoseGoal", pose2d);
+            return Optional.of(pose2d);
         });
 
         Command scoreLeft = drive.runOnce(() -> drive.target = 0);
         Command scoreRight = drive.runOnce(() -> drive.target = 1);
 
-        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
-            return Optional.of(FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
+        alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPose", pose2d);
+            return Optional.of(pose2d);
         });
 
         Trigger canMoveElevator = new Trigger(() -> drive.getPose()

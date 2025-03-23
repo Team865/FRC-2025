@@ -17,6 +17,7 @@ public class FieldConstantsHelper {
             List.of(FieldConstants.CoralStation.leftCenterFace, FieldConstants.CoralStation.rightCenterFace);
 
     private static List<Pose2d> faces = List.of(FieldConstants.Reef.centerFaces);
+    // private static List<Pose2d> facesRed = List.of(FieldConstants.Reef.centerFacesBlue);
 
     public static Pose2d getClosestStation(Pose2d pose) {
         return pose.nearest(stations);

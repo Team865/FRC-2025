@@ -66,6 +66,9 @@ public class Robot extends LoggedRobot {
         // Switch thread to high priority to improve loop timing
         Threads.setCurrentThreadPriority(true, 10);
 
+        Logger.recordOutput("Aligned", robotContainer.alignedTrigger.getAsBoolean());
+        Logger.recordOutput("AlignedGoal", robotContainer.alignedGoal.get());
+
         PhoenixUtil.refreshAll();
         CommandScheduler.getInstance().run();
     }
