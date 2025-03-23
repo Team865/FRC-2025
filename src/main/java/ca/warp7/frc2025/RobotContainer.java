@@ -359,7 +359,6 @@ public class RobotContainer {
                 .y()
                 .and(atStow)
                 .and(intake.middleSensorTrigger().negate())
-                .and(elevator.atSetpointTrigger(Elevator.STOW))
                 .whileTrue(intakeAngle)
                 .onTrue(intakeCommand);
 
