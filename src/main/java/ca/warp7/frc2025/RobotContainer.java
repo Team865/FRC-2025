@@ -362,8 +362,7 @@ public class RobotContainer {
                 .whileTrue(intakeAngle)
                 .onTrue(intakeCommand);
 
-        controller.leftStick().onTrue(drive.zeroPose());
-        controller.rightStick().onTrue(drive.zeroPose());
+        controller.start().onTrue(drive.zeroPose());
 
         controller.povDown().onTrue(climberDown);
 
@@ -374,7 +373,7 @@ public class RobotContainer {
 
         controller.back().onTrue(climberStow);
 
-        controller.start().toggleOnTrue(slowModeToggle);
+        // controller.start().toggleOnTrue(slowModeToggle);
     }
 
     private void configureTuningBindings() {}
