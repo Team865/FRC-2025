@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8700068794281375,
-        "y": 1.5575336327597848
+        "x": 2.357596628289474,
+        "y": 0.7641652960526312
       },
       "isLocked": false,
       "linkedName": "Left Human Player"
@@ -20,8 +20,8 @@
         "y": 2.961987179487179
       },
       "prevControl": {
-        "x": 3.0574358974358966,
-        "y": 2.19826923076923
+        "x": 2.2350123355263163,
+        "y": 0.929769736842105
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.625289641783567,
+      "waypointRelativePos": 0.6609625501002004,
       "rotationDegrees": 59.99999999999999
     }
   ],
@@ -51,7 +51,7 @@
   ],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.25,
+    "maxAcceleration": 3.625,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1100.0,
     "nominalVoltage": 12.0,

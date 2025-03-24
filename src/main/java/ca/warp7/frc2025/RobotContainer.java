@@ -52,6 +52,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -62,6 +63,9 @@ public class RobotContainer {
     private final ClimberSubsystem climber;
     private final VisionSubsystem vision;
     private final LEDSubsystem leds;
+
+    public Trigger alignedTrigger;
+    public Supplier<Pose2d> alignedGoal;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -182,7 +186,7 @@ public class RobotContainer {
         Command outakeCommand = new SequentialCommandGroup(new WaitUntilCommand(intake.bottomSensorTrigger()
                         .negate()
                         .and(intake.middleSensorTrigger().negate()))
-                .deadlineFor(intake.runVoltsRoller(-6)));
+                .deadlineFor(intake.runVoltsRoller(-10)));
 
         Command intakeCommand = new SequentialCommandGroup(
                 intake.runVoltsRoller(-4).until(intake.bottomSensorTrigger()), elevator.setGoal(Elevator.STOW));
@@ -237,17 +241,28 @@ public class RobotContainer {
                 .withTimeout(0.75)
                 .andThen(leds.setToDefault());
 
+        alignedGoal = () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPoseGoal", pose2d);
+            return pose2d;
+        };
+
         Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
-            return Optional.of(FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPoseGoal", pose2d);
+            return Optional.of(pose2d);
         });
 
         Command scoreLeft = drive.runOnce(() -> drive.target = 0);
         Command scoreRight = drive.runOnce(() -> drive.target = 1);
 
-        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
-            return Optional.of(FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0));
+        alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPose", pose2d);
+            return Optional.of(pose2d);
         });
 
         Trigger canMoveElevator = new Trigger(() -> drive.getPose()
@@ -291,8 +306,11 @@ public class RobotContainer {
                 .andThen(outakeCommand.get())
                 .onlyIf(canMoveElevator);
 
-        Command autoScoreL1 =
-                align.get().until(alignedTrigger).andThen(spitCoral).onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
+        Command autoScoreL1 = align.get()
+                .until(alignedTrigger)
+                .andThen(elevator.setGoal(Elevator.L1))
+                .andThen(intake.runVoltsRoller(-2).until(notHoldingCoral))
+                .onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
 
         Command algaeClearHigh = drive.setSpeedModifer(0.25)
                 .onlyIf(canMoveElevator)
@@ -319,8 +337,8 @@ public class RobotContainer {
                 .andThen(climber.setClimbGains())
                 .andThen(climber.setPivotPosition(Climber.CLIMB));
 
-        Command reverseRollers = intake.runVoltsRoller(-4);
-        Command forwardRollers = intake.runVoltsRoller(4);
+        Command reverseRollers = intake.runVoltsRoller(-10);
+        Command forwardRollers = intake.runVoltsRoller(3);
 
         drive.setDefaultCommand(driveCommand);
 
@@ -341,12 +359,10 @@ public class RobotContainer {
                 .y()
                 .and(atStow)
                 .and(intake.middleSensorTrigger().negate())
-                .and(elevator.atSetpointTrigger(Elevator.STOW))
                 .whileTrue(intakeAngle)
                 .onTrue(intakeCommand);
 
-        controller.leftStick().onTrue(drive.zeroPose());
-        controller.rightStick().onTrue(drive.zeroPose());
+        controller.start().onTrue(drive.zeroPose());
 
         controller.povDown().onTrue(climberDown);
 
@@ -357,7 +373,7 @@ public class RobotContainer {
 
         controller.back().onTrue(climberStow);
 
-        controller.start().toggleOnTrue(slowModeToggle);
+        // controller.start().toggleOnTrue(slowModeToggle);
     }
 
     private void configureTuningBindings() {}

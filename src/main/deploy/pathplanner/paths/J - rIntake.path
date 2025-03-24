@@ -1,0 +1,80 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.018333333333333,
+        "y": 5.242820512820512
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.030429786352727,
+        "y": 7.071478231502591
+      },
+      "isLocked": false,
+      "linkedName": "Reef J"
+    },
+    {
+      "anchor": {
+        "x": 1.172877261513158,
+        "y": 6.959806743421052
+      },
+      "prevControl": {
+        "x": 1.419755846612611,
+        "y": 6.896767016890926
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Right Human Player"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.19711681547619042,
+      "maxWaypointRelativePos": 0,
+      "constraints": {
+        "maxVelocity": 3.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Stow",
+      "waypointRelativePos": 0.18056175595238091,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Stow"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.625,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 1100.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 126.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "useDefaultConstraints": true
+}

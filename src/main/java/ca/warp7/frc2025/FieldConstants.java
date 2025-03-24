@@ -63,6 +63,20 @@ public class FieldConstants {
                 rightCenterFace.getX(),
                 fieldWidth - rightCenterFace.getY(),
                 Rotation2d.fromRadians(-rightCenterFace.getRotation().getRadians()));
+        public static final Pose2d rightCenterFaceRed = new Pose2d(
+                fieldLength - rightCenterFace.getX(),
+                rightCenterFace.getY(),
+                Rotation2d.fromRadians(rightCenterFace
+                        .getRotation()
+                        .plus(Rotation2d.kCCW_90deg)
+                        .getRadians()));
+        public static final Pose2d leftCenterFaceRed = new Pose2d(
+                rightCenterFaceRed.getX(),
+                leftCenterFace.getY(),
+                Rotation2d.fromRadians(leftCenterFace
+                        .getRotation()
+                        .minus(Rotation2d.kCCW_90deg)
+                        .getRadians()));
     }
 
     public static class Reef {
@@ -72,10 +86,7 @@ public class FieldConstants {
                 Units.inchesToMeters(12); // Side of the reef to the inside of the reef zone line
 
         public static final Pose2d[] centerFaces =
-                new Pose2d[6]; // Starting facing the driver station in clockwise order
-        public static final List<Map<ReefLevel, Pose3d>> branchPositions =
-                new ArrayList<>(); // Starting at the right branch facing the driver station in clockwise
-        public static final List<Map<ReefLevel, Pose2d>> branchPositions2d = new ArrayList<>();
+                new Pose2d[12]; // Starting facing the driver station in clockwise order
 
         static {
             // Initialize faces
@@ -87,55 +98,141 @@ public class FieldConstants {
             centerFaces[4] = aprilTagLayout.getTagPose(22).get().toPose2d();
             centerFaces[5] = aprilTagLayout.getTagPose(17).get().toPose2d();
 
-            // Initialize branch positions
-            for (int face = 0; face < 6; face++) {
-                Map<ReefLevel, Pose3d> fillRight = new HashMap<>();
-                Map<ReefLevel, Pose3d> fillLeft = new HashMap<>();
-                Map<ReefLevel, Pose2d> fillRight2d = new HashMap<>();
-                Map<ReefLevel, Pose2d> fillLeft2d = new HashMap<>();
-                for (var level : ReefLevel.values()) {
-                    Pose2d poseDirection = new Pose2d(center, Rotation2d.fromDegrees(180 - (60 * face)));
-                    double adjustX = Units.inchesToMeters(30.738);
-                    double adjustY = Units.inchesToMeters(6.469);
-
-                    var rightBranchPose = new Pose3d(
-                            new Translation3d(
-                                    poseDirection
-                                            .transformBy(new Transform2d(adjustX, adjustY, new Rotation2d()))
-                                            .getX(),
-                                    poseDirection
-                                            .transformBy(new Transform2d(adjustX, adjustY, new Rotation2d()))
-                                            .getY(),
-                                    level.height),
-                            new Rotation3d(
-                                    0,
-                                    Units.degreesToRadians(level.pitch),
-                                    poseDirection.getRotation().getRadians()));
-                    var leftBranchPose = new Pose3d(
-                            new Translation3d(
-                                    poseDirection
-                                            .transformBy(new Transform2d(adjustX, -adjustY, new Rotation2d()))
-                                            .getX(),
-                                    poseDirection
-                                            .transformBy(new Transform2d(adjustX, -adjustY, new Rotation2d()))
-                                            .getY(),
-                                    level.height),
-                            new Rotation3d(
-                                    0,
-                                    Units.degreesToRadians(level.pitch),
-                                    poseDirection.getRotation().getRadians()));
-
-                    fillRight.put(level, rightBranchPose);
-                    fillLeft.put(level, leftBranchPose);
-                    fillRight2d.put(level, rightBranchPose.toPose2d());
-                    fillLeft2d.put(level, leftBranchPose.toPose2d());
-                }
-                branchPositions.add(fillRight);
-                branchPositions.add(fillLeft);
-                branchPositions2d.add(fillRight2d);
-                branchPositions2d.add(fillLeft2d);
-            }
+            centerFaces[6] = aprilTagLayout.getTagPose(7).get().toPose2d();
+            centerFaces[7] = aprilTagLayout.getTagPose(6).get().toPose2d();
+            centerFaces[8] = aprilTagLayout.getTagPose(11).get().toPose2d();
+            centerFaces[9] = aprilTagLayout.getTagPose(10).get().toPose2d();
+            centerFaces[10] = aprilTagLayout.getTagPose(9).get().toPose2d();
+            centerFaces[11] = aprilTagLayout.getTagPose(8).get().toPose2d();
         }
+
+        // public static final Pose2d[] centerFacesBlue =
+        //         new Pose2d[6]; // Starting facing the driver station in clockwise order
+        // public static final Pose2d[] centerFacesRed =
+        //         new Pose2d[6]; // Starting facing the driver station in clockwise order
+        // public static final List<Map<ReefLevel, Pose3d>> branchPositions =
+        //         new ArrayList<>(); // Starting at the right branch facing the driver station in clockwise
+        // public static final List<Map<ReefLevel, Pose2d>> branchPositions2d = new ArrayList<>();
+
+        // static {
+        //     // Initialize faces
+        //     var aprilTagLayout = AprilTagLayoutType.OFFICIAL.getLayout();
+        //     centerFacesRed[0] = aprilTagLayout.getTagPose(7).get().toPose2d();
+        //     centerFacesRed[1] = aprilTagLayout.getTagPose(6).get().toPose2d();
+        //     centerFacesRed[2] = aprilTagLayout.getTagPose(11).get().toPose2d();
+        //     centerFacesRed[3] = aprilTagLayout.getTagPose(10).get().toPose2d();
+        //     centerFacesRed[4] = aprilTagLayout.getTagPose(9).get().toPose2d();
+        //     centerFacesRed[5] = aprilTagLayout.getTagPose(8).get().toPose2d();
+        //
+        //     // Initialize branch positions
+        //     for (int face = 0; face < 6; face++) {
+        //         Map<ReefLevel, Pose3d> fillRight = new HashMap<>();
+        //         Map<ReefLevel, Pose3d> fillLeft = new HashMap<>();
+        //         Map<ReefLevel, Pose2d> fillRight2d = new HashMap<>();
+        //         Map<ReefLevel, Pose2d> fillLeft2d = new HashMap<>();
+        //         for (var level : ReefLevel.values()) {
+        //             Pose2d poseDirection = new Pose2d(center, Rotation2d.fromDegrees(180 - (60 * face)));
+        //             double adjustX = Units.inchesToMeters(30.738);
+        //             double adjustY = Units.inchesToMeters(6.469);
+        //
+        //             var rightBranchPose = new Pose3d(
+        //                     new Translation3d(
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, adjustY, new Rotation2d()))
+        //                                     .getX(),
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, adjustY, new Rotation2d()))
+        //                                     .getY(),
+        //                             level.height),
+        //                     new Rotation3d(
+        //                             0,
+        //                             Units.degreesToRadians(level.pitch),
+        //                             poseDirection.getRotation().getRadians()));
+        //             var leftBranchPose = new Pose3d(
+        //                     new Translation3d(
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, -adjustY, new Rotation2d()))
+        //                                     .getX(),
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, -adjustY, new Rotation2d()))
+        //                                     .getY(),
+        //                             level.height),
+        //                     new Rotation3d(
+        //                             0,
+        //                             Units.degreesToRadians(level.pitch),
+        //                             poseDirection.getRotation().getRadians()));
+        //
+        //             fillRight.put(level, rightBranchPose);
+        //             fillLeft.put(level, leftBranchPose);
+        //             fillRight2d.put(level, rightBranchPose.toPose2d());
+        //             fillLeft2d.put(level, leftBranchPose.toPose2d());
+        //         }
+        //         branchPositions.add(fillRight);
+        //         branchPositions.add(fillLeft);
+        //         branchPositions2d.add(fillRight2d);
+        //         branchPositions2d.add(fillLeft2d);
+        //     }
+        // }
+        //
+        // static {
+        //     // Initialize faces
+        //     var aprilTagLayout = AprilTagLayoutType.OFFICIAL.getLayout();
+        //     centerFacesBlue[0] = aprilTagLayout.getTagPose(18).get().toPose2d();
+        //     centerFacesBlue[1] = aprilTagLayout.getTagPose(19).get().toPose2d();
+        //     centerFacesBlue[2] = aprilTagLayout.getTagPose(20).get().toPose2d();
+        //     centerFacesBlue[3] = aprilTagLayout.getTagPose(21).get().toPose2d();
+        //     centerFacesBlue[4] = aprilTagLayout.getTagPose(22).get().toPose2d();
+        //     centerFacesBlue[5] = aprilTagLayout.getTagPose(17).get().toPose2d();
+        //
+        //     // Initialize branch positions
+        //     for (int face = 0; face < 6; face++) {
+        //         Map<ReefLevel, Pose3d> fillRight = new HashMap<>();
+        //         Map<ReefLevel, Pose3d> fillLeft = new HashMap<>();
+        //         Map<ReefLevel, Pose2d> fillRight2d = new HashMap<>();
+        //         Map<ReefLevel, Pose2d> fillLeft2d = new HashMap<>();
+        //         for (var level : ReefLevel.values()) {
+        //             Pose2d poseDirection = new Pose2d(center, Rotation2d.fromDegrees(180 - (60 * face)));
+        //             double adjustX = Units.inchesToMeters(30.738);
+        //             double adjustY = Units.inchesToMeters(6.469);
+        //
+        //             var rightBranchPose = new Pose3d(
+        //                     new Translation3d(
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, adjustY, new Rotation2d()))
+        //                                     .getX(),
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, adjustY, new Rotation2d()))
+        //                                     .getY(),
+        //                             level.height),
+        //                     new Rotation3d(
+        //                             0,
+        //                             Units.degreesToRadians(level.pitch),
+        //                             poseDirection.getRotation().getRadians()));
+        //             var leftBranchPose = new Pose3d(
+        //                     new Translation3d(
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, -adjustY, new Rotation2d()))
+        //                                     .getX(),
+        //                             poseDirection
+        //                                     .transformBy(new Transform2d(adjustX, -adjustY, new Rotation2d()))
+        //                                     .getY(),
+        //                             level.height),
+        //                     new Rotation3d(
+        //                             0,
+        //                             Units.degreesToRadians(level.pitch),
+        //                             poseDirection.getRotation().getRadians()));
+        //
+        //             fillRight.put(level, rightBranchPose);
+        //             fillLeft.put(level, leftBranchPose);
+        //             fillRight2d.put(level, rightBranchPose.toPose2d());
+        //             fillLeft2d.put(level, leftBranchPose.toPose2d());
+        //         }
+        //         branchPositions.add(fillRight);
+        //         branchPositions.add(fillLeft);
+        //         branchPositions2d.add(fillRight2d);
+        //         branchPositions2d.add(fillLeft2d);
+        //     }
+        // }
     }
 
     public static class StagingPositions {

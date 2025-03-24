@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.198610169058746,
-        "y": 1.0498693369837928
+        "x": 3.9986071134868424,
+        "y": 1.4120579769736845
       },
       "isLocked": false,
       "linkedName": "Reef E"
@@ -60,7 +60,7 @@
   ],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 3.25,
+    "maxAcceleration": 3.625,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 1100.0,
     "nominalVoltage": 12.0,
