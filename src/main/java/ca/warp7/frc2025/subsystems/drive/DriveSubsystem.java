@@ -241,7 +241,10 @@ public class DriveSubsystem extends SubsystemBase {
         // Calculate module setpoints
         speeds = speeds.times(speedModifer);
 
-        lastSetpoint = setpointGenerator.generateSetpoint(lastSetpoint, speeds, Drivetrain.PERIOD);
+        // lastSetpoint = setpointGenerator.generateSetpoint(lastSetpoint, speeds, Drivetrain.PERIOD);
+        // speeds = ChassisSpeeds.discretize(speeds, 0.02);
+        lastSetpoint = setpointGenerator.generateSetpoint(lastSetpoint, speeds, 0.02);
+
         SwerveModuleState[] setpointStates = lastSetpoint.moduleStates();
 
         // Log unoptimized setpoints and setpoint speeds

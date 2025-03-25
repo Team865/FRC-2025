@@ -1,7 +1,6 @@
 package ca.warp7.frc2025.commands;
 
 import ca.warp7.frc2025.subsystems.drive.DriveSubsystem;
-import ca.warp7.frc2025.util.SensitivityGainAdjustment;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -75,11 +74,9 @@ public class DriveCommands {
                     // Convert to field relative speeds & send command
                     // Convert to field relative speeds & send command
                     ChassisSpeeds speeds = new ChassisSpeeds(
-                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
-                                    * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
-                                    * drive.getMaxLinearSpeedMetersPerSec(),
-                            SensitivityGainAdjustment.steerGainAdjustment(omega) * drive.getMaxAngularSpeedRadPerSec());
+                            linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                            linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                            omega * drive.getMaxAngularSpeedRadPerSec());
                     boolean isFlipped = DriverStation.getAlliance().isPresent()
                             && DriverStation.getAlliance().get() == Alliance.Red;
                     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -120,11 +117,9 @@ public class DriveCommands {
 
                             // Convert to field relative speeds & send command
                             ChassisSpeeds speeds = new ChassisSpeeds(
-                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getX())
-                                            * drive.getMaxLinearSpeedMetersPerSec(),
-                                    SensitivityGainAdjustment.driveGainAdjustment(linearVelocity.getY())
-                                            * drive.getMaxLinearSpeedMetersPerSec(),
-                                    SensitivityGainAdjustment.steerGainAdjustment(omega));
+                                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                                    omega);
                             boolean isFlipped = DriverStation.getAlliance().isPresent()
                                     && DriverStation.getAlliance().get() == Alliance.Red;
                             speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
