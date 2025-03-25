@@ -75,27 +75,23 @@ public class IntakeSubsystem extends SubsystemBase {
         return runOnce(() -> rollersIO.setVolts(inputAmps));
     }
 
-    private void setBottomSensor(boolean value) {
-        if (Robot.isSimulation() && value) {
-            topSensorInputs.objectDistanceMM = topDistanceToCoral;
-        } else {
-            topSensorInputs.objectDistanceMM = 0;
-        }
+    private Command setBottomSensor(boolean value) {
+        return runOnce(() -> {
+            if (Robot.isSimulation()) topSensorInputs.objectDistanceMM = value ? topDistanceToCoral : 0;
+        });
     }
 
-    private void setMiddleSensor(boolean value) {
-        if (Robot.isSimulation() && value) {
-            frontSensorInputs.objectDistanceMM = frontTopDistanceToCoral;
-        } else {
-            frontSensorInputs.objectDistanceMM = 0;
-        }
+    private Command setMiddleSensor(boolean value) {
+        return runOnce(() -> {
+            if (Robot.isSimulation()) topSensorInputs.objectDistanceMM = value ? topDistanceToCoral : 0;
+        });
     }
 
     public Command intake() {
         return (Robot.isSimulation()
                         ? new WaitCommand(0.5)
-                                .andThen(() -> setMiddleSensor(true))
-                                .andThen(() -> setBottomSensor(true))
+                                .andThen(setMiddleSensor(true))
+                                .andThen(setBottomSensor(true))
                                 .andThen(new PrintCommand("Simulating intake"))
                         : Commands.none())
                 .andThen(runVoltsRoller(-4).until(bottomSensorTrigger()));
@@ -104,14 +100,18 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command outake() {
         return (Robot.isSimulation()
                         ? new WaitCommand(0.5)
-                                .andThen(() -> setMiddleSensor(false))
-                                .andThen(() -> setBottomSensor(false))
+                                .andThen(setMiddleSensor(false))
+                                .andThen(setBottomSensor(false))
                                 .andThen(new PrintCommand("Simulating outake"))
                         : Commands.none())
-                .andThen(runVoltsRoller(-10)
-                        .until(bottomSensorTrigger()
-                                .negate()
-                                .and(middleSensorTrigger())
-                                .negate()));
+                .andThen(runVoltsRoller(-10).until(notHoldingCoral()));
+    }
+
+    public Trigger holdingCoral() {
+        return middleSensorTrigger().and(bottomSensorTrigger());
+    }
+
+    public Trigger notHoldingCoral() {
+        return middleSensorTrigger().negate().and(bottomSensorTrigger().negate());
     }
 }

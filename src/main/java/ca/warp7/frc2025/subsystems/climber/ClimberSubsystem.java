@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.Logger;
 
@@ -50,6 +51,27 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command setClimbGains() {
         return runOnce(() -> io.setPD(Climber.kPClimbing, Climber.kDClimbing));
+    }
+
+    public Command down() {
+        return setPivotServoPosition(0)
+                .andThen(new WaitCommand(1))
+                .andThen(setNormalGains())
+                .andThen(setPivotPosition(Climber.DOWN));
+    }
+
+    public Command stow() {
+        return setPivotServoPosition(1)
+                .andThen(new WaitCommand(1))
+                .andThen(setNormalGains())
+                .andThen(setPivotPosition(Climber.STOW));
+    }
+
+    public Command climb() {
+        return setPivotServoPosition(1)
+                .andThen(new WaitCommand(1))
+                .andThen(setClimbGains())
+                .andThen(setPivotPosition(Climber.CLIMB));
     }
 
     @Override

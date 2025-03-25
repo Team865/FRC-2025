@@ -21,6 +21,7 @@ public class FieldConstantsHelper {
             FieldConstants.CoralStation.leftCenterFaceRed);
 
     private static List<Pose2d> faces = List.of(FieldConstants.Reef.centerFaces);
+    private static Translation2d center = FieldConstants.Reef.center;
     // private static List<Pose2d> facesRed = List.of(FieldConstants.Reef.centerFacesBlue);
 
     public static Pose2d getClosestStation(Pose2d pose) {
@@ -32,6 +33,18 @@ public class FieldConstantsHelper {
 
     public static Pose2d getclosestFace(Pose2d pose) {
         return pose.nearest(faces);
+    }
+
+    public static Rotation2d getAngleToReefCenter(Pose2d pose) {
+        // FieldConstants.Reef.center;
+        // pose.relativeTo()
+        //
+        Rotation2d angle = new Rotation2d(center.getX() - pose.getX(), center.getY() - pose.getY());
+        Logger.recordOutput("Reef", new Pose2d(pose.getTranslation(), angle));
+
+        return angle;
+
+        // return new Rotation2d();
     }
 
     public static Pose2d faceToRobotPose(Pose2d pose, boolean left) {
