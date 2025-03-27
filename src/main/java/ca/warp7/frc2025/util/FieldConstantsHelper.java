@@ -1,9 +1,11 @@
 package ca.warp7.frc2025.util;
 
 import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
 
 import ca.warp7.frc2025.Constants.Drivetrain;
 import ca.warp7.frc2025.FieldConstants;
+import ca.warp7.frc2025.FieldConstants.Reef;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,6 +13,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import java.util.List;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class FieldConstantsHelper {
@@ -45,6 +48,15 @@ public class FieldConstantsHelper {
         return angle;
 
         // return new Rotation2d();
+    }
+
+    @AutoLogOutput
+    public static Distance lengthFromCenterOfReef(Pose2d pose) {
+        double target = pose.getTranslation().getDistance(AllianceFlipUtil.apply(Reef.center));
+        // Logger.recordOutput("Field Constants/Length From Cenete");
+        Logger.recordOutput("Field Constants/Length From Ceneter Pose", target);
+
+        return Meters.of(target);
     }
 
     public static Pose2d faceToRobotPose(Pose2d pose, boolean left) {

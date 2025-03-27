@@ -90,7 +90,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private Command setMiddleSensor(boolean value) {
         return runOnce(() -> {
-            if (Robot.isSimulation()) topSensorInputs.objectDistanceMM = value ? topDistanceToCoral : 0;
+            if (Robot.isSimulation()) frontSensorInputs.objectDistanceMM = value ? frontTopDistanceToCoral : 0;
         });
     }
 

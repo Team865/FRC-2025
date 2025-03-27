@@ -165,37 +165,32 @@ public class RobotContainer {
             return Optional.of(pose2d);
         });
 
-        Trigger canMoveElevator = new Trigger(() -> drive.getPose()
-                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
-                        .getTranslation()
-                        .minus(FieldConstantsHelper.faceToRobotPose(
-                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
-                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
-                                .getTranslation())
-                        .getNorm()
-                > 0.12);
+        Trigger toFarForExtend = new Trigger(() -> {
+            double distance =
+                    FieldConstantsHelper.lengthFromCenterOfReef(drive.getPose()).magnitude();
 
-        Trigger canMoveElevator2 = new Trigger(() -> drive.getPose()
-                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
-                        .getTranslation()
-                        .minus(FieldConstantsHelper.faceToRobotPose(
-                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
-                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
-                                .getTranslation())
-                        .getNorm()
-                < 1);
+            return 1.7 <= distance;
+        });
+
+        Trigger toCloseForExtension = new Trigger(() -> {
+            double distance =
+                    FieldConstantsHelper.lengthFromCenterOfReef(drive.getPose()).magnitude();
+
+            return distance <= 1.5;
+        });
 
         superstructure = new Superstructure(
                 elevator,
                 intake,
                 climber,
                 driveController.y(),
-                driveController.rightTrigger().and(canMoveElevator2),
+                driveController.rightTrigger(),
                 alignedTrigger,
                 driveController.a(),
                 new Trigger(() -> false),
                 new Trigger(() -> false),
-                canMoveElevator);
+                toCloseForExtension,
+                toFarForExtend);
 
         leds = new LEDSubsystem(2);
         leds.setToDefault();
@@ -320,8 +315,11 @@ public class RobotContainer {
         driveController.povRight().whileTrue(intake.setTorque());
 
         driveController.start().onTrue(drive.zeroPose());
+        driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
         driveController.leftTrigger().toggleOnTrue(driveReefAngleCenter).toggleOnFalse(driveCommand);
+
+        // Fix elevator thing
     }
 
     private void configureTuningBindings() {}
