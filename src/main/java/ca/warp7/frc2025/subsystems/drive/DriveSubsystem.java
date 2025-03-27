@@ -260,6 +260,11 @@ public class DriveSubsystem extends SubsystemBase {
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
 
+    /** Stops the drive. */
+    public void stop() {
+        runVelocity(new ChassisSpeeds());
+    }
+
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {

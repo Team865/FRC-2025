@@ -59,6 +59,12 @@ public class FieldConstantsHelper {
         return Meters.of(target);
     }
 
+    public static Pose2d stationToRobot(Pose2d pose) {
+        Transform2d transformer =
+                new Transform2d(new Translation2d(Drivetrain.LENGTH.div(2), Meters.zero()), Rotation2d.k180deg);
+        return pose.transformBy(transformer);
+    }
+
     public static Pose2d faceToRobotPose(Pose2d pose, boolean left) {
         Distance yOffset =
                 Meter.of(left ? VisionConstants.robotToCamera0.getY() : VisionConstants.robotToCamera1.getY());

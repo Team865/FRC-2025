@@ -9,6 +9,7 @@ import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.Constants.Intake;
 import ca.warp7.frc2025.FieldConstants.ReefLevel;
 import ca.warp7.frc2025.commands.DriveCommands;
+import ca.warp7.frc2025.commands.DriveToPose;
 import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO;
@@ -65,9 +66,6 @@ public class RobotContainer {
 
     // Superstructure
     private final Superstructure superstructure;
-
-    public Trigger alignedTrigger;
-    public Supplier<Pose2d> alignedGoal;
 
     // Controller
     private final CommandXboxController driveController = new CommandXboxController(0);
@@ -158,7 +156,7 @@ public class RobotContainer {
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
-        alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
             Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
             Logger.recordOutput("alignedPose", pose2d);
@@ -183,12 +181,12 @@ public class RobotContainer {
                 elevator,
                 intake,
                 climber,
-                driveController.y(),
+                driveController.y().or(driveController.x()),
                 driveController.rightTrigger(),
                 alignedTrigger,
                 driveController.a(),
-                new Trigger(() -> false),
-                new Trigger(() -> false),
+                driveController.povDown(),
+                driveController.povUp(),
                 toCloseForExtension,
                 toFarForExtend);
 
@@ -213,6 +211,7 @@ public class RobotContainer {
         } else {
         }
         configureBindings();
+        // configureTuningBindings();
     }
 
     private void configureNamedCommands() {
@@ -245,13 +244,9 @@ public class RobotContainer {
                         .getRotation()
                         .rotateBy(Rotation2d.k180deg));
 
-        Command driveReefAngleFace = DriveCommands.joystickDriveAtAngle(
+        Command driveToHumanPlayer = new DriveToPose(
                 drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () -> FieldConstantsHelper.getclosestFace(drive.getPose())
-                        .getRotation()
-                        .rotateBy(Rotation2d.k180deg));
+                () -> FieldConstantsHelper.stationToRobot(FieldConstantsHelper.getClosestStation(drive.getPose())));
 
         Command driveReefAngleCenter = DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -259,18 +254,32 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () -> FieldConstantsHelper.getAngleToReefCenter(drive.getPose()));
 
-        alignedGoal = () -> {
+        Supplier<Pose2d> alignedGoal = () -> {
             Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
             Logger.recordOutput("alignedPoseGoal", pose2d);
             return pose2d;
         };
 
-        Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
+        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPose", pose2d);
+            return Optional.of(pose2d);
+        });
+
+        // Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
+        //     Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+        //             FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+        //     Logger.recordOutput("alignedPoseGoal", pose2d);
+        //     return Optional.of(pose2d);
+        // });
+
+        Supplier<Command> align = () -> new DriveToPose(drive, () -> {
             Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
             Logger.recordOutput("alignedPoseGoal", pose2d);
-            return Optional.of(pose2d);
+            return pose2d;
         });
 
         Command scoreLeft = drive.runOnce(() -> drive.target = 0);
@@ -306,11 +315,12 @@ public class RobotContainer {
                 .and(superstructure.readyToScore())
                 .whileTrue(align.get().until(alignedTrigger));
 
-        driveController.x().and(superstructure.canIntake()).whileTrue(intakeAngle);
-        driveController.y().and(superstructure.canIntake()).whileTrue(intakeAngle);
+        // driveController.x().and(superstructure.canIntake()).whileTrue(intakeAngle);
+        driveController.y().and(superstructure.canIntake()).whileTrue(driveToHumanPlayer);
+        driveController.x().whileTrue(intakeAngle);
 
-        driveController.povDown().whileTrue(intake.runVoltsRoller(-10));
-        driveController.povUp().whileTrue(intake.runVoltsRoller(4));
+        driveController.povRight().whileTrue(intake.runVoltsRoller(-10));
+        driveController.povLeft().whileTrue(intake.runVoltsRoller(4));
 
         driveController.povRight().whileTrue(intake.setTorque());
 
@@ -322,7 +332,24 @@ public class RobotContainer {
         // Fix elevator thing
     }
 
-    private void configureTuningBindings() {}
+    private void configureTuningBindings() {
+        Supplier<Command> align = () -> new DriveToPose(drive, () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPoseGoal", pose2d);
+            return pose2d;
+        });
+
+        Command driveCommand = DriveCommands.joystickDrive(
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> -driveController.getRightX());
+
+        drive.setDefaultCommand(driveCommand);
+
+        driveController.rightTrigger().whileTrue(align.get());
+    }
 
     public Command getAutonomousCommand() {
         return autoChooser.get();
