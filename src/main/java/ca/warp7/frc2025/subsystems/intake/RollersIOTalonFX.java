@@ -31,7 +31,7 @@ public class RollersIOTalonFX implements RollersIO {
 
     private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
-    private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0);
+    private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(50.0);
     private final VoltageOut VoltageOut = new VoltageOut(0.0).withUpdateFreqHz(50.0);
     // private final NeutralOut neutralOut = new NeutralOut();
 
@@ -58,7 +58,7 @@ public class RollersIOTalonFX implements RollersIO {
                 () -> BaseStatusSignal.setUpdateFrequencyForAll(
                         50.0, position, velocity, appliedVoltage, supplyCurrent, torqueCurrent, tempCelsius));
 
-        PhoenixUtil.tryUntilOk(5, () -> talon.optimizeBusUtilization(0, 1.0));
+        // PhoenixUtil.tryUntilOk(5, () -> talon.optimizeBusUtilization(0, 1.0));
     }
 
     @Override

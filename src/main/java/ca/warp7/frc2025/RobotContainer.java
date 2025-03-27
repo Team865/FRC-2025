@@ -35,6 +35,7 @@ import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import ca.warp7.frc2025.subsystems.leds.LEDSubsystem;
 import ca.warp7.frc2025.subsystems.superstructure.Superstructure;
+import ca.warp7.frc2025.subsystems.superstructure.Superstructure.AlgaeLevel;
 import ca.warp7.frc2025.subsystems.superstructure.Superstructure.SuperState;
 import ca.warp7.frc2025.util.FieldConstantsHelper;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -174,16 +175,26 @@ public class RobotContainer {
                         .getNorm()
                 > 0.12);
 
+        Trigger canMoveElevator2 = new Trigger(() -> drive.getPose()
+                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                        .getTranslation()
+                        .minus(FieldConstantsHelper.faceToRobotPose(
+                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
+                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                                .getTranslation())
+                        .getNorm()
+                < 1);
+
         superstructure = new Superstructure(
                 elevator,
                 intake,
                 climber,
                 driveController.y(),
-                driveController.rightTrigger(),
+                driveController.rightTrigger().and(canMoveElevator2),
                 alignedTrigger,
                 driveController.a(),
-                driveController.povDown(),
-                driveController.povUp(),
+                new Trigger(() -> false),
+                new Trigger(() -> false),
                 canMoveElevator);
 
         leds = new LEDSubsystem(2);
@@ -204,10 +215,9 @@ public class RobotContainer {
             autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-            configureTuningBindings();
         } else {
-            configureBindings();
         }
+        configureBindings();
     }
 
     private void configureNamedCommands() {
@@ -284,7 +294,12 @@ public class RobotContainer {
         operatorController.povLeft().onTrue(scoreLeft);
         operatorController.povRight().onTrue(scoreRight);
 
+        operatorController.povUp().onTrue(superstructure.setAlgae(AlgaeLevel.HIGH));
+        operatorController.povDown().onTrue(superstructure.setAlgae(AlgaeLevel.LOW));
+
         operatorController.back().onTrue(superstructure.forceState(SuperState.IDLE));
+
+        // operatorController.povUp().onTrue(elevator.set)
 
         // driveController.x().onTrue(scoreLeft);
         // driveController.b().onTrue(scoreRight);
@@ -302,11 +317,11 @@ public class RobotContainer {
         driveController.povDown().whileTrue(intake.runVoltsRoller(-10));
         driveController.povUp().whileTrue(intake.runVoltsRoller(4));
 
+        driveController.povRight().whileTrue(intake.setTorque());
+
         driveController.start().onTrue(drive.zeroPose());
 
-        driveController.leftTrigger().onTrue(driveReefAngleCenter);
-        driveController.leftBumper().onTrue(driveReefAngleFace);
-        driveController.rightBumper().onTrue(driveCommand);
+        driveController.leftTrigger().toggleOnTrue(driveReefAngleCenter).toggleOnFalse(driveCommand);
     }
 
     private void configureTuningBindings() {}
