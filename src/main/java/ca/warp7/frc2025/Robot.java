@@ -7,6 +7,8 @@ package ca.warp7.frc2025;
 import au.grapplerobotics.CanBridge;
 import ca.warp7.frc2025.util.PhoenixUtil;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
@@ -59,6 +61,9 @@ public class Robot extends LoggedRobot {
         robotContainer = new RobotContainer();
 
         FollowPathCommand.warmupCommand().schedule();
+
+        Alert alert = new Alert("Change back tolerence for auto align", AlertType.kInfo);
+        alert.set(true);
     }
 
     @Override

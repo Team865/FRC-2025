@@ -28,8 +28,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
     private static final double DEADBAND = 0.1;
-    private static final double ANGLE_KP = 4.0;
-    private static final double ANGLE_KD = 0.4;
+    private static final double ANGLE_KP = 5.0;
+    private static final double ANGLE_KD = 1;
     private static final double ANGLE_MAX_VELOCITY = 8.0;
     private static final double ANGLE_MAX_ACCELERATION = 15.0;
     private static final double AUTOAIM_MAX_VELOCITY = 2.5;
@@ -69,7 +69,7 @@ public class DriveCommands {
                     // Square rotation value for more precise control
                     omega = Math.copySign(omega * omega, omega);
 
-                    // double speedMulti = speedMultiplier.getAsDouble();
+                    // double speed Multi = speed Multiplier.get's Double();
 
                     // Convert to field relative speeds & send command
                     // Convert to field relative speeds & send command
@@ -88,7 +88,7 @@ public class DriveCommands {
     }
 
     /**
-     * Field relative drive command using joystick for linear control and PID for angular control.
+     * Field relative drive command using joystick for linear control and PEED for angular control.
      * Possible use cases include snapping to an angle, aiming at a vision target, or controlling
      * absolute rotation with a joystick.
      */
@@ -114,6 +114,13 @@ public class DriveCommands {
                             double omega = angleController.calculate(
                                     drive.getRotation().getRadians(),
                                     rotationSupplier.get().getRadians());
+
+                            if (MathUtil.isNear(
+                                    rotationSupplier.get().getDegrees(),
+                                    drive.getRotation().getDegrees(),
+                                    1)) {
+                                omega = 0;
+                            }
 
                             // Convert to field relative speeds & send command
                             ChassisSpeeds speeds = new ChassisSpeeds(
@@ -175,9 +182,9 @@ public class DriveCommands {
                 .map((target) -> MathUtil.isNear(
                                 pos.get().getRotation().getDegrees(),
                                 target.getRotation().getDegrees(),
-                                1)
-                        && MathUtil.isNear(pos.get().getX(), target.getX(), Units.inchesToMeters(1))
-                        && MathUtil.isNear(pos.get().getY(), target.getY(), Units.inchesToMeters(1)))
+                                3)
+                        && MathUtil.isNear(pos.get().getX(), target.getX(), Units.inchesToMeters(3))
+                        && MathUtil.isNear(pos.get().getY(), target.getY(), Units.inchesToMeters(3)))
                 .orElse(false));
     }
 

@@ -7,12 +7,12 @@ package ca.warp7.frc2025;
 import ca.warp7.frc2025.Constants.Climber;
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.Constants.Intake;
+import ca.warp7.frc2025.FieldConstants.ReefLevel;
 import ca.warp7.frc2025.commands.DriveCommands;
 import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO;
 import ca.warp7.frc2025.subsystems.Vision.VisionIOLimelight;
-import ca.warp7.frc2025.subsystems.Vision.VisionIOPhotonVisionSim;
 import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
 import ca.warp7.frc2025.subsystems.climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.climber.ClimberIOTalonFX;
@@ -34,7 +34,9 @@ import ca.warp7.frc2025.subsystems.intake.RollersIO;
 import ca.warp7.frc2025.subsystems.intake.RollersIOSim;
 import ca.warp7.frc2025.subsystems.intake.RollersIOTalonFX;
 import ca.warp7.frc2025.subsystems.leds.LEDSubsystem;
-import ca.warp7.frc2025.subsystems.leds.LEDSubsystem.SparkColor;
+import ca.warp7.frc2025.subsystems.superstructure.Superstructure;
+import ca.warp7.frc2025.subsystems.superstructure.Superstructure.AlgaeLevel;
+import ca.warp7.frc2025.subsystems.superstructure.Superstructure.SuperState;
 import ca.warp7.frc2025.util.FieldConstantsHelper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -43,8 +45,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -63,11 +63,15 @@ public class RobotContainer {
     private final VisionSubsystem vision;
     private final LEDSubsystem leds;
 
+    // Superstructure
+    private final Superstructure superstructure;
+
     public Trigger alignedTrigger;
     public Supplier<Pose2d> alignedGoal;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    private final CommandXboxController driveController = new CommandXboxController(0);
+    private final CommandXboxController operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -128,18 +132,17 @@ public class RobotContainer {
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
-                vision = new VisionSubsystem(
-                        drive::addVisionMeasurement,
-                        // new VisionIOPhotonVisionSim(
-                        //         VisionConstants.camera0Name,
-                        //         VisionConstants.robotToCamera0,
-                        //         () -> drive.getPose(),
-                        //         false),
-                        new VisionIOPhotonVisionSim(
-                                VisionConstants.camera1Name,
-                                VisionConstants.robotToCamera1,
-                                () -> drive.getPose(),
-                                false));
+                vision = new VisionSubsystem(drive::addVisionMeasurement);
+                // new VisionIOPhotonVisionSim(
+                //         VisionConstants.camera0Name,
+                //         VisionConstants.robotToCamera0,
+                //         () -> drive.getPose(),
+                //         false),
+                // new VisionIOPhotonVisionSim(
+                //         VisionConstants.camera1Name,
+                //         VisionConstants.robotToCamera1,
+                //         () -> drive.getPose(),
+                //         false));
                 break;
             case REPLAY:
             default:
@@ -154,6 +157,45 @@ public class RobotContainer {
 
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
+
+        alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
+                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
+            Logger.recordOutput("alignedPose", pose2d);
+            return Optional.of(pose2d);
+        });
+
+        Trigger canMoveElevator = new Trigger(() -> drive.getPose()
+                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                        .getTranslation()
+                        .minus(FieldConstantsHelper.faceToRobotPose(
+                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
+                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                                .getTranslation())
+                        .getNorm()
+                > 0.12);
+
+        Trigger canMoveElevator2 = new Trigger(() -> drive.getPose()
+                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                        .getTranslation()
+                        .minus(FieldConstantsHelper.faceToRobotPose(
+                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
+                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
+                                .getTranslation())
+                        .getNorm()
+                < 1);
+
+        superstructure = new Superstructure(
+                elevator,
+                intake,
+                climber,
+                driveController.y(),
+                driveController.rightTrigger().and(canMoveElevator2),
+                alignedTrigger,
+                driveController.a(),
+                new Trigger(() -> false),
+                new Trigger(() -> false),
+                canMoveElevator);
 
         leds = new LEDSubsystem(2);
         leds.setToDefault();
@@ -173,10 +215,9 @@ public class RobotContainer {
             autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-            configureTuningBindings();
         } else {
-            configureBindings();
         }
+        configureBindings();
     }
 
     private void configureNamedCommands() {
@@ -196,36 +237,32 @@ public class RobotContainer {
      */
     private void configureBindings() {
         Command driveCommand = DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> -driveController.getRightX());
 
         Command intakeAngle = DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
                 () -> FieldConstantsHelper.getClosestStation(drive.getPose())
                         .getRotation()
                         .rotateBy(Rotation2d.k180deg));
 
-        Command slowModeToggle = drive.runOnce(() -> {
-            if (drive.speedModifer != 1) {
-                drive.speedModifer = 1;
-            } else {
-                drive.speedModifer = 0.5;
-            }
-        });
+        Command driveReefAngleFace = DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> FieldConstantsHelper.getclosestFace(drive.getPose())
+                        .getRotation()
+                        .rotateBy(Rotation2d.k180deg));
 
-        // run intake motor until sensor
-        Command intakeCommand = intake.intake()
-                .raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
-                .andThen(leds.setBlinkingCmd(SparkColor.LIME, SparkColor.BLACK, 20)
-                        .withTimeout(0.75))
-                .andThen(leds.setToDefault());
-
-        Supplier<Command> outakeCommand = () -> intake.outake()
-                .raceWith(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
-                .andThen(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20))
-                .withTimeout(0.75)
-                .andThen(leds.setToDefault());
+        Command driveReefAngleCenter = DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> FieldConstantsHelper.getAngleToReefCenter(drive.getPose()));
 
         alignedGoal = () -> {
             Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
@@ -244,122 +281,47 @@ public class RobotContainer {
         Command scoreLeft = drive.runOnce(() -> drive.target = 0);
         Command scoreRight = drive.runOnce(() -> drive.target = 1);
 
-        alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
-            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPose", pose2d);
-            return Optional.of(pose2d);
-        });
+        operatorController.y().onTrue(superstructure.setLevel(ReefLevel.L4));
+        operatorController.x().onTrue(superstructure.setLevel(ReefLevel.L3));
+        operatorController.b().onTrue(superstructure.setLevel(ReefLevel.L2));
+        operatorController.a().onTrue(superstructure.setLevel(ReefLevel.L1));
 
-        Trigger canMoveElevator = new Trigger(() -> drive.getPose()
-                        .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
-                        .getTranslation()
-                        .minus(FieldConstantsHelper.faceToRobotPose(
-                                        FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0)
-                                .relativeTo(new Pose2d(FieldConstants.Reef.center, Rotation2d.kZero))
-                                .getTranslation())
-                        .getNorm()
-                > 0.12);
+        driveController.povUp().onTrue(superstructure.setLevel(ReefLevel.L4));
+        driveController.povRight().onTrue(superstructure.setLevel(ReefLevel.L3));
+        driveController.povLeft().onTrue(superstructure.setLevel(ReefLevel.L2));
+        driveController.povDown().onTrue(superstructure.setLevel(ReefLevel.L1));
 
-        Command stow = drive.setSpeedModifer(1)
-                .andThen(elevator.setGoal(Elevator.STOW).andThen(intake.setVoltsRoller(0)))
-                .onlyIf(canMoveElevator);
+        operatorController.povLeft().onTrue(scoreLeft);
+        operatorController.povRight().onTrue(scoreRight);
 
-        Trigger holdingCoral = intake.middleSensorTrigger();
+        operatorController.povUp().onTrue(superstructure.setAlgae(AlgaeLevel.HIGH));
+        operatorController.povDown().onTrue(superstructure.setAlgae(AlgaeLevel.LOW));
 
-        Trigger notHoldingCoral = holdingCoral.negate();
+        operatorController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
-        Trigger atStow = elevator.atSetpointTrigger(Elevator.STOW);
+        // operatorController.povUp().onTrue(elevator.set)
 
-        Command spitCoral = intake.setVoltsRoller(5)
-                .andThen(new WaitCommand(1))
-                .andThen(new WaitUntilCommand(notHoldingCoral))
-                .andThen(intake.setVoltsRoller(0));
-
-        Command autoScoreL4 = elevator.setGoal(Elevator.L4)
-                .andThen(align.get().until(alignedTrigger))
-                .andThen(outakeCommand.get())
-                .onlyIf(canMoveElevator);
-
-        Command autoScoreL3 = elevator.setGoal(Elevator.L3)
-                .andThen(align.get().until(alignedTrigger))
-                .andThen(outakeCommand.get())
-                .onlyIf(canMoveElevator);
-
-        Command autoScoreL2 = elevator.setGoal(Elevator.L2)
-                .onlyIf(canMoveElevator)
-                .andThen(align.get().until(alignedTrigger))
-                .andThen(outakeCommand.get())
-                .onlyIf(canMoveElevator);
-
-        Command autoScoreL1 = align.get()
-                .until(alignedTrigger)
-                .andThen(elevator.setGoal(Elevator.L1))
-                .andThen(intake.runVoltsRoller(-2).until(notHoldingCoral))
-                .onlyIf(elevator.atSetpointTrigger(Elevator.STOW));
-
-        Command algaeClearHigh = drive.setSpeedModifer(0.25)
-                .onlyIf(canMoveElevator)
-                .andThen(elevator.setGoal(Elevator.L2A))
-                .andThen(intake.setVoltsRoller(4.5));
-
-        Command algaeClearLow = drive.setSpeedModifer(0.25)
-                .onlyIf(canMoveElevator)
-                .andThen(elevator.setGoal(Elevator.L1A))
-                .andThen(intake.setVoltsRoller(4.5));
-
-        Command climberDown = climber.setPivotServoPosition(0)
-                .andThen(new WaitCommand(1))
-                .andThen(climber.setNormalGains())
-                .andThen(climber.setPivotPosition(Climber.DOWN));
-
-        Command climberStow = climber.setPivotServoPosition(1)
-                .andThen(new WaitCommand(1))
-                .andThen(climber.setNormalGains())
-                .andThen(climber.setPivotPosition(Climber.STOW));
-
-        Command climb = climber.setPivotServoPosition(1)
-                .andThen(new WaitCommand(1))
-                .andThen(climber.setClimbGains())
-                .andThen(climber.setPivotPosition(Climber.CLIMB));
-
-        Command reverseRollers = intake.runVoltsRoller(-10);
-        Command forwardRollers = intake.runVoltsRoller(3);
+        // driveController.x().onTrue(scoreLeft);
+        // driveController.b().onTrue(scoreRight);
 
         drive.setDefaultCommand(driveCommand);
 
-        controller.leftTrigger().whileTrue(autoScoreL4);
+        driveController
+                .rightTrigger()
+                .and(superstructure.readyToScore())
+                .whileTrue(align.get().until(alignedTrigger));
 
-        controller.rightTrigger().whileTrue(Commands.either(autoScoreL3, algaeClearHigh, holdingCoral));
+        driveController.x().and(superstructure.canIntake()).whileTrue(intakeAngle);
+        driveController.y().and(superstructure.canIntake()).whileTrue(intakeAngle);
 
-        controller.leftBumper().whileTrue(autoScoreL2);
-        controller.rightBumper().whileTrue(Commands.either(autoScoreL1, algaeClearLow, holdingCoral));
+        driveController.povDown().whileTrue(intake.runVoltsRoller(-10));
+        driveController.povUp().whileTrue(intake.runVoltsRoller(4));
 
-        controller.a().onTrue(stow);
+        driveController.povRight().whileTrue(intake.setTorque());
 
-        controller.x().onTrue(scoreLeft);
+        driveController.start().onTrue(drive.zeroPose());
 
-        controller.b().onTrue(scoreRight);
-
-        controller
-                .y()
-                .and(atStow)
-                .and(intake.middleSensorTrigger().negate())
-                .whileTrue(intakeAngle)
-                .onTrue(intakeCommand);
-
-        controller.start().onTrue(drive.zeroPose());
-
-        controller.povDown().onTrue(climberDown);
-
-        controller.povUp().onTrue(climb);
-
-        controller.povRight().whileTrue(reverseRollers);
-        controller.povLeft().whileTrue(forwardRollers);
-
-        controller.back().onTrue(climberStow);
-
-        // controller.start().toggleOnTrue(slowModeToggle);
+        driveController.leftTrigger().toggleOnTrue(driveReefAngleCenter).toggleOnFalse(driveCommand);
     }
 
     private void configureTuningBindings() {}

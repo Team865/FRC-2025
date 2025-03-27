@@ -19,10 +19,10 @@ public class ElevatorIOSim implements ElevatorIO {
 
     private TrapezoidProfile profile = new TrapezoidProfile(new Constraints(0, 0));
 
-    private final PIDController feedbackController = new PIDController(0, 0, 0);
+    private final PIDController feedbackController = new PIDController(10, 0, 1);
 
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
-            0, 0.06, (DCMotor.getKrakenX60(1).KvRadPerSecPerVolt * Elevator.DRUM_RADIUS_METERS) / Elevator.GEAR_RATIO);
+            0, 0.06, (DCMotor.getKrakenX60(2).KvRadPerSecPerVolt * Elevator.DRUM_RADIUS_METERS) / Elevator.GEAR_RATIO);
 
     private State goal = new TrapezoidProfile.State(0, 0);
 
@@ -40,7 +40,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
     @Override
     public void setControlConstants(double kG, double kS, double kV, double kA, double kP, double kD) {
-        feedbackController.setPID(kP, 0, kD);
+        // feedbackController.setPID(kP, 0, kD);
 
         feedforwardController = new ElevatorFeedforward(kG, kS, kV, kA);
     }
