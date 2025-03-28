@@ -41,7 +41,6 @@ import ca.warp7.frc2025.subsystems.superstructure.Superstructure.SuperState;
 import ca.warp7.frc2025.util.FieldConstantsHelper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -52,8 +51,6 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -77,6 +74,13 @@ public class RobotContainer {
 
     public Trigger alignedToReef;
     private Command align;
+
+    enum Side {
+        Left,
+        Right
+    }
+
+    public Side side = Side.Left;
 
     public RobotContainer() {
         switch (Constants.currentMode) {
@@ -151,12 +155,10 @@ public class RobotContainer {
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
-        DriveToPose driveToReef = new DriveToPose(drive, () -> {
-            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPoseGoal", pose2d);
-            return pose2d;
-        });
+        DriveToPose driveToReef = new DriveToPose(
+                drive,
+                () -> FieldConstantsHelper.faceToRobotPose(
+                        FieldConstantsHelper.getclosestFace(drive.getPose()), side == Side.Left));
 
         alignedToReef =
                 new Trigger(() -> driveToReef.withinTolerance(Units.inchesToMeters(1), Rotation2d.fromDegrees(2)));
@@ -209,7 +211,6 @@ public class RobotContainer {
                     "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
             autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
         }
         configureBindings();
     }
@@ -248,8 +249,8 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () -> FieldConstantsHelper.getAngleToReefCenter(drive.getPose()));
 
-        Command scoreLeft = drive.runOnce(() -> drive.target = 0);
-        Command scoreRight = drive.runOnce(() -> drive.target = 1);
+        Command scoreLeft = drive.runOnce(() -> side = Side.Left);
+        Command scoreRight = drive.runOnce(() -> side = Side.Right);
 
         operatorController.y().onTrue(superstructure.setLevel(ReefLevel.L4));
         operatorController.x().onTrue(superstructure.setLevel(ReefLevel.L3));

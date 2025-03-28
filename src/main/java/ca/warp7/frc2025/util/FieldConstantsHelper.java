@@ -29,31 +29,27 @@ public class FieldConstantsHelper {
 
     public static Pose2d getClosestStation(Pose2d pose) {
         Pose2d station = pose.nearest(stations);
-        Logger.recordOutput("AutoAlign/hpStation", station);
-        Logger.recordOutput("AutoAlign/hpStationFlip", AllianceFlipUtil.apply(station));
+        Logger.recordOutput("Field Constants/Closest Station", station);
         return station;
     }
 
     public static Pose2d getclosestFace(Pose2d pose) {
-        return pose.nearest(faces);
+        Pose2d face = pose.nearest(faces);
+        Logger.recordOutput("Field Constants/Closest Reef Face", face);
+        return face;
     }
 
     public static Rotation2d getAngleToReefCenter(Pose2d pose) {
-        // FieldConstants.Reef.center;
-        // pose.relativeTo()
-        //
         Rotation2d angle = new Rotation2d(center.getX() - pose.getX(), center.getY() - pose.getY());
-        Logger.recordOutput("Reef", new Pose2d(pose.getTranslation(), angle));
+
+        Logger.recordOutput("Field Constants/Pose from center of reef", new Pose2d(pose.getTranslation(), angle));
 
         return angle;
-
-        // return new Rotation2d();
     }
 
     @AutoLogOutput
     public static Distance lengthFromCenterOfReef(Pose2d pose) {
         double target = pose.getTranslation().getDistance(AllianceFlipUtil.apply(Reef.center));
-        // Logger.recordOutput("Field Constants/Length From Cenete");
         Logger.recordOutput("Field Constants/Length From Ceneter Pose", target);
 
         return Meters.of(target);
@@ -62,7 +58,12 @@ public class FieldConstantsHelper {
     public static Pose2d stationToRobot(Pose2d pose) {
         Transform2d transformer =
                 new Transform2d(new Translation2d(Drivetrain.LENGTH.div(2), Meters.zero()), Rotation2d.k180deg);
-        return pose.transformBy(transformer);
+
+        Pose2d result = pose.transformBy(transformer);
+
+        Logger.recordOutput("Field Constants/Robot Station Pose", result);
+
+        return result;
     }
 
     public static Pose2d faceToRobotPose(Pose2d pose, boolean left) {
@@ -72,6 +73,8 @@ public class FieldConstantsHelper {
                 new Transform2d(new Translation2d(Drivetrain.LENGTH.div(2), yOffset), Rotation2d.k180deg);
 
         pose = pose.transformBy(transformer);
+
+        Logger.recordOutput("Field Constants/Robot Reef Pose", pose);
 
         return pose;
     }

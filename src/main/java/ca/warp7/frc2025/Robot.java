@@ -71,7 +71,7 @@ public class Robot extends LoggedRobot {
         // Switch thread to high priority to improve loop timing
         Threads.setCurrentThreadPriority(true, 10);
 
-        Logger.recordOutput("robo/thing", robotContainer.alignedToReef);
+        Logger.recordOutput("State/Side", robotContainer.side);
 
         PhoenixUtil.refreshAll();
         CommandScheduler.getInstance().run();
