@@ -138,7 +138,7 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.IDLE)
                 .or(stateTriggers.get(SuperState.READY_CORAL))
                 .and(preClimberReq)
-                .onTrue(slowMode)
+                // .onTrue(slowMode)
                 .whileTrue(climber.down())
                 .and(climber.atSetpointTrigger())
                 .onTrue(forceState(SuperState.CLIMB));
