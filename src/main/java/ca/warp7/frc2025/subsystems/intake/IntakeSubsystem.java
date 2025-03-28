@@ -35,7 +35,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double topDistanceToCoral = 95;
     private final double frontTopDistanceToCoral = 50;
 
-    private final LoggedTunableNumber processerTorque = new LoggedTunableNumber("Intake/torque", 0.60);
+    private final LoggedTunableNumber processerTorque = new LoggedTunableNumber("Intake/torque", 0.40);
 
     public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
