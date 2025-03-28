@@ -78,4 +78,17 @@ public class FieldConstantsHelper {
 
         return pose;
     }
+
+    public static Pose2d getAlgaeGoalPose(Pose2d pose) {
+        pose = getclosestFace(pose);
+
+        Transform2d transformer =
+                new Transform2d(new Translation2d(Drivetrain.LENGTH.div(2), Meters.zero()), Rotation2d.k180deg);
+
+        pose = pose.transformBy(transformer);
+
+        Logger.recordOutput("Field Constants/Robot Algae Pose", pose);
+
+        return pose;
+    }
 }

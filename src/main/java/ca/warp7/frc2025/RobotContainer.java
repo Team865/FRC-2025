@@ -47,6 +47,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -73,7 +74,9 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoChooser;
 
     public Trigger alignedToReef;
-    private Command align;
+    private Command alignToReef;
+    private Trigger alignedToAlgae;
+    private Command alignToAlgae;
 
     enum Side {
         Left,
@@ -166,7 +169,14 @@ public class RobotContainer {
         alignedToReef =
                 new Trigger(() -> driveToReef.withinTolerance(Units.inchesToMeters(5), Rotation2d.fromDegrees(5)));
 
-        align = driveToReef;
+        alignToReef = driveToReef;
+
+        DriveToPose driveToAlgae = new DriveToPose(drive, () -> FieldConstantsHelper.getAlgaeGoalPose(drive.getPose()));
+
+        alignToAlgae = driveToAlgae.withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+
+        alignedToAlgae =
+                new Trigger(() -> driveToAlgae.withinTolerance(Units.inchesToMeters(5), Rotation2d.fromDegrees(5)));
 
         Trigger toFarForExtend = new Trigger(() -> {
             double distance =
@@ -190,6 +200,7 @@ public class RobotContainer {
                 driveController.y().or(driveController.x()),
                 driveController.rightTrigger(),
                 alignedToReef,
+                alignedToAlgae,
                 driveController.a(),
                 driveController.povDown(),
                 driveController.povUp(),
@@ -274,7 +285,10 @@ public class RobotContainer {
 
         drive.setDefaultCommand(driveCommand);
 
-        driveController.rightTrigger().whileTrue(align);
+        driveController
+                .rightTrigger()
+                .and(superstructure.holdingAlgae().negate())
+                .whileTrue(Commands.either(alignToReef, alignToAlgae, intake.holdingCoral()));
 
         driveController.y().and(superstructure.canIntake()).whileTrue(driveToHumanPlayer);
 
