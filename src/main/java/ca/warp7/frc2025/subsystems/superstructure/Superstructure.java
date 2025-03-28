@@ -33,7 +33,9 @@ public class Superstructure extends SubsystemBase {
         SCORE_CORAL_L1,
         PRE_ALGAE_HIGH,
         PRE_ALGAE_LOW,
-        CLEAR_ALGAE,
+        INTAKE_ALGAE,
+        READY_ALGAE,
+        SPIT_ALGAE,
         BARGE,
         PRE_CLIMB,
         CLIMB
@@ -42,6 +44,11 @@ public class Superstructure extends SubsystemBase {
     public static enum AlgaeLevel {
         HIGH,
         LOW,
+    }
+
+    public static enum AlgaeTarget {
+        BARGE,
+        PROCESSOR,
     }
 
     @AutoLogOutput(key = "Superstructure/Intake Req")
@@ -73,6 +80,9 @@ public class Superstructure extends SubsystemBase {
 
     @AutoLogOutput(key = "Superstructure/Algae Level")
     private AlgaeLevel algaeLevel = AlgaeLevel.HIGH;
+
+    @AutoLogOutput(key = "Superstructure/Algae Target")
+    private AlgaeTarget algaeTarget = AlgaeTarget.PROCESSOR;
 
     private SuperState lastState = SuperState.IDLE;
     private SuperState state = SuperState.IDLE;
@@ -147,23 +157,31 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers.get(SuperState.IDLE).and(intakeReq).onTrue(forceState(SuperState.INTAKE_CORAL));
 
-        // stateTriggers
-        //         .get(SuperState.IDLE)
-        //         .and(() -> lastState == SuperState.PRE_ALGAE_HIGH)
-        //         .and(preScoreReq)
-        //         .onTrue(forceState(SuperState.BARGE));
+        stateTriggers.get(SuperState.READY_ALGAE)
+            .whileTrue(intake.setTorque())
+            .whileTrue(elevator.setGoal(Elevator.STOW))
+            .and(preScoreReq)
+            .and(() -> algaeTarget == AlgaeTarget.PROCESSOR)
+            .onTrue(forceState(SuperState.SPIT_ALGAE));
+
+        stateTriggers.get(SuperState.SPIT_ALGAE)
+            .onTrue(intake.runVoltsRoller(-10).withTimeout(2.0).andThen(forceState(SuperState.IDLE)));
+
+        stateTriggers.get(SuperState.READY_ALGAE)
+            .whileTrue(intake.setTorque())
+            .whileTrue(elevator.setGoal(Elevator.STOW))
+            .and(preScoreReq)
+            .and(() -> algaeTarget == AlgaeTarget.BARGE)
+            .onTrue(forceState(SuperState.BARGE));
 
         stateTriggers
                 .get(SuperState.BARGE)
                 .onTrue(elevator.setGoal(Elevator.L4)
                         .andThen(new WaitCommand(0.5))
-                        .andThen(intake.runVoltsRoller(-10).withTimeout(2)));
-
-        stateTriggers.get(SuperState.BARGE).and(stowReq).onTrue(elevator.setGoal(Elevator.STOW));
+                        .andThen(intake.runVoltsRoller(-10).withTimeout(2)).andThen(forceState(SuperState.IDLE)));
 
         stateTriggers
                 .get(SuperState.IDLE)
-                .and(() -> lastState != SuperState.PRE_ALGAE_HIGH)
                 .and(preScoreReq)
                 .and(elevatorTooClose.negate())
                 .and(() -> algaeLevel == AlgaeLevel.HIGH)
@@ -184,7 +202,15 @@ public class Superstructure extends SubsystemBase {
         stateTriggers
                 .get(SuperState.PRE_ALGAE_HIGH)
                 .whileTrue(elevator.setGoal(Elevator.L2A))
-                .whileTrue(intake.setTorque());
+                .whileTrue(intake.setTorque())
+                .and(elevatorTooClose.negate())
+                .onTrue(forceState(SuperState.READY_ALGAE));
+
+        stateTriggers
+                .get(SuperState.PRE_ALGAE_LOW)
+                .whileTrue(intake.setTorque())
+                .and(elevatorTooClose.negate())
+                .onTrue(forceState(SuperState.READY_ALGAE));
 
         stateTriggers
                 .get(SuperState.INTAKE_CORAL)
