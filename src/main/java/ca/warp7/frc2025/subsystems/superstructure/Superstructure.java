@@ -5,6 +5,8 @@ import ca.warp7.frc2025.FieldConstants.ReefLevel;
 import ca.warp7.frc2025.subsystems.climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
+import ca.warp7.frc2025.subsystems.leds.LEDSubsystem;
+import ca.warp7.frc2025.subsystems.leds.LEDSubsystem.SparkColor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -79,6 +81,7 @@ public class Superstructure extends SubsystemBase {
     private final ElevatorSubsystem elevator;
     private final IntakeSubsystem intake;
     private final ClimberSubsystem climber;
+    private final LEDSubsystem leds;
 
     private Command slowMode;
     private Command normalMode;
@@ -87,6 +90,7 @@ public class Superstructure extends SubsystemBase {
             ElevatorSubsystem elevator,
             IntakeSubsystem intake,
             ClimberSubsystem climber,
+            LEDSubsystem leds,
             Trigger intakeReq,
             Trigger preScoreReq,
             Trigger scoreReq,
@@ -100,6 +104,7 @@ public class Superstructure extends SubsystemBase {
         this.elevator = elevator;
         this.intake = intake;
         this.climber = climber;
+        this.leds = leds;
 
         this.intakeReq = intakeReq;
         this.preScoreReq = preScoreReq;
@@ -125,6 +130,7 @@ public class Superstructure extends SubsystemBase {
         stateTriggers
                 .get(SuperState.IDLE)
                 .onTrue(elevator.setGoal(Elevator.STOW))
+                .onTrue(leds.setToDefault())
                 .and(() -> !isAlgaeLike())
                 .onTrue(intake.setVoltsRoller(0));
 
@@ -179,14 +185,19 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.PRE_ALGAE_HIGH)
                 .whileTrue(elevator.setGoal(Elevator.L2A))
                 .whileTrue(intake.setTorque());
-        // .whileTrue(intake.setVoltsRoller(-8));
 
         stateTriggers
                 .get(SuperState.INTAKE_CORAL)
                 .whileTrue(intake.intake())
+                .whileTrue(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
                 .and(intake.holdingCoral())
                 .onTrue(forceState(SuperState.READY_CORAL));
 
+        stateTriggers
+                .get(SuperState.READY_CORAL)
+                .whileTrue(leds.setBlinkingCmd(SparkColor.LIME, SparkColor.BLACK, 20)
+                        .withTimeout(0.75)
+                        .andThen(leds.setToDefault()));
         stateTriggers
                 .get(SuperState.READY_CORAL)
                 .whileTrue(elevator.setGoal(Elevator.STOW))
@@ -258,7 +269,13 @@ public class Superstructure extends SubsystemBase {
                 .and(stowReq)
                 .onTrue(forceState(SuperState.READY_CORAL));
 
-        stateTriggers.get(SuperState.SCORE_CORAL).and(scoreReq).whileTrue(intake.outake());
+        stateTriggers
+                .get(SuperState.SCORE_CORAL)
+                .and(scoreReq)
+                .onTrue(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
+                .whileTrue(intake.outake())
+                .and(intake.notHoldingCoral())
+                .onTrue(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20));
 
         stateTriggers
                 .get(SuperState.SCORE_CORAL)

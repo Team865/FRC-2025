@@ -155,13 +155,16 @@ public class RobotContainer {
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
+        leds = new LEDSubsystem(2);
+        leds.setToDefault();
+
         DriveToPose driveToReef = new DriveToPose(
                 drive,
                 () -> FieldConstantsHelper.faceToRobotPose(
                         FieldConstantsHelper.getclosestFace(drive.getPose()), side == Side.Left));
 
         alignedToReef =
-                new Trigger(() -> driveToReef.withinTolerance(Units.inchesToMeters(1), Rotation2d.fromDegrees(2)));
+                new Trigger(() -> driveToReef.withinTolerance(Units.inchesToMeters(5), Rotation2d.fromDegrees(5)));
 
         align = driveToReef;
 
@@ -183,6 +186,7 @@ public class RobotContainer {
                 elevator,
                 intake,
                 climber,
+                leds,
                 driveController.y().or(driveController.x()),
                 driveController.rightTrigger(),
                 alignedToReef,
@@ -194,8 +198,6 @@ public class RobotContainer {
                 drive.setSpeedModifer(0.25),
                 drive.setSpeedModifer(1));
 
-        leds = new LEDSubsystem(2);
-        leds.setToDefault();
         configureNamedCommands();
 
         // Set up auto routines
