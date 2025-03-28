@@ -80,6 +80,9 @@ public class Superstructure extends SubsystemBase {
     private final IntakeSubsystem intake;
     private final ClimberSubsystem climber;
 
+    private Command slowMode;
+    private Command normalMode;
+
     public Superstructure(
             ElevatorSubsystem elevator,
             IntakeSubsystem intake,
@@ -91,7 +94,9 @@ public class Superstructure extends SubsystemBase {
             Trigger preClimberReq,
             Trigger climberReq,
             Trigger elevatorTooClose,
-            Trigger elevatorTooFar) {
+            Trigger elevatorTooFar,
+            Command slowMode,
+            Command normalMode) {
         this.elevator = elevator;
         this.intake = intake;
         this.climber = climber;
@@ -104,6 +109,9 @@ public class Superstructure extends SubsystemBase {
         this.climberReq = climberReq;
         this.elevatorTooClose = elevatorTooClose;
         this.elevatorTooFar = elevatorTooFar;
+
+        this.slowMode = slowMode;
+        this.normalMode = normalMode;
 
         for (var state : SuperState.values()) {
             stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
@@ -124,6 +132,7 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.IDLE)
                 .or(stateTriggers.get(SuperState.READY_CORAL))
                 .and(preClimberReq)
+                .onTrue(slowMode)
                 .whileTrue(climber.down())
                 .and(climber.atSetpointTrigger())
                 .onTrue(forceState(SuperState.CLIMB));
@@ -132,11 +141,11 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers.get(SuperState.IDLE).and(intakeReq).onTrue(forceState(SuperState.INTAKE_CORAL));
 
-        stateTriggers
-                .get(SuperState.IDLE)
-                .and(() -> lastState == SuperState.PRE_ALGAE_HIGH)
-                .and(preScoreReq)
-                .onTrue(forceState(SuperState.BARGE));
+        // stateTriggers
+        //         .get(SuperState.IDLE)
+        //         .and(() -> lastState == SuperState.PRE_ALGAE_HIGH)
+        //         .and(preScoreReq)
+        //         .onTrue(forceState(SuperState.BARGE));
 
         stateTriggers
                 .get(SuperState.BARGE)
@@ -182,7 +191,6 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.READY_CORAL)
                 .whileTrue(elevator.setGoal(Elevator.STOW))
                 .and(elevatorTooFar.negate())
-                .and(scoreReq)
                 .and(() -> reefLevel == ReefLevel.L4)
                 .onTrue(forceState(SuperState.PRE_L4));
 
@@ -190,7 +198,6 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.READY_CORAL)
                 .whileTrue(elevator.setGoal(Elevator.STOW))
                 .and(elevatorTooFar.negate())
-                .and(scoreReq)
                 .and(() -> reefLevel == ReefLevel.L3)
                 .onTrue(forceState(SuperState.PRE_L3));
 
@@ -210,6 +217,7 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers
                 .get(SuperState.PRE_L4)
+                .and(preScoreReq)
                 .whileTrue(elevator.setGoal(Elevator.L4))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
@@ -217,6 +225,7 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers
                 .get(SuperState.PRE_L3)
+                .and(preScoreReq)
                 .whileTrue(elevator.setGoal(Elevator.L3))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
@@ -282,8 +291,9 @@ public class Superstructure extends SubsystemBase {
         return intake.holdingCoral();
     }
 
+    @AutoLogOutput(key = "Superstructure/Intake Coral Trigger")
     public Trigger canIntake() {
-        return stateTriggers.get(SuperState.INTAKE_CORAL);
+        return stateTriggers.get(SuperState.INTAKE_CORAL).or(stateTriggers.get(SuperState.IDLE));
     }
 
     public Command setLevel(ReefLevel reefLevel) {

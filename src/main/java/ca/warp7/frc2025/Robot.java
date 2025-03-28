@@ -62,14 +62,16 @@ public class Robot extends LoggedRobot {
 
         FollowPathCommand.warmupCommand().schedule();
 
-        Alert alert = new Alert("Change back tolerence for auto align", AlertType.kInfo);
-        alert.set(true);
+        new Alert("Change back tolerence for auto align", AlertType.kInfo).set(true);
+        new Alert("Re enable algae", AlertType.kInfo).set(true);
     }
 
     @Override
     public void robotPeriodic() {
         // Switch thread to high priority to improve loop timing
         Threads.setCurrentThreadPriority(true, 10);
+
+        Logger.recordOutput("robo/thing", robotContainer.alignedToReef);
 
         PhoenixUtil.refreshAll();
         CommandScheduler.getInstance().run();

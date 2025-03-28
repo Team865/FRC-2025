@@ -44,13 +44,14 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import java.util.Optional;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -74,14 +75,8 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    public enum ControlMode {
-        MANUAL,
-        ASSIST,
-    }
-
-    private ControlMode controlMode = ControlMode.ASSIST;
-
-    private Trigger isManual = new Trigger(() -> controlMode == ControlMode.MANUAL);
+    public Trigger alignedToReef;
+    private Command align;
 
     public RobotContainer() {
         switch (Constants.currentMode) {
@@ -156,18 +151,23 @@ public class RobotContainer {
                 vision = new VisionSubsystem(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         }
 
-        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
+        DriveToPose driveToReef = new DriveToPose(drive, () -> {
             Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
                     FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPose", pose2d);
-            return Optional.of(pose2d);
+            Logger.recordOutput("alignedPoseGoal", pose2d);
+            return pose2d;
         });
+
+        alignedToReef =
+                new Trigger(() -> driveToReef.withinTolerance(Units.inchesToMeters(1), Rotation2d.fromDegrees(2)));
+
+        align = driveToReef;
 
         Trigger toFarForExtend = new Trigger(() -> {
             double distance =
                     FieldConstantsHelper.lengthFromCenterOfReef(drive.getPose()).magnitude();
 
-            return 3 <= distance;
+            return 2 <= distance;
         });
 
         Trigger toCloseForExtension = new Trigger(() -> {
@@ -183,12 +183,14 @@ public class RobotContainer {
                 climber,
                 driveController.y().or(driveController.x()),
                 driveController.rightTrigger(),
-                alignedTrigger,
+                alignedToReef,
                 driveController.a(),
                 driveController.povDown(),
                 driveController.povUp(),
                 toCloseForExtension,
-                toFarForExtend);
+                toFarForExtend,
+                drive.setSpeedModifer(0.25),
+                drive.setSpeedModifer(1));
 
         leds = new LEDSubsystem(2);
         leds.setToDefault();
@@ -208,10 +210,8 @@ public class RobotContainer {
             autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-        } else {
         }
         configureBindings();
-        // configureTuningBindings();
     }
 
     private void configureNamedCommands() {
@@ -236,51 +236,17 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () -> -driveController.getRightX());
 
-        Command intakeAngle = DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () -> FieldConstantsHelper.getClosestStation(drive.getPose())
-                        .getRotation()
-                        .rotateBy(Rotation2d.k180deg));
-
         Command driveToHumanPlayer = new DriveToPose(
-                drive,
-                () -> FieldConstantsHelper.stationToRobot(FieldConstantsHelper.getClosestStation(drive.getPose())));
+                        drive,
+                        () -> FieldConstantsHelper.stationToRobot(
+                                FieldConstantsHelper.getClosestStation(drive.getPose())))
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
 
         Command driveReefAngleCenter = DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> -driveController.getLeftY(),
                 () -> -driveController.getLeftX(),
                 () -> FieldConstantsHelper.getAngleToReefCenter(drive.getPose()));
-
-        Supplier<Pose2d> alignedGoal = () -> {
-            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPoseGoal", pose2d);
-            return pose2d;
-        };
-
-        Trigger alignedTrigger = DriveCommands.isAligned(() -> drive.getPose(), () -> {
-            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPose", pose2d);
-            return Optional.of(pose2d);
-        });
-
-        // Supplier<Command> align = () -> DriveCommands.poseLockDriveCommand(drive, () -> {
-        //     Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-        //             FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-        //     Logger.recordOutput("alignedPoseGoal", pose2d);
-        //     return Optional.of(pose2d);
-        // });
-
-        Supplier<Command> align = () -> new DriveToPose(drive, () -> {
-            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPoseGoal", pose2d);
-            return pose2d;
-        });
 
         Command scoreLeft = drive.runOnce(() -> drive.target = 0);
         Command scoreRight = drive.runOnce(() -> drive.target = 1);
@@ -303,21 +269,11 @@ public class RobotContainer {
 
         operatorController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
-        // operatorController.povUp().onTrue(elevator.set)
-
-        // driveController.x().onTrue(scoreLeft);
-        // driveController.b().onTrue(scoreRight);
-
         drive.setDefaultCommand(driveCommand);
 
-        driveController
-                .rightTrigger()
-                .and(superstructure.readyToScore())
-                .whileTrue(align.get().until(alignedTrigger));
+        driveController.rightTrigger().whileTrue(align);
 
-        // driveController.x().and(superstructure.canIntake()).whileTrue(intakeAngle);
         driveController.y().and(superstructure.canIntake()).whileTrue(driveToHumanPlayer);
-        driveController.x().whileTrue(intakeAngle);
 
         driveController.povRight().whileTrue(intake.runVoltsRoller(-10));
         driveController.povLeft().whileTrue(intake.runVoltsRoller(4));
@@ -328,28 +284,9 @@ public class RobotContainer {
         driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
         driveController.leftTrigger().toggleOnTrue(driveReefAngleCenter).toggleOnFalse(driveCommand);
-
-        // Fix elevator thing
     }
 
-    private void configureTuningBindings() {
-        Supplier<Command> align = () -> new DriveToPose(drive, () -> {
-            Pose2d pose2d = FieldConstantsHelper.faceToRobotPose(
-                    FieldConstantsHelper.getclosestFace(drive.getPose()), drive.target == 0);
-            Logger.recordOutput("alignedPoseGoal", pose2d);
-            return pose2d;
-        });
-
-        Command driveCommand = DriveCommands.joystickDrive(
-                drive,
-                () -> -driveController.getLeftY(),
-                () -> -driveController.getLeftX(),
-                () -> -driveController.getRightX());
-
-        drive.setDefaultCommand(driveCommand);
-
-        driveController.rightTrigger().whileTrue(align.get());
-    }
+    private void configureTuningBindings() {}
 
     public Command getAutonomousCommand() {
         return autoChooser.get();

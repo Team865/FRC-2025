@@ -63,7 +63,7 @@ public class DriveToPose extends Command {
         thetaMaxAcceleration.initDefault(8.0);
         thetaMaxVelocityAuto.initDefault(Units.degreesToRadians(360.0));
         thetaMaxAccelerationAuto.initDefault(8.0);
-        driveTolerance.initDefault(0.01);
+        driveTolerance.initDefault(Units.inchesToMeters(1.0));
         thetaTolerance.initDefault(Units.degreesToRadians(1.0));
         ffMinRadius.initDefault(0.01);
         ffMaxRadius.initDefault(0.05);
@@ -247,6 +247,7 @@ public class DriveToPose extends Command {
     public void end(boolean interrupted) {
         drive.stop();
         running = false;
+        System.out.println(interrupted);
         // Clear logs
         Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});
         Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {});
