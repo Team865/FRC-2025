@@ -260,18 +260,13 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () -> FieldConstantsHelper.getAngleToReefCenter(drive.getPose()));
 
-        Command scoreLeft = drive.runOnce(() -> side = Side.Left);
-        Command scoreRight = drive.runOnce(() -> side = Side.Right);
+        Command scoreLeft = Commands.runOnce(() -> side = Side.Left);
+        Command scoreRight = Commands.runOnce(() -> side = Side.Right);
 
         operatorController.y().onTrue(superstructure.setLevel(ReefLevel.L4));
         operatorController.x().onTrue(superstructure.setLevel(ReefLevel.L3));
         operatorController.b().onTrue(superstructure.setLevel(ReefLevel.L2));
         operatorController.a().onTrue(superstructure.setLevel(ReefLevel.L1));
-
-        driveController.povUp().onTrue(superstructure.setLevel(ReefLevel.L4));
-        driveController.povRight().onTrue(superstructure.setLevel(ReefLevel.L3));
-        driveController.povLeft().onTrue(superstructure.setLevel(ReefLevel.L2));
-        driveController.povDown().onTrue(superstructure.setLevel(ReefLevel.L1));
 
         operatorController.povLeft().onTrue(scoreLeft);
         operatorController.povRight().onTrue(scoreRight);
@@ -298,6 +293,14 @@ public class RobotContainer {
 
         driveController.povUp().onTrue(climber.climb());
         driveController.povDown().onTrue(climber.down());
+
+        driveController
+                .leftTrigger()
+                .and(driveController
+                        .rightTrigger()
+                        .negate()
+                        .or(driveController.rightBumper().negate()))
+                .whileTrue(driveReefAngleCenter);
     }
 
     private void configureTuningBindings() {}
