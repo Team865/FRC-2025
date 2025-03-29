@@ -247,7 +247,6 @@ public class DriveToPose extends Command {
     public void end(boolean interrupted) {
         drive.stop();
         running = false;
-        System.out.println(interrupted);
         // Clear logs
         Logger.recordOutput("DriveToPose/Setpoint", new Pose2d[] {});
         Logger.recordOutput("DriveToPose/Goal", new Pose2d[] {});
