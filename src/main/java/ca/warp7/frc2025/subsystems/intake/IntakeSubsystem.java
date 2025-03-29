@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -127,6 +128,14 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command setTorque() {
-        return run(() -> rollersIO.setTorqueAmps(processerTorque.get() * rollerKt));
+        return setTorque(processerTorque.get());
+    }
+
+    public Command setTorque(double nM) {
+        return run(() -> rollersIO.setTorqueAmps(nM * rollerKt));
+    }
+
+    public Command setTorque(DoubleSupplier nM) {
+        return setTorque(nM.getAsDouble());
     }
 }
