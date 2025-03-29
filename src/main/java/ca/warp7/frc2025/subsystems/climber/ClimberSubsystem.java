@@ -42,7 +42,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Trigger atSetpointTrigger() {
-        return new Trigger(() -> MathUtil.isNear(this.goal.getDegrees(), inputs.pivotPositionRads.getDegrees(), 0.5));
+        return new Trigger(() -> MathUtil.isNear(goal.getDegrees(), inputs.pivotPositionRads.getDegrees(), 0.5));
     }
 
     public Command setNormalGains() {

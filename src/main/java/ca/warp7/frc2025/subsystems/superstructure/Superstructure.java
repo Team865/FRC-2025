@@ -2,7 +2,6 @@ package ca.warp7.frc2025.subsystems.superstructure;
 
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.FieldConstants.ReefLevel;
-import ca.warp7.frc2025.subsystems.climber.ClimberSubsystem;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
 import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.leds.LEDSubsystem;
@@ -37,8 +36,6 @@ public class Superstructure extends SubsystemBase {
         READY_ALGAE,
         SPIT_ALGAE,
         BARGE,
-        PRE_CLIMB,
-        CLIMB
     }
 
     public static enum AlgaeLevel {
@@ -69,12 +66,6 @@ public class Superstructure extends SubsystemBase {
     @AutoLogOutput(key = "Superstructure/Stow Req")
     private final Trigger stowReq;
 
-    @AutoLogOutput(key = "Superstructure/Pre Climber Req")
-    private final Trigger preClimberReq;
-
-    @AutoLogOutput(key = "Superstructure/Climber Req")
-    private final Trigger climberReq;
-
     @AutoLogOutput(key = "Superstructure/Elev Too Close")
     private final Trigger elevatorTooClose;
 
@@ -96,7 +87,6 @@ public class Superstructure extends SubsystemBase {
 
     private final ElevatorSubsystem elevator;
     private final IntakeSubsystem intake;
-    private final ClimberSubsystem climber;
     private final LEDSubsystem leds;
 
     private Command slowMode;
@@ -105,7 +95,6 @@ public class Superstructure extends SubsystemBase {
     public Superstructure(
             ElevatorSubsystem elevator,
             IntakeSubsystem intake,
-            ClimberSubsystem climber,
             LEDSubsystem leds,
             Trigger intakeReq,
             Trigger preScoreCoralReq,
@@ -113,15 +102,12 @@ public class Superstructure extends SubsystemBase {
             Trigger scoreReq,
             Trigger scoreAlgaeReq,
             Trigger stowReq,
-            Trigger preClimberReq,
-            Trigger climberReq,
             Trigger elevatorTooClose,
             Trigger elevatorTooFar,
             Command slowMode,
             Command normalMode) {
         this.elevator = elevator;
         this.intake = intake;
-        this.climber = climber;
         this.leds = leds;
 
         this.intakeReq = intakeReq;
@@ -130,8 +116,6 @@ public class Superstructure extends SubsystemBase {
         this.scoreReq = scoreReq;
         this.scoreAlgaeReq = scoreAlgaeReq;
         this.stowReq = stowReq;
-        this.preClimberReq = preClimberReq;
-        this.climberReq = climberReq;
         this.elevatorTooClose = elevatorTooClose;
         this.elevatorTooFar = elevatorTooFar;
 
@@ -154,18 +138,21 @@ public class Superstructure extends SubsystemBase {
                 .and(() -> !isAlgaeLike())
                 .onTrue(intake.setVoltsRoller(0));
 
+        stateTriggers.get(SuperState.IDLE).and(intakeReq).onTrue(forceState(SuperState.INTAKE_CORAL));
+
         stateTriggers
                 .get(SuperState.IDLE)
-                .or(stateTriggers.get(SuperState.READY_CORAL))
-                .and(preClimberReq)
-                // .onTrue(slowMode)
-                .whileTrue(climber.down())
-                .and(climber.atSetpointTrigger())
-                .onTrue(forceState(SuperState.CLIMB));
+                .and(preScoreAlgaeReq)
+                .and(elevatorTooClose.negate())
+                .and(() -> algaeLevel == AlgaeLevel.HIGH)
+                .onTrue(forceState(SuperState.PRE_ALGAE_HIGH));
 
-        stateTriggers.get(SuperState.CLIMB).and(climberReq).whileTrue(climber.climb());
-
-        stateTriggers.get(SuperState.IDLE).and(intakeReq).onTrue(forceState(SuperState.INTAKE_CORAL));
+        stateTriggers
+                .get(SuperState.IDLE)
+                .and(preScoreAlgaeReq)
+                .and(elevatorTooClose.negate())
+                .and(() -> algaeLevel == AlgaeLevel.LOW)
+                .onTrue(forceState(SuperState.PRE_ALGAE_LOW));
 
         stateTriggers
                 .get(SuperState.READY_ALGAE)

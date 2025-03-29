@@ -195,7 +195,6 @@ public class RobotContainer {
         superstructure = new Superstructure(
                 elevator,
                 intake,
-                climber,
                 leds,
                 driveController.y().or(driveController.x()),
                 driveController.rightTrigger(),
@@ -203,8 +202,6 @@ public class RobotContainer {
                 alignedToReef,
                 alignedToAlgae,
                 driveController.a(),
-                driveController.povDown(),
-                driveController.povUp(),
                 toCloseForExtension,
                 toFarForExtend,
                 drive.setSpeedModifer(0.25),
@@ -299,7 +296,8 @@ public class RobotContainer {
         driveController.start().onTrue(drive.zeroPose());
         driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
-        driveController.leftTrigger().toggleOnTrue(driveReefAngleCenter).toggleOnFalse(driveCommand);
+        driveController.povUp().onTrue(climber.climb());
+        driveController.povDown().onTrue(climber.down());
     }
 
     private void configureTuningBindings() {}
