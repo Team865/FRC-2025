@@ -71,7 +71,7 @@ public final class Constants {
         // public static final Distance L2A = L2.minus(Inches.of(1));
         public static final Distance L2A = Inches.of(19.625 - 0.75 - 0.25);
         public static final Distance L1A = Inches.of(9.9);
-        public static final Distance L1 = Inches.of(6);
+        public static final Distance L1 = Inches.of(0.5);
     }
 
     public static final class Intake {

@@ -49,7 +49,7 @@ public class Superstructure extends SubsystemBase {
         PROCESSOR,
     }
 
-    private final LoggedTunableNumber l1Torque = new LoggedTunableNumber("Superstructure/L1 Torque", -0.75);
+    private final LoggedTunableNumber l1Torque = new LoggedTunableNumber("Superstructure/L1 Torque", 0.75);
 
     @AutoLogOutput(key = "Superstructure/Intake Req")
     private final Trigger intakeReq;
@@ -181,7 +181,7 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.BARGE)
                 .onTrue(elevator.setGoal(Elevator.L4)
                         .andThen(new WaitCommand(0.5))
-                        .andThen(intake.runVoltsRoller(-10).withTimeout(2))
+                        .andThen(intake.runVoltsRoller(-10).withTimeout(0.5))
                         .andThen(forceState(SuperState.IDLE)));
 
         stateTriggers
@@ -314,7 +314,9 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.SCORE_CORAL_L1)
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
-                .whileTrue(intake.setTorque(() -> l1Torque.get()));
+                .whileTrue(intake.runVoltsRoller(-10)
+                        .until(intake.middleSensorTrigger())
+                        .andThen(intake.setTorque(() -> l1Torque.get())));
 
         stateTriggers
                 .get(SuperState.SCORE_CORAL_L1)
