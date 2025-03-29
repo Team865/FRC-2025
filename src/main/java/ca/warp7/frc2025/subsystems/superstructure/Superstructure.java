@@ -161,7 +161,7 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.READY_ALGAE)
                 .whileTrue(intake.setTorque())
                 .whileTrue(elevator.setGoal(Elevator.STOW))
-                .and(scoreAlgaeReq)
+                .and(preScoreAlgaeReq)
                 .and(() -> algaeTarget == AlgaeTarget.PROCESSOR)
                 .onTrue(forceState(SuperState.SPIT_ALGAE));
 
