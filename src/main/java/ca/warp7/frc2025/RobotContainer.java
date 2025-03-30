@@ -260,6 +260,14 @@ public class RobotContainer {
                 () -> -driveController.getLeftX(),
                 () -> FieldConstantsHelper.getAngleToReefCenter(drive.getPose()));
 
+        Command intakeAngle = DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driveController.getLeftY(),
+                () -> -driveController.getLeftX(),
+                () -> FieldConstantsHelper.getClosestStation(drive.getPose())
+                        .getRotation()
+                        .rotateBy(Rotation2d.k180deg));
+
         Command scoreLeft = Commands.runOnce(() -> side = Side.Left);
         Command scoreRight = Commands.runOnce(() -> side = Side.Right);
 
@@ -285,6 +293,7 @@ public class RobotContainer {
                 .whileTrue(alignToAlgae);
 
         driveController.y().and(superstructure.canIntake()).whileTrue(driveToHumanPlayer);
+        driveController.x().and(driveController.y().negate()).whileTrue(intakeAngle);
 
         driveController.povRight().whileTrue(intake.runVoltsRoller(-10));
         driveController.povLeft().whileTrue(intake.runVoltsRoller(4));
