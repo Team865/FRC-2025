@@ -36,7 +36,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double topDistanceToCoral = 95;
     private final double frontTopDistanceToCoral = 50;
 
-    private final LoggedTunableNumber processerTorque = new LoggedTunableNumber("Intake/torque", 0.40);
+    private final LoggedTunableNumber processerTorque = new LoggedTunableNumber("Intake/torque", 0.60);
 
     public IntakeSubsystem(RollersIO rollersIO, ObjectDectionIO topSensorIO, ObjectDectionIO frontSensorIO) {
         this.rollersIO = rollersIO;
@@ -102,11 +102,11 @@ public class IntakeSubsystem extends SubsystemBase {
                                 .andThen(setBottomSensor(true))
                                 .andThen(new PrintCommand("Simulating intake"))
                         : Commands.none())
-                .andThen(runVoltsRoller(-4).until(bottomSensorTrigger()));
+                .andThen(runVoltsRoller(-10).until(bottomSensorTrigger()));
     }
 
     public Command outake() {
-        return outake(-10);
+        return outake(-12);
     }
 
     public Command outake(double volts) {
