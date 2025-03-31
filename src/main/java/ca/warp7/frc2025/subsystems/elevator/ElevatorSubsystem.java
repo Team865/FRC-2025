@@ -101,6 +101,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         return new Trigger(() -> this.goal == goal);
     }
 
+    public Distance getHeightOfFirstStage() {
+        return Meters.of(inputs.positionMeters);
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);

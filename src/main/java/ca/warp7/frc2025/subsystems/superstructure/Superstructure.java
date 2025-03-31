@@ -1,5 +1,7 @@
 package ca.warp7.frc2025.subsystems.superstructure;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.FieldConstants.ReefLevel;
 import ca.warp7.frc2025.subsystems.elevator.ElevatorSubsystem;
@@ -7,6 +9,10 @@ import ca.warp7.frc2025.subsystems.intake.IntakeSubsystem;
 import ca.warp7.frc2025.subsystems.leds.LEDSubsystem;
 import ca.warp7.frc2025.subsystems.leds.LEDSubsystem.SparkColor;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -50,6 +56,9 @@ public class Superstructure extends SubsystemBase {
     }
 
     private final LoggedTunableNumber l1Torque = new LoggedTunableNumber("Superstructure/L1 Torque", 0.75);
+
+    @AutoLogOutput
+    private final Pose3d[] components = new Pose3d[2];
 
     @AutoLogOutput(key = "Superstructure/Intake Req")
     private final Trigger intakeReq;
@@ -130,6 +139,10 @@ public class Superstructure extends SubsystemBase {
         }
 
         configureStateTransitionCommands();
+
+        components[0] =
+                new Pose3d(new Translation3d(1, new Rotation3d(0, Units.degreesToRadians(-81), 0)), new Rotation3d());
+        components[1] = new Pose3d();
     }
 
     private void configureStateTransitionCommands() {
@@ -362,5 +375,15 @@ public class Superstructure extends SubsystemBase {
     @Override
     public void periodic() {
         Logger.recordOutput("Superstructure/Superstructure State", state);
+
+        components[0] = new Pose3d(
+                new Translation3d(
+                        elevator.getHeightOfFirstStage().in(Meters), new Rotation3d(0, Units.degreesToRadians(-81), 0)),
+                new Rotation3d());
+        components[1] = new Pose3d(
+                new Translation3d(
+                        elevator.getHeightOfFirstStage().in(Meters) * 2,
+                        new Rotation3d(0, Units.degreesToRadians(-81), 0)),
+                new Rotation3d());
     }
 }
