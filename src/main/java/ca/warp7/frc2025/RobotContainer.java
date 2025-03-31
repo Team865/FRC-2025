@@ -230,7 +230,8 @@ public class RobotContainer {
             autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
             if (DriverStation.getMatchType() == MatchType.None) {
-                autoChooser.addOption("Pit Checks", PitChecker.runChecks());
+                autoChooser.addOption("Pit Checks Sequence", PitChecker.runChecksInSequence());
+                autoChooser.addOption("Pit Checks Parallel", PitChecker.runChecksInParallel());
                 autoChooser.addOption("Intake Checks", intake.check());
                 autoChooser.addOption("Elevator Checks", elevator.check());
             }

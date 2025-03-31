@@ -4,6 +4,7 @@ import ca.warp7.frc2025.Robot;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
 import ca.warp7.frc2025.util.pitchecks.PitCheckable;
 import ca.warp7.frc2025.util.pitchecks.PitChecker;
+import ca.warp7.frc2025.util.pitchecks.PitChecks;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
@@ -145,7 +146,7 @@ public class IntakeSubsystem extends SubsystemBase implements PitCheckable {
 
     @Override
     public Command check() {
-        return rampCheck(
+        return PitChecks.rampCheck(
                 0.75,
                 10.0,
                 0.1,

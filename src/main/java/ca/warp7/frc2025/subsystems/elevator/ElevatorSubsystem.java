@@ -6,6 +6,7 @@ import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
 import ca.warp7.frc2025.util.pitchecks.PitCheckable;
 import ca.warp7.frc2025.util.pitchecks.PitChecker;
+import ca.warp7.frc2025.util.pitchecks.PitChecks;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
@@ -143,15 +144,56 @@ public class ElevatorSubsystem extends SubsystemBase implements PitCheckable {
         }
     }
 
+    public void slowMode() {
+        io.setMotionProfile(Units.inchesToMeters(2), Units.inchesToMeters(2), 0);
+    }
+
+    public void normalMode() {
+        io.setMotionProfile(
+                Units.inchesToMeters(velocity.get()),
+                Units.inchesToMeters(accel.get()),
+                Units.inchesToMeters(jerk.get()));
+    }
+
     @Override
     public Command check() {
-        return rampCheck(
-                12,
-                20.0,
-                0.25,
-                () -> Units.metersToInches(inputs.positionMeters),
-                (inches) -> io.setPosition(Units.inchesToMeters(inches)),
-                10.0,
-                "Elevator");
+        return PitChecks.goalCheck(
+                        new double[] {
+                            Elevator.L1.in(Meters),
+                            Elevator.L1A.in(Meters),
+                            Elevator.L2.in(Meters),
+                            Elevator.L2A.in(Meters),
+                            Elevator.L3.in(Meters),
+                            Elevator.L4.in(Meters),
+                        },
+                        new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
+                        0.25,
+                        Elevator.STOW.in(Meters),
+                        (goal) -> setGoal(Meters.of(goal)),
+                        (goal) -> atSetpointTrigger(Meters.of(goal)),
+                        10,
+                        "Elevator")
+                .beforeStarting(() -> {
+                    slowMode();
+                })
+                .finallyDo(() -> {
+                    normalMode();
+                })
+                .andThen(PitChecks.goalCheck(
+                        new double[] {
+                            Elevator.L1.in(Meters),
+                            Elevator.L1A.in(Meters),
+                            Elevator.L2.in(Meters),
+                            Elevator.L2A.in(Meters),
+                            Elevator.L3.in(Meters),
+                            Elevator.L4.in(Meters),
+                        },
+                        new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
+                        0.25,
+                        Elevator.STOW.in(Meters),
+                        (goal) -> setGoal(Meters.of(goal)),
+                        (goal) -> atSetpointTrigger(Meters.of(goal)),
+                        10,
+                        "Elevator"));
     }
 }

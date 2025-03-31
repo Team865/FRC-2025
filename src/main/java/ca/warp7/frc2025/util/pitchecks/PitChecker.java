@@ -13,11 +13,21 @@ public class PitChecker {
         checkables = newCheckables;
     }
 
-    public static Command runChecks() {
+    public static Command runChecksInSequence() {
         Command command = Commands.sequence();
 
         for (var checkable : checkables) {
             command = command.andThen(checkable.check());
+        }
+
+        return command;
+    }
+
+    public static Command runChecksInParallel() {
+        Command command = Commands.parallel();
+
+        for (var checkable : checkables) {
+            command = command.alongWith(checkable.check());
         }
 
         return command;
