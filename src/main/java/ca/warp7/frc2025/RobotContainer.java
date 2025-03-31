@@ -43,6 +43,7 @@ import ca.warp7.frc2025.util.FieldConstantsHelper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -253,7 +254,10 @@ public class RobotContainer {
         Command driveToHumanPlayer = new DriveToPose(
                         drive,
                         () -> FieldConstantsHelper.stationToRobot(
-                                FieldConstantsHelper.getClosestStation(drive.getPose())))
+                                FieldConstantsHelper.getClosestStation(drive.getPose())),
+                        () -> drive.getPose(),
+                        () -> new Translation2d(0.1, drive.getRotation()),
+                        () -> 0)
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
 
         Command driveReefAngleCenter = DriveCommands.joystickDriveAtAngle(
