@@ -147,12 +147,20 @@ public class IntakeSubsystem extends SubsystemBase implements PitCheckable {
     @Override
     public Command check() {
         return PitChecks.rampCheck(
-                0.75,
-                10.0,
-                0.1,
-                () -> rollersInputs.appliedVoltage,
-                (volts) -> rollersIO.setVolts(volts),
-                10,
-                "Intake");
+                        0.75,
+                        10.0,
+                        0.1,
+                        () -> rollersInputs.appliedVoltage,
+                        (volts) -> rollersIO.setVolts(volts),
+                        10,
+                        "Intake")
+                .andThen(PitChecks.goalCheck(
+                        new double[] {1, 5, 10, -1, -5, -10},
+                        0.1,
+                        0,
+                        (volts) -> setVoltsRoller(volts),
+                        (volts) -> new Trigger(() -> rollersInputs.appliedVoltage == volts),
+                        5,
+                        "Intake"));
     }
 }
