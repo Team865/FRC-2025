@@ -185,7 +185,7 @@ public class RobotContainer {
             double distance =
                     FieldConstantsHelper.lengthFromCenterOfReef(drive.getPose()).magnitude();
 
-            return 2.7 <= distance;
+            return 2.8 <= distance;
         });
 
         Trigger toCloseForExtension = new Trigger(() -> {
