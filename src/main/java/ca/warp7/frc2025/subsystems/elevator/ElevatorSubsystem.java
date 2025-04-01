@@ -4,6 +4,9 @@ import static edu.wpi.first.units.Units.*;
 
 import ca.warp7.frc2025.Constants.Elevator;
 import ca.warp7.frc2025.util.LoggedTunableNumber;
+import ca.warp7.frc2025.util.pitchecks.PitCheckable;
+import ca.warp7.frc2025.util.pitchecks.PitChecker;
+import ca.warp7.frc2025.util.pitchecks.PitChecks;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
@@ -20,7 +23,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
-public class ElevatorSubsystem extends SubsystemBase {
+public class ElevatorSubsystem extends SubsystemBase implements PitCheckable {
     // Logging
     private final ElevatorIO io;
     private final ElevatorIOInputAutoLogged inputs = new ElevatorIOInputAutoLogged();
@@ -67,6 +70,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         io.setControlConstants(kG.get(), kS.get(), kV.get(), kA.get(), kP.get(), kD.get());
 
         io.setMotionProfile(velocity.get(), accel.get(), accel.get());
+
+        PitChecker.registerCheck(this);
     }
 
     public Command setGoal(Distance goal) {
@@ -137,5 +142,58 @@ public class ElevatorSubsystem extends SubsystemBase {
         } else {
             io.setPosition(goal.in(Meters));
         }
+    }
+
+    public void slowMode() {
+        io.setMotionProfile(Units.inchesToMeters(2), Units.inchesToMeters(2), 0);
+    }
+
+    public void normalMode() {
+        io.setMotionProfile(
+                Units.inchesToMeters(velocity.get()),
+                Units.inchesToMeters(accel.get()),
+                Units.inchesToMeters(jerk.get()));
+    }
+
+    @Override
+    public Command check() {
+        return PitChecks.goalCheck(
+                        new double[] {
+                            Elevator.L1.in(Meters),
+                            Elevator.L1A.in(Meters),
+                            Elevator.L2.in(Meters),
+                            Elevator.L2A.in(Meters),
+                            Elevator.L3.in(Meters),
+                            Elevator.L4.in(Meters),
+                        },
+                        new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
+                        0.25,
+                        Elevator.STOW.in(Meters),
+                        (goal) -> setGoal(Meters.of(goal)),
+                        (goal) -> atSetpointTrigger(Meters.of(goal)),
+                        10,
+                        "Elevator")
+                .beforeStarting(() -> {
+                    slowMode();
+                })
+                .finallyDo(() -> {
+                    normalMode();
+                })
+                .andThen(PitChecks.goalCheck(
+                        new double[] {
+                            Elevator.L1.in(Meters),
+                            Elevator.L1A.in(Meters),
+                            Elevator.L2.in(Meters),
+                            Elevator.L2A.in(Meters),
+                            Elevator.L3.in(Meters),
+                            Elevator.L4.in(Meters),
+                        },
+                        new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
+                        0.25,
+                        Elevator.STOW.in(Meters),
+                        (goal) -> setGoal(Meters.of(goal)),
+                        (goal) -> atSetpointTrigger(Meters.of(goal)),
+                        10,
+                        "Elevator"));
     }
 }
