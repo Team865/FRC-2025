@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -87,8 +88,7 @@ public class Superstructure extends SubsystemBase {
     @AutoLogOutput(key = "Superstructure/Reef Level")
     private ReefLevel reefLevel = ReefLevel.L4;
 
-    @AutoLogOutput(key = "Superstructure/Algae Level")
-    private AlgaeLevel algaeLevel = AlgaeLevel.HIGH;
+    private Supplier<AlgaeLevel> algaeLevel;
 
     @AutoLogOutput(key = "Superstructure/Algae Target")
     private AlgaeTarget algaeTarget = AlgaeTarget.PROCESSOR;
@@ -116,8 +116,7 @@ public class Superstructure extends SubsystemBase {
             Trigger stowReq,
             Trigger elevatorTooClose,
             Trigger elevatorTooFar,
-            Command slowMode,
-            Command normalMode) {
+            Supplier<AlgaeLevel> algaeLevel) {
         this.elevator = elevator;
         this.intake = intake;
         this.leds = leds;
@@ -131,8 +130,7 @@ public class Superstructure extends SubsystemBase {
         this.elevatorTooClose = elevatorTooClose;
         this.elevatorTooFar = elevatorTooFar;
 
-        this.slowMode = slowMode;
-        this.normalMode = normalMode;
+        this.algaeLevel = algaeLevel;
 
         for (var state : SuperState.values()) {
             stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
@@ -160,14 +158,14 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.IDLE)
                 .and(preScoreAlgaeReq)
                 .and(elevatorTooClose.negate())
-                .and(() -> algaeLevel == AlgaeLevel.HIGH)
+                .and(() -> algaeLevel.get() == AlgaeLevel.HIGH)
                 .onTrue(forceState(SuperState.PRE_ALGAE_HIGH));
 
         stateTriggers
                 .get(SuperState.IDLE)
                 .and(preScoreAlgaeReq)
                 .and(elevatorTooClose.negate())
-                .and(() -> algaeLevel == AlgaeLevel.LOW)
+                .and(() -> algaeLevel.get() == AlgaeLevel.LOW)
                 .onTrue(forceState(SuperState.PRE_ALGAE_LOW));
 
         stateTriggers
@@ -359,8 +357,8 @@ public class Superstructure extends SubsystemBase {
         return runOnce(() -> this.reefLevel = reefLevel);
     }
 
-    public Command setAlgae(AlgaeLevel algaeLevel) {
-        return runOnce(() -> this.algaeLevel = algaeLevel);
+    public Command setAlgaeTarget(AlgaeTarget target) {
+        return runOnce(() -> this.algaeTarget = target);
     }
 
     public Command forceState(SuperState nextState) {
@@ -385,5 +383,7 @@ public class Superstructure extends SubsystemBase {
                         elevator.getHeightOfFirstStage().in(Meters) * 2,
                         new Rotation3d(0, Units.degreesToRadians(-81), 0)),
                 new Rotation3d());
+
+        Logger.recordOutput("Superstructure/Algae Level", algaeLevel.get());
     }
 }

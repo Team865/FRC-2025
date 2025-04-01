@@ -7,6 +7,8 @@
 
 package ca.warp7.frc2025;
 
+import ca.warp7.frc2025.subsystems.superstructure.Superstructure;
+import ca.warp7.frc2025.subsystems.superstructure.Superstructure.AlgaeLevel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -88,6 +90,8 @@ public class FieldConstants {
         public static final Pose2d[] centerFaces =
                 new Pose2d[12]; // Starting facing the driver station in clockwise order
 
+        public static final Map<Pose2d, AlgaeLevel> algaeLevels = new HashMap<Pose2d, Superstructure.AlgaeLevel>();
+
         static {
             // Initialize faces
             var aprilTagLayout = AprilTagLayoutType.OFFICIAL.getLayout();
@@ -104,6 +108,21 @@ public class FieldConstants {
             centerFaces[9] = aprilTagLayout.getTagPose(10).get().toPose2d();
             centerFaces[10] = aprilTagLayout.getTagPose(9).get().toPose2d();
             centerFaces[11] = aprilTagLayout.getTagPose(8).get().toPose2d();
+        }
+
+        static {
+            algaeLevels.put(centerFaces[0], AlgaeLevel.HIGH);
+            algaeLevels.put(centerFaces[1], AlgaeLevel.LOW);
+            algaeLevels.put(centerFaces[2], AlgaeLevel.HIGH);
+            algaeLevels.put(centerFaces[3], AlgaeLevel.LOW);
+            algaeLevels.put(centerFaces[4], AlgaeLevel.HIGH);
+            algaeLevels.put(centerFaces[5], AlgaeLevel.LOW);
+            algaeLevels.put(centerFaces[6], AlgaeLevel.HIGH);
+            algaeLevels.put(centerFaces[7], AlgaeLevel.LOW);
+            algaeLevels.put(centerFaces[8], AlgaeLevel.HIGH);
+            algaeLevels.put(centerFaces[9], AlgaeLevel.LOW);
+            algaeLevels.put(centerFaces[10], AlgaeLevel.HIGH);
+            algaeLevels.put(centerFaces[11], AlgaeLevel.LOW);
         }
 
         // public static final Pose2d[] centerFacesBlue =
