@@ -174,26 +174,26 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.READY_ALGAE)
                 .whileTrue(intake.setTorque())
                 .whileTrue(elevator.setGoal(Elevator.STOW))
-                .and(preScoreAlgaeReq)
+                .and(preScoreAlgaeReq.negate())
                 .and(() -> algaeTarget == AlgaeTarget.PROCESSOR)
                 .onTrue(forceState(SuperState.SPIT_ALGAE));
 
         stateTriggers
                 .get(SuperState.SPIT_ALGAE)
-                .onTrue(intake.runVoltsRoller(-10).withTimeout(2.0).andThen(forceState(SuperState.IDLE)));
+                .onTrue(intake.runVoltsRoller(-10).withTimeout(0.1).andThen(forceState(SuperState.IDLE)));
 
         stateTriggers
                 .get(SuperState.READY_ALGAE)
                 .whileTrue(intake.setTorque())
                 .whileTrue(elevator.setGoal(Elevator.STOW))
-                .and(scoreAlgaeReq)
+                .and(preScoreAlgaeReq)
                 .and(() -> algaeTarget == AlgaeTarget.BARGE)
                 .onTrue(forceState(SuperState.BARGE));
 
         stateTriggers
                 .get(SuperState.BARGE)
                 .onTrue(elevator.setGoal(Elevator.L4)
-                        .andThen(new WaitCommand(0.5))
+                        .andThen(new WaitCommand(0.3))
                         .andThen(intake.runVoltsRoller(-10).withTimeout(0.5))
                         .andThen(forceState(SuperState.IDLE)));
 

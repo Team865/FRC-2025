@@ -292,7 +292,7 @@ public class RobotContainer {
 
         drive.setDefaultCommand(driveCommand);
 
-        driveController.rightTrigger().whileTrue(alignToReef);
+        driveController.rightTrigger().and(alignedToAlgae.negate()).whileTrue(alignToReef);
         driveController
                 .rightBumper()
                 .and(superstructure.holdingAlgae().negate())
