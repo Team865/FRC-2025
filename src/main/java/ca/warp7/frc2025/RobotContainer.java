@@ -308,8 +308,6 @@ public class RobotContainer {
         driveController.povRight().whileTrue(intake.runVoltsRoller(-10));
         driveController.povLeft().whileTrue(intake.runVoltsRoller(4));
 
-        driveController.povRight().whileTrue(intake.setTorque());
-
         driveController.start().onTrue(drive.zeroPose());
         driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
