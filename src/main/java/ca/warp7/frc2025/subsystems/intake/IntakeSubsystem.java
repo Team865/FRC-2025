@@ -107,7 +107,7 @@ public class IntakeSubsystem extends SubsystemBase implements PitCheckable {
                                 .andThen(setBottomSensor(true))
                                 .andThen(new PrintCommand("Simulating intake"))
                         : Commands.none())
-                .andThen(runVoltsRoller(-10).until(bottomSensorTrigger()));
+                .andThen(runVoltsRoller(-6).until(bottomSensorTrigger()));
     }
 
     public Command outake() {
