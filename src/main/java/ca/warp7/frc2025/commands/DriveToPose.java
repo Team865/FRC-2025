@@ -56,7 +56,7 @@ public class DriveToPose extends Command {
         thetakP.initDefault(4.0);
         thetakD.initDefault(0.0);
         driveMaxVelocity.initDefault(3.8);
-        driveMaxAcceleration.initDefault(3.0);
+        driveMaxAcceleration.initDefault(2.0);
         driveMaxVelocityAuto.initDefault(3.8);
         driveMaxAccelerationAuto.initDefault(3.0);
         thetaMaxVelocity.initDefault(Units.degreesToRadians(360.0));
@@ -163,11 +163,17 @@ public class DriveToPose extends Command {
             thetaController.setD(thetakD.get());
             thetaController.setTolerance(thetaTolerance.get());
         }
-
         // Update constraints
-        driveController.setConstraints(new TrapezoidProfile.Constraints(
-                DriverStation.isAutonomous() ? driveMaxVelocityAuto.get() : driveMaxVelocity.get(),
-                DriverStation.isAutonomous() ? driveMaxAccelerationAuto.get() : driveMaxAcceleration.get()));
+        if (driveMaxVelocity.hasChanged(hashCode())
+                || driveMaxVelocityAuto.hasChanged(hashCode())
+                || driveMaxAcceleration.hasChanged(hashCode())
+                || driveMaxAccelerationAuto.hasChanged(hashCode())) {
+            // Update constraints
+            driveController.setConstraints(new TrapezoidProfile.Constraints(
+                    DriverStation.isAutonomous() ? driveMaxVelocityAuto.get() : driveMaxVelocity.get(),
+                    DriverStation.isAutonomous() ? driveMaxAccelerationAuto.get() : driveMaxAcceleration.get()));
+        }
+
         thetaController.setConstraints(new TrapezoidProfile.Constraints(
                 DriverStation.isAutonomous() ? thetaMaxVelocityAuto.get() : thetaMaxVelocity.get(),
                 DriverStation.isAutonomous() ? thetaMaxAccelerationAuto.get() : thetaMaxAcceleration.get()));
