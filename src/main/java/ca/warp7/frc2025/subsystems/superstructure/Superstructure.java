@@ -294,13 +294,12 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.PRE_L4)
                 .or(stateTriggers.get(SuperState.PRE_L3))
                 .and(elevatorTooClose.negate())
-                .and(stowReq)
                 .onTrue(forceState(SuperState.READY_CORAL));
 
         stateTriggers
                 .get(SuperState.PRE_L2)
                 .or(stateTriggers.get(SuperState.PRE_L1))
-                .and(stowReq)
+                .and(elevatorTooClose.negate())
                 .onTrue(forceState(SuperState.READY_CORAL));
 
         stateTriggers
