@@ -126,7 +126,7 @@ public class VisionSubsystem extends SubsystemBase {
                     angularStdDev *= cameraStdDevFactors[index];
                 }
 
-                System.out.println("vision add");
+                // System.out.println("vision add");
                 // Send vision observation
                 consumer.accept(
                         observation.pose().toPose2d(),
