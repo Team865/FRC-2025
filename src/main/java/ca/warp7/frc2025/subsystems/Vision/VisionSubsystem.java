@@ -66,6 +66,7 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         for (int index = 0; index < io.length; index++) {
+            // Update disconnected alert
             disconnectedAlerts[index].set(!inputs[index].connected);
 
             // Initialize logging values
@@ -125,6 +126,7 @@ public class VisionSubsystem extends SubsystemBase {
                     angularStdDev *= cameraStdDevFactors[index];
                 }
 
+                System.out.println("vision add");
                 // Send vision observation
                 consumer.accept(
                         observation.pose().toPose2d(),
