@@ -133,14 +133,17 @@ public class Superstructure extends SubsystemBase {
         this.algaeLevel = algaeLevel;
 
         for (var state : SuperState.values()) {
-            stateTriggers.put(state, new Trigger(() -> this.state == state && DriverStation.isEnabled()));
+            stateTriggers.put(
+                    state,
+                    new Trigger(() -> this.state == state && DriverStation.isEnabled() && DriverStation.isTeleop()));
         }
-
-        configureStateTransitionCommands();
 
         components[0] =
                 new Pose3d(new Translation3d(1, new Rotation3d(0, Units.degreesToRadians(-81), 0)), new Rotation3d());
         components[1] = new Pose3d();
+
+        // RobotModeTriggers.teleop().onTrue(runOnce(() -> configureStateTransitionCommands()));
+        configureStateTransitionCommands();
     }
 
     private void configureStateTransitionCommands() {
