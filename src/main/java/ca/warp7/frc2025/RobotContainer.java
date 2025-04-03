@@ -193,7 +193,7 @@ public class RobotContainer {
         Trigger toCloseForExtension = RobotModeTriggers.teleop().and(new Trigger(() -> {
             double distance =
                     FieldConstantsHelper.lengthFromCenterOfReef(drive.getPose()).magnitude();
-            return distance <= 2;
+            return distance <= 1.6;
         }));
 
         superstructure = new Superstructure(
