@@ -310,7 +310,7 @@ public class RobotContainer {
         driveController.povLeft().whileTrue(intake.runVoltsRoller(4));
 
         driveController.start().onTrue(drive.zeroPose());
-        // driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
+        driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
         driveController.povUp().onTrue(climber.climb());
         driveController.povDown().onTrue(climber.down());
