@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,11 +143,15 @@ public class Superstructure extends SubsystemBase {
                 new Pose3d(new Translation3d(1, new Rotation3d(0, Units.degreesToRadians(-81), 0)), new Rotation3d());
         components[1] = new Pose3d();
 
-        // RobotModeTriggers.teleop().onTrue(runOnce(() -> configureStateTransitionCommands()));
         configureStateTransitionCommands();
     }
 
     private void configureStateTransitionCommands() {
+        RobotModeTriggers.autonomous().and(elevator.atSetpoint(Elevator.L4)).onTrue(forceState(SuperState.PRE_L4));
+        RobotModeTriggers.autonomous()
+                .and(elevator.atSetpoint(Elevator.STOW))
+                .onTrue(forceState(SuperState.INTAKE_CORAL));
+
         // Idle
         stateTriggers
                 .get(SuperState.IDLE)
@@ -160,14 +165,12 @@ public class Superstructure extends SubsystemBase {
         stateTriggers
                 .get(SuperState.IDLE)
                 .and(preScoreAlgaeReq)
-                .and(elevatorTooClose.negate())
                 .and(() -> algaeLevel.get() == AlgaeLevel.HIGH)
                 .onTrue(forceState(SuperState.PRE_ALGAE_HIGH));
 
         stateTriggers
                 .get(SuperState.IDLE)
                 .and(preScoreAlgaeReq)
-                .and(elevatorTooClose.negate())
                 .and(() -> algaeLevel.get() == AlgaeLevel.LOW)
                 .onTrue(forceState(SuperState.PRE_ALGAE_LOW));
 
@@ -294,12 +297,14 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.PRE_L4)
                 .or(stateTriggers.get(SuperState.PRE_L3))
                 .and(elevatorTooClose.negate())
+                .and(elevatorTooFar)
                 .onTrue(forceState(SuperState.READY_CORAL));
 
         stateTriggers
                 .get(SuperState.PRE_L2)
                 .or(stateTriggers.get(SuperState.PRE_L1))
                 .and(elevatorTooClose.negate())
+                .and(elevatorTooFar)
                 .onTrue(forceState(SuperState.READY_CORAL));
 
         stateTriggers
