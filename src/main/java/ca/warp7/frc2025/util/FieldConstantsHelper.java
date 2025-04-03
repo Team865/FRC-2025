@@ -1,5 +1,6 @@
 package ca.warp7.frc2025.util;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -83,7 +84,7 @@ public class FieldConstantsHelper {
         pose = getclosestFace(pose);
 
         Transform2d transformer =
-                new Transform2d(new Translation2d(Drivetrain.LENGTH.div(2), Meters.zero()), Rotation2d.k180deg);
+                new Transform2d(new Translation2d(Drivetrain.LENGTH.div(2), Inches.of(2)), Rotation2d.k180deg);
 
         pose = pose.transformBy(transformer);
 
