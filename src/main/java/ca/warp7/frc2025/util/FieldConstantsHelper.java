@@ -41,6 +41,7 @@ public class FieldConstantsHelper {
     }
 
     public static Rotation2d getAngleToReefCenter(Pose2d pose) {
+        Translation2d center = AllianceFlipUtil.apply(FieldConstantsHelper.center);
         Rotation2d angle = new Rotation2d(center.getX() - pose.getX(), center.getY() - pose.getY());
 
         Logger.recordOutput("Field Constants/Pose from center of reef", new Pose2d(pose.getTranslation(), angle));
