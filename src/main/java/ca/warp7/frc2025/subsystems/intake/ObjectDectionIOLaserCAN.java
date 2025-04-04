@@ -21,7 +21,7 @@ public class ObjectDectionIOLaserCAN implements ObjectDectionIO {
 
         try {
             laserCan.setRangingMode(LaserCan.RangingMode.SHORT);
-            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(8, 8, 8, 8));
+            laserCan.setRegionOfInterest(new LaserCan.RegionOfInterest(4, 4, 8, 8));
             laserCan.setTimingBudget(LaserCan.TimingBudget.TIMING_BUDGET_20MS);
         } catch (ConfigurationFailedException e) {
             new Alert("Failed to configure " + name + " on intake, measurement may be inconsistent", AlertType.kWarning)
