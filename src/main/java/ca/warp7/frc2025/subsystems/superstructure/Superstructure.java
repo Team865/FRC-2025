@@ -248,6 +248,7 @@ public class Superstructure extends SubsystemBase {
                 .whileTrue(elevator.setGoal(Elevator.STOW))
                 .and(elevatorTooFar.negate())
                 .and(() -> reefLevel == ReefLevel.L4)
+                .and(preScoreCoralReq)
                 .onTrue(forceState(SuperState.PRE_L4));
 
         stateTriggers
@@ -255,6 +256,7 @@ public class Superstructure extends SubsystemBase {
                 .whileTrue(elevator.setGoal(Elevator.STOW))
                 .and(elevatorTooFar.negate())
                 .and(() -> reefLevel == ReefLevel.L3)
+                .and(preScoreCoralReq)
                 .onTrue(forceState(SuperState.PRE_L3));
 
         stateTriggers
@@ -262,6 +264,7 @@ public class Superstructure extends SubsystemBase {
                 .whileTrue(elevator.setGoal(Elevator.STOW))
                 .and(scoreReq)
                 .and(() -> reefLevel == ReefLevel.L2)
+                .and(preScoreCoralReq)
                 .onTrue(forceState(SuperState.PRE_L2));
 
         stateTriggers
@@ -269,11 +272,11 @@ public class Superstructure extends SubsystemBase {
                 .whileTrue(elevator.setGoal(Elevator.STOW))
                 .and(scoreReq)
                 .and(() -> reefLevel == ReefLevel.L1)
+                .and(preScoreCoralReq)
                 .onTrue(forceState(SuperState.PRE_L1));
 
         stateTriggers
                 .get(SuperState.PRE_L4)
-                .and(preScoreCoralReq)
                 .whileTrue(elevator.setGoal(Elevator.L4))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
@@ -281,7 +284,6 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers
                 .get(SuperState.PRE_L3)
-                .and(preScoreCoralReq)
                 .whileTrue(elevator.setGoal(Elevator.L3))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
@@ -289,7 +291,6 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers
                 .get(SuperState.PRE_L2)
-                .and(preScoreCoralReq)
                 .whileTrue(elevator.setGoal(Elevator.L2))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
@@ -297,7 +298,6 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers
                 .get(SuperState.PRE_L1)
-                .and(preScoreCoralReq)
                 .whileTrue(elevator.setGoal(Elevator.L1))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)

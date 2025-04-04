@@ -203,7 +203,7 @@ public class RobotContainer {
                 driveController.rightBumper(),
                 alignedToReef,
                 alignedToAlgae,
-                driveController.a(),
+                new Trigger(() -> false),
                 toCloseForExtension,
                 toFarForExtend,
                 () -> FieldConstants.Reef.algaeLevels.get(FieldConstantsHelper.getclosestFace(drive.getPose())));
@@ -308,7 +308,6 @@ public class RobotContainer {
         driveController.povLeft().whileTrue(intake.runVoltsRoller(4));
 
         driveController.start().onTrue(drive.zeroPose());
-        driveController.back().onTrue(superstructure.forceState(SuperState.IDLE));
 
         driveController.povUp().onTrue(climber.climb());
         driveController.povDown().onTrue(climber.down());
@@ -320,6 +319,8 @@ public class RobotContainer {
                         .negate()
                         .or(driveController.rightBumper().negate()))
                 .whileTrue(driveReefAngleCenter);
+
+        driveController.a().onTrue(superstructure.forceState(SuperState.IDLE));
     }
 
     private void configureTuningBindings() {}
