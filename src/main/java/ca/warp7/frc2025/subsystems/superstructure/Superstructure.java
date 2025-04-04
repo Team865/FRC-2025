@@ -353,9 +353,7 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.SCORE_CORAL_L1)
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
-                .whileTrue(intake.runVoltsRoller(-10)
-                        .until(intake.middleSensorTrigger())
-                        .andThen(intake.setTorque(() -> l1Torque.get())));
+                .whileTrue(intake.runVoltsRoller(-5));
 
         stateTriggers
                 .get(SuperState.SCORE_CORAL_L1)
