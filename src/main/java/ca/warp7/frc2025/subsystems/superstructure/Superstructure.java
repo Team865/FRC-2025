@@ -340,6 +340,7 @@ public class Superstructure extends SubsystemBase {
                 .get(SuperState.SCORE_CORAL)
                 .and(() -> lastState == SuperState.PRE_L2)
                 .and(intake.notHoldingCoral())
+                .and(elevatorTooClose.negate())
                 .onTrue(forceState(SuperState.IDLE));
 
         stateTriggers
