@@ -1,4 +1,7 @@
 package ca.warp7.frc2025.subsystems.superstructure;
+// test gyro
+// test l2-l3 with l4 and l3 coral
+// test distences for auto retract
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -161,16 +164,22 @@ public class Superstructure extends SubsystemBase {
                 .and(() -> !isAlgaeLike())
                 .onTrue(intake.setVoltsRoller(0));
 
-        stateTriggers.get(SuperState.IDLE).and(intakeReq).onTrue(forceState(SuperState.INTAKE_CORAL));
+        stateTriggers
+                .get(SuperState.IDLE)
+                .or(() -> isAlgaeLike())
+                .and(intakeReq)
+                .onTrue(forceState(SuperState.INTAKE_CORAL));
 
         stateTriggers
                 .get(SuperState.IDLE)
+                .or(stateTriggers.get(SuperState.INTAKE_CORAL))
                 .and(preScoreAlgaeReq)
                 .and(() -> algaeLevel.get() == AlgaeLevel.HIGH)
                 .onTrue(forceState(SuperState.PRE_ALGAE_HIGH));
 
         stateTriggers
                 .get(SuperState.IDLE)
+                .or(stateTriggers.get(SuperState.INTAKE_CORAL))
                 .and(preScoreAlgaeReq)
                 .and(() -> algaeLevel.get() == AlgaeLevel.LOW)
                 .onTrue(forceState(SuperState.PRE_ALGAE_LOW));
@@ -317,11 +326,9 @@ public class Superstructure extends SubsystemBase {
                 .and(intake.notHoldingCoral())
                 .onTrue(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20));
 
-        stateTriggers.get(SuperState.SCORE_CORAL_L4)
-            .whileTrue(intake.outake());
+        stateTriggers.get(SuperState.SCORE_CORAL_L4).whileTrue(intake.outake());
 
-        stateTriggers.get(SuperState.SCORE_CORAL)
-            .whileTrue(intake.outake(-10));
+        stateTriggers.get(SuperState.SCORE_CORAL).whileTrue(intake.outake(-10));
 
         stateTriggers
                 .get(SuperState.SCORE_CORAL_L4)
