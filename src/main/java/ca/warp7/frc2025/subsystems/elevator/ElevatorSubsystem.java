@@ -157,6 +157,44 @@ public class ElevatorSubsystem extends SubsystemBase implements PitCheckable {
 
     @Override
     public Command check() {
+        // return PitChecks.goalCheck(
+        //                 new double[] {
+        //                     Elevator.L1.in(Meters),
+        //                     Elevator.L1A.in(Meters),
+        //                     Elevator.L2.in(Meters),
+        //                     Elevator.L2A.in(Meters),
+        //                     Elevator.L3.in(Meters),
+        //                     Elevator.L4.in(Meters),
+        //                 },
+        //                 new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
+        //                 0.25,
+        //                 Elevator.STOW.in(Meters),
+        //                 (goal) -> setGoal(Meters.of(goal)),
+        //                 (goal) -> atSetpointTrigger(Meters.of(goal)),
+        //                 10,
+        //                 "Elevator")
+        //         .beforeStarting(() -> {
+        //             slowMode();
+        //         })
+        //         .finallyDo(() -> {
+        //             normalMode();
+        //         })
+        //         .andThen(PitChecks.goalCheck(
+        //                 new double[] {
+        //                     Elevator.L1.in(Meters),
+        //                     Elevator.L1A.in(Meters),
+        //                     Elevator.L2.in(Meters),
+        //                     Elevator.L2A.in(Meters),
+        //                     Elevator.L3.in(Meters),
+        //                     Elevator.L4.in(Meters),
+        //                 },
+        //                 new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
+        //                 0.25,
+        //                 Elevator.STOW.in(Meters),
+        //                 (goal) -> setGoal(Meters.of(goal)),
+        //                 (goal) -> atSetpointTrigger(Meters.of(goal)),
+        //                 10,
+        //                 "Elevator"));
         return PitChecks.goalCheck(
                         new double[] {
                             Elevator.L1.in(Meters),
@@ -172,28 +210,6 @@ public class ElevatorSubsystem extends SubsystemBase implements PitCheckable {
                         (goal) -> setGoal(Meters.of(goal)),
                         (goal) -> atSetpointTrigger(Meters.of(goal)),
                         10,
-                        "Elevator")
-                .beforeStarting(() -> {
-                    slowMode();
-                })
-                .finallyDo(() -> {
-                    normalMode();
-                })
-                .andThen(PitChecks.goalCheck(
-                        new double[] {
-                            Elevator.L1.in(Meters),
-                            Elevator.L1A.in(Meters),
-                            Elevator.L2.in(Meters),
-                            Elevator.L2A.in(Meters),
-                            Elevator.L3.in(Meters),
-                            Elevator.L4.in(Meters),
-                        },
-                        new String[] {"L1", "Low Algae", "L2", "High Algae", "L3", "L4"},
-                        0.25,
-                        Elevator.STOW.in(Meters),
-                        (goal) -> setGoal(Meters.of(goal)),
-                        (goal) -> atSetpointTrigger(Meters.of(goal)),
-                        10,
-                        "Elevator"));
+                        "Elevator");
     }
 }

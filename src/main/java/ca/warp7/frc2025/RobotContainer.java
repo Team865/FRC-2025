@@ -13,7 +13,6 @@ import ca.warp7.frc2025.generated.TunerConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionConstants;
 import ca.warp7.frc2025.subsystems.Vision.VisionIO;
 import ca.warp7.frc2025.subsystems.Vision.VisionIOLimelight;
-import ca.warp7.frc2025.subsystems.Vision.VisionIOPhotonVisionSim;
 import ca.warp7.frc2025.subsystems.Vision.VisionSubsystem;
 import ca.warp7.frc2025.subsystems.climber.ClimberIO;
 import ca.warp7.frc2025.subsystems.climber.ClimberIOTalonFX;
@@ -135,18 +134,17 @@ public class RobotContainer {
 
                 climber = new ClimberSubsystem(new ClimberIO() {});
 
-                vision = new VisionSubsystem(
-                        drive::addVisionMeasurement,
-                        new VisionIOPhotonVisionSim(
-                                VisionConstants.camera0Name,
-                                VisionConstants.robotToCamera0,
-                                () -> drive.getPose(),
-                                false),
-                        new VisionIOPhotonVisionSim(
-                                VisionConstants.camera1Name,
-                                VisionConstants.robotToCamera1,
-                                () -> drive.getPose(),
-                                false));
+                vision = new VisionSubsystem(drive::addVisionMeasurement);
+                // new VisionIOPhotonVisionSim(
+                //         VisionConstants.camera0Name,
+                //         VisionConstants.robotToCamera0,
+                //         () -> drive.getPose(),
+                //         false),
+                // new VisionIOPhotonVisionSim(
+                //         VisionConstants.camera1Name,
+                //         VisionConstants.robotToCamera1,
+                //         () -> drive.getPose(),
+                //         false));
                 break;
             case REPLAY:
             default:
