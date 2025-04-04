@@ -39,6 +39,7 @@ public class Superstructure extends SubsystemBase {
         PRE_L4,
         SCORE_CORAL,
         SCORE_CORAL_L1,
+        SCORE_CORAL_L4,
         PRE_ALGAE_HIGH,
         PRE_ALGAE_LOW,
         INTAKE_ALGAE,
@@ -267,7 +268,7 @@ public class Superstructure extends SubsystemBase {
                 .whileTrue(elevator.setGoal(Elevator.L4))
                 .and(elevator.atSetpoint())
                 .and(scoreReq)
-                .onTrue(forceState(SuperState.SCORE_CORAL));
+                .onTrue(forceState(SuperState.SCORE_CORAL_L4));
 
         stateTriggers
                 .get(SuperState.PRE_L3)
@@ -309,22 +310,35 @@ public class Superstructure extends SubsystemBase {
 
         stateTriggers
                 .get(SuperState.SCORE_CORAL)
+                .or(stateTriggers.get(SuperState.SCORE_CORAL_L1))
+                .or(stateTriggers.get(SuperState.SCORE_CORAL_L4))
                 .and(scoreReq)
                 .onTrue(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 5))
-                .whileTrue(intake.outake())
                 .and(intake.notHoldingCoral())
                 .onTrue(leds.setBlinkingCmd(SparkColor.GREEN, SparkColor.BLACK, 20));
 
+        stateTriggers.get(SuperState.SCORE_CORAL_L4)
+            .whileTrue(intake.outake());
+
+        stateTriggers.get(SuperState.SCORE_CORAL)
+            .whileTrue(intake.outake(-10));
+
         stateTriggers
-                .get(SuperState.SCORE_CORAL)
-                .and(() -> lastState == SuperState.PRE_L3 || lastState == SuperState.PRE_L4)
+                .get(SuperState.SCORE_CORAL_L4)
                 .and(elevatorTooClose.negate())
                 .and(intake.notHoldingCoral())
                 .onTrue(forceState(SuperState.IDLE));
 
         stateTriggers
                 .get(SuperState.SCORE_CORAL)
-                .and(() -> lastState != SuperState.PRE_L3 && lastState != SuperState.PRE_L4)
+                .and(() -> lastState == SuperState.PRE_L2)
+                .and(intake.notHoldingCoral())
+                .onTrue(forceState(SuperState.IDLE));
+
+        stateTriggers
+                .get(SuperState.SCORE_CORAL)
+                .and(() -> lastState == SuperState.PRE_L3)
+                .and(elevatorTooClose.negate())
                 .and(intake.notHoldingCoral())
                 .onTrue(forceState(SuperState.IDLE));
 
