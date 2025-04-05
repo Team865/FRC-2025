@@ -49,7 +49,7 @@ public class VisionSubsystem extends SubsystemBase {
     public void periodic() {
         for (int i = 0; i < io.length; i++) {
             io[i].updateInputs(inputs[i]);
-            Logger.processInputs("Vision/Camera " + inputs[i].name, inputs[i]);
+            Logger.processInputs("Vision/Camera " + (i != 0 ? "limelight-right" : "limelight-left"), inputs[i]);
         }
 
         // Initialize logging values
